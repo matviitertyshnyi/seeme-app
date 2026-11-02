@@ -97,10 +97,10 @@ export default function SeeMeHomePage() {
     INITIAL_SEED_DATA.lobbies
   );
   const [ratings, setRatings] = useState<PlayerRating[]>(
-    INITIAL_SEED_DATA.ratings
+    INITIAL_SEED_DATA.ratings || []
   );
   const [notifications, setNotifications] = useState<AppNotification[]>(
-    INITIAL_SEED_DATA.notifications
+    INITIAL_SEED_DATA.notifications || []
   );
 
   // Primary Bottom Navigation Destination (Explore, Map, My Meetups, Profile)

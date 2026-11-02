@@ -166,6 +166,6 @@ export interface DatabaseSchema {
   personas: UserPersona[];
   lobbies: Lobby[];
   messages: ChatMessage[];
-  ratings?: PlayerRating[];
-  notifications?: AppNotification[];
+  ratings: PlayerRating[];
+  notifications: AppNotification[];
 }
