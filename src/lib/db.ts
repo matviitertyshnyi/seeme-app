@@ -68,18 +68,6 @@ export function readDb(): DatabaseSchema {
     if (!Array.isArray(parsed.notifications)) {
       parsed.notifications = INITIAL_SEED_DATA.notifications || [];
     }
-    parsed.personas = parsed.personas.map((p) => ({
-      ...p,
-      settings: {
-        iosAndroidPush: true,
-        soundEffects: true,
-        hapticFeedback: true,
-        distanceUnit: 'km' as const,
-        profileVisible: true,
-        showReliabilityScore: true,
-        ...p.settings,
-      },
-    }));
     return parsed;
   } catch {
     const seedClone = JSON.parse(JSON.stringify(INITIAL_SEED_DATA)) as DatabaseSchema;
