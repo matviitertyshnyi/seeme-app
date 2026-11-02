@@ -62,7 +62,7 @@ export function LobbyCard({
           onSelectLobby(lobby);
         }
       }}
-      className={`group rounded-[26px] p-4 sm:p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
+      className={`group rounded-[26px] p-4 sm:p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 dark:focus-visible:ring-indigo-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
         isParticipant
           ? 'bg-white dark:bg-slate-900 ring-2 ring-emerald-600 dark:ring-emerald-500 shadow-ambient'
           : isFinished
@@ -163,6 +163,11 @@ export function LobbyCard({
                 {hostPerson.skillBadge || 'Host'})
               </span>
             )}
+            {lobby.preferredAgeRange && lobby.preferredAgeRange !== 'All Ages (18+)' && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-300/80 dark:border-amber-700/60 font-semibold text-[11px]">
+                {lobby.preferredAgeRange}
+              </span>
+            )}
           </div>
 
           <p className="text-xs text-slate-700 dark:text-slate-300 font-medium line-clamp-2 leading-relaxed bg-slate-50 dark:bg-slate-800/80 rounded-xl px-3 py-2 border border-slate-200/80 dark:border-slate-700/80">
@@ -215,7 +220,7 @@ export function LobbyCard({
                 e.stopPropagation();
                 onSelectLobby(lobby);
               }}
-              className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white text-xs font-extrabold transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white text-xs font-extrabold transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
               <MessageCircle className="w-4 h-4" />
               {isHost && lobby.pendingRequests.length > 0 ? 'Review' : 'Open Chat'}
@@ -227,7 +232,7 @@ export function LobbyCard({
                 e.stopPropagation();
                 onSelectLobby(lobby);
               }}
-              className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 text-xs font-extrabold transition-all"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 border border-amber-400 dark:border-amber-700/80 text-xs font-extrabold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
               <Check className="w-4 h-4" />
               Requested
@@ -246,7 +251,7 @@ export function LobbyCard({
               type="button"
               disabled={isJoining}
               onClick={(e) => onQuickJoin(lobby, e)}
-              className="min-h-[44px] inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-extrabold shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-extrabold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 dark:focus-visible:ring-indigo-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
               <UserPlus className="w-4 h-4" />
               {lobby.joinMode === 'OPEN' ? 'Join Meetup' : 'Request Spot'}

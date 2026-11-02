@@ -50,6 +50,14 @@ export interface UserSettings {
   darkMode?: boolean;
 }
 
+export type AgeRangeOption =
+  | 'All Ages (18+)'
+  | '18–25'
+  | '20s & 30s'
+  | '25–35'
+  | '30+'
+  | '40+';
+
 export interface PlayerRating {
   id: string;
   fromUserId: string;
@@ -58,8 +66,10 @@ export interface PlayerRating {
   toUserId: string;
   lobbyId: string;
   lobbyTitle: string;
+  role?: 'HOST_RATING_GUEST' | 'GUEST_RATING_HOST' | 'PEER_RATING';
   stars: number;
   showedUp: boolean;
+  tags?: string[];
   comment: string;
   createdAt: string;
 }
@@ -157,6 +167,7 @@ export interface Lobby {
   startTimeBadge: string;
   roomStatus?: RoomStatus;
   skillCompatibility?: SkillCompatibility;
+  preferredAgeRange?: string; // e.g., 'All Ages', '18-25', '20s & 30s', '25-35', '30+'
   maxParticipants: number;
   joinMode: JoinMode;
   hostId: string;

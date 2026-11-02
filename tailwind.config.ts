@@ -10,13 +10,85 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: '#F8FAFC',
-        ink: '#0F172A',
+        canvas: {
+          DEFAULT: '#FAF8F5',
+          dark: '#181512',
+        },
+        ink: {
+          DEFAULT: '#1C1917',
+          dark: '#FAF8F5',
+          muted: '#57534E',
+          'muted-dark': '#A8A29E',
+          subtle: '#78716C',
+          'subtle-dark': '#D6D3D1',
+        },
+        surface: {
+          DEFAULT: '#FFFFFF',
+          dark: '#1C1917',
+          subtle: '#F5F2EB',
+          'subtle-dark': '#292524',
+        },
+        border: {
+          DEFAULT: '#E7E2D9',
+          dark: '#292524',
+          strong: '#D6D0C4',
+          'strong-dark': '#44403C',
+        },
         brand: {
-          DEFAULT: '#4F46E5',
-          light: '#6366F1',
-          dark: '#4338CA',
-          soft: '#EEF2FF',
+          DEFAULT: '#EA580C', // Warm Orange 600 (Passes AA on white)
+          dark: '#C2410C',    // Orange 700 (Hover)
+          light: '#F97316',   // Orange 500
+          accent: '#FB923C',  // Orange 400 (Dark mode focus & links)
+          soft: '#FFF7ED',    // Orange 50 (Pills & active tab light)
+          'surface-dark': '#431407', // Orange 950 (Active tab dark)
+          'muted-dark': '#FDBA74',   // Orange 300
+        },
+        amber: {
+          DEFAULT: '#D97706', // Golden Amber 600
+          dark: '#B45309',    // Amber 700
+          light: '#F59E0B',   // Amber 500
+          accent: '#FBBF24',  // Amber 400
+          soft: '#FFFBEB',    // Amber 50
+        },
+        // Alias indigo scale to warm orange/amber to eliminate cold blue leakage
+        indigo: {
+          50: '#FFF7ED',
+          100: '#FFEDD5',
+          200: '#FED7AA',
+          300: '#FDBA74',
+          400: '#FB923C',
+          500: '#F97316',
+          600: '#EA580C',
+          700: '#C2410C',
+          800: '#9A3412',
+          900: '#7C2D12',
+          950: '#431407',
+        },
+        status: {
+          live: {
+            DEFAULT: '#047857', // Emerald 700 (Passes AA white text)
+            hover: '#065F46',   // Emerald 800
+            accent: '#10B981',  // Emerald 500
+            light: '#ECFDF5',   // Emerald 50
+            'text-dark': '#A7F3D0', // Emerald 200
+            'surface-dark': '#022C22', // Emerald 950
+          },
+          upcoming: {
+            DEFAULT: '#B45309', // Amber 700 (Passes AA text)
+            bg: '#FBBF24',      // Amber 400 (Solid badge bg with slate-950 text)
+            accent: '#F59E0B',  // Amber 500
+            light: '#FFFBEB',   // Amber 50
+            'text-dark': '#FDE68A', // Amber 200
+            'surface-dark': '#451A03', // Amber 950
+          },
+          finished: {
+            DEFAULT: '#BE123C', // Rose 700 (Passes AA white text)
+            hover: '#9F1239',   // Rose 800
+            accent: '#F43F5E',  // Rose 500
+            light: '#FFF1F2',   // Rose 50
+            'text-dark': '#FECDD3', // Rose 200
+            'surface-dark': '#4C0519', // Rose 950
+          },
         },
       },
       boxShadow: {

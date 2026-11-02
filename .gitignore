@@ -6,3 +6,7 @@ out
 .env*.local
 next-env.d.ts
 tsbuildinfo
+*.tsbuildinfo
+powershell.cmd
+*.bak
+.agents/

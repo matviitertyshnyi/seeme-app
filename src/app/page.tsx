@@ -57,7 +57,14 @@ import {
   getActivityGroup,
   ALL_CATEGORIES,
   CategoryIcon,
+  getBroadCategory,
+  BROAD_CATEGORIES,
 } from '@/components/CategoryIcon';
+import {
+  SUPPORTED_LANGUAGES,
+  SupportedLanguage,
+  useTranslation,
+} from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
 import { RoomDetailModal } from '@/components/RoomDetailModal';
 import { CreateLobbyModal } from '@/components/CreateLobbyModal';
@@ -66,6 +73,8 @@ import { MetricsModal } from '@/components/MetricsModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { WelcomeLoginScreen } from '@/components/WelcomeLoginScreen';
 import { AdminAccountsModal } from '@/components/AdminAccountsModal';
+import { BottomNav } from '@/components/BottomNav';
+import { MyMeetupsView } from '@/components/MyMeetupsView';
 import {
   MobilePushBanner,
   NotificationDrawer,
@@ -89,14 +98,14 @@ const DISTANCE_RADII = [2, 5, 15, 50];
 
 type NavDestination = 'EXPLORE' | 'MAP' | 'MY_MEETUPS' | 'PROFILE';
 
-export default function SeeMeHomePage() {
+export default function LeaveTheRoomHomePage() {
   const [personas, setPersonas] = useState<UserPersona[]>(DEMO_PERSONAS);
   const [activePersonaId, setActivePersonaId] = useState<string>(
     DEMO_PERSONAS[0].id
   );
   const [isSignedOut, setIsSignedOut] = useState<boolean>(true);
   const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
-  const [isGuestMode, setIsGuestMode] = useState<boolean>(false);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(true);
   const [rawLobbies, setRawLobbies] = useState<Lobby[]>(
     INITIAL_SEED_DATA.lobbies
   );
@@ -110,8 +119,12 @@ export default function SeeMeHomePage() {
   // Primary Bottom Navigation Destination (Explore, Map, My Meetups, Profile)
   const [activeNav, setActiveNav] = useState<NavDestination>('EXPLORE');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const isThemeInitialized = React.useRef(false);
 
   // Filters (Directly in Explore & Map)
+  const [selectedBroadCategory, setSelectedBroadCategory] = useState<string>('All Categories');
+  const [selectedAgeFilter, setSelectedAgeFilter] = useState<string>('Any');
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>('en');
   const [selectedGroup, setSelectedGroup] = useState<
     ActivityGroup | 'All Activities'
   >('All Activities');
@@ -150,9 +163,7 @@ export default function SeeMeHomePage() {
   const [selectedLobbyId, setSelectedLobbyId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<
-    'LOGIN' | 'REGISTER' | 'EDIT'
-  >('EDIT');
+  const [authModalTab, setAuthModalTab] = useState<'LOGIN' | 'EDIT'>('LOGIN');
   const [isMetricsModalOpen, setIsMetricsModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
@@ -172,16 +183,68 @@ export default function SeeMeHomePage() {
     [personas, activePersonaId]
   );
 
-  // Sync dark mode class on <html>
+  // Initialize theme from localStorage or system preference
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored =
+        localStorage.getItem('leavetheroom_theme') ||
+        localStorage.getItem('seeme_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const htmlIsDark = document.documentElement.classList.contains('dark');
+      if (stored === 'dark' || (!stored && prefersDark) || htmlIsDark) {
+        setIsDarkMode(true);
+        document.documentElement.classList.add('dark');
+      } else {
+        setIsDarkMode(false);
+        document.documentElement.classList.remove('dark');
+      }
+      isThemeInitialized.current = true;
+    }
+  }, []);
+
+  // Sync dark mode class on <html> and persist
+  useEffect(() => {
+    if (!isThemeInitialized.current) return;
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
     if (isDarkMode) {
       root.classList.add('dark');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('leavetheroom_theme', 'dark');
+        localStorage.setItem('seeme_theme', 'dark');
+      }
     } else {
       root.classList.remove('dark');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('leavetheroom_theme', 'light');
+        localStorage.setItem('seeme_theme', 'light');
+      }
     }
   }, [isDarkMode]);
+
+  // Language state initialization
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved =
+        (localStorage.getItem('leavetheroom_lang') as SupportedLanguage) ||
+        (localStorage.getItem('ltr_language') as SupportedLanguage) ||
+        (localStorage.getItem('seeme_language') as SupportedLanguage) ||
+        'en';
+      if (['en', 'uk', 'pl', 'de', 'fr'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    }
+  }, []);
+
+  const handleLanguageSelect = (lang: SupportedLanguage) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('leavetheroom_lang', lang);
+      localStorage.setItem('ltr_language', lang);
+      localStorage.setItem('seeme_language', lang);
+      document.documentElement.lang = lang;
+    }
+  };
 
   const distanceUnit = activeUser.settings?.distanceUnit || 'km';
   const formatRadiusUnit = (km: number) =>
@@ -253,7 +316,9 @@ export default function SeeMeHomePage() {
   // Load persistent user session from localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedSession = localStorage.getItem('seeme_session_user_id');
+      const savedSession =
+        localStorage.getItem('leavetheroom_session_user_id') ||
+        localStorage.getItem('seeme_session_user_id');
       if (savedSession && savedSession !== 'signed_out') {
         setActivePersonaId(savedSession);
         setIsSignedOut(false);
@@ -269,6 +334,7 @@ export default function SeeMeHomePage() {
     setIsSignedOut(false);
     setIsGuestMode(false);
     if (typeof window !== 'undefined') {
+      localStorage.setItem('leavetheroom_session_user_id', userId);
       localStorage.setItem('seeme_session_user_id', userId);
     }
     const targetPersona = personas.find((p) => p.id === userId);
@@ -281,9 +347,10 @@ export default function SeeMeHomePage() {
     setIsSignedOut(true);
     setIsGuestMode(false);
     if (typeof window !== 'undefined') {
+      localStorage.setItem('leavetheroom_session_user_id', 'signed_out');
       localStorage.setItem('seeme_session_user_id', 'signed_out');
     }
-    showToast('Signed out of SeeMe');
+    showToast('Signed out of Leave The Room');
   };
 
   const handleGoogleSignIn = async () => {
@@ -307,6 +374,7 @@ export default function SeeMeHomePage() {
           setIsSignedOut(false);
           setIsGuestMode(false);
           if (typeof window !== 'undefined') {
+            localStorage.setItem('leavetheroom_session_user_id', data.persona.id);
             localStorage.setItem('seeme_session_user_id', data.persona.id);
           }
           triggerSensoryFeedback('SUCCESS', data.persona.settings);
@@ -339,6 +407,7 @@ export default function SeeMeHomePage() {
           setIsSignedOut(false);
           setIsGuestMode(false);
           if (typeof window !== 'undefined') {
+            localStorage.setItem('leavetheroom_session_user_id', data.persona.id);
             localStorage.setItem('seeme_session_user_id', data.persona.id);
           }
           triggerSensoryFeedback('SUCCESS', data.persona.settings);
@@ -348,91 +417,6 @@ export default function SeeMeHomePage() {
     } catch {
       showToast('Could not sign in with Apple');
     }
-  };
-
-  const handleEmailLogin = async (
-    emailOrName: string,
-    password?: string
-  ): Promise<boolean> => {
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'LOGIN',
-          emailOrName,
-          password,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.personas)) setPersonas(data.personas);
-        if (data.persona) {
-          setActivePersonaId(data.persona.id);
-          setIsSignedOut(false);
-          setIsGuestMode(false);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('seeme_session_user_id', data.persona.id);
-          }
-          triggerSensoryFeedback('SUCCESS', data.persona.settings);
-          showToast(`Welcome back, ${data.persona.name}!`);
-          return true;
-        }
-      } else {
-        const errData = await res.json().catch(() => null);
-        if (errData?.error) showToast(errData.error);
-      }
-    } catch {
-      showToast('Login request failed');
-    }
-    return false;
-  };
-
-  const handleCreateAccount = async (profile: {
-    name: string;
-    email: string;
-    password?: string;
-    age: number;
-    neighborhood: string;
-    favoriteActivities: ActivityCategory[];
-  }): Promise<boolean> => {
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'REGISTER_OR_CREATE_PROFILE',
-          name: profile.name,
-          email: profile.email,
-          password: profile.password,
-          age: profile.age,
-          neighborhood: profile.neighborhood,
-          favoriteActivities: profile.favoriteActivities,
-          skillBadge: 'Active Member',
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.personas)) setPersonas(data.personas);
-        if (data.persona) {
-          setActivePersonaId(data.persona.id);
-          setIsSignedOut(false);
-          setIsGuestMode(false);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('seeme_session_user_id', data.persona.id);
-          }
-          triggerSensoryFeedback('SUCCESS', data.persona.settings);
-          showToast(`Account created! Welcome to SeeMe, ${data.persona.name}!`);
-          return true;
-        }
-      } else {
-        const errData = await res.json().catch(() => null);
-        if (errData?.error) showToast(errData.error);
-      }
-    } catch {
-      showToast('Network error while creating account');
-    }
-    return false;
   };
 
   const handleRequestVerification = async (note?: string) => {
@@ -473,21 +457,39 @@ export default function SeeMeHomePage() {
         return false;
       }
 
-      const matchesGroup =
-        selectedGroup === 'All Activities' ||
-        getActivityGroup(lobby.category) === selectedGroup;
-      const matchesCategory =
-        selectedCategory === 'All' || lobby.category === selectedCategory;
-      const matchesRadius = lobby.distanceKm <= radiusKm;
-      const matchesStatus =
-        statusFilter === 'ALL' || lobby.computedStatus === statusFilter;
+      // Haversine distance limit
+      if (lobby.distanceKm > radiusKm) return false;
 
-      return matchesGroup && matchesCategory && matchesRadius && matchesStatus;
+      // Status filter
+      if (statusFilter !== 'ALL' && lobby.computedStatus !== statusFilter) {
+        return false;
+      }
+
+      // Broad Category filter
+      if (selectedBroadCategory !== 'All Categories') {
+        const broad = getBroadCategory(lobby.category);
+        if (broad !== selectedBroadCategory) {
+          return false;
+        }
+      }
+
+      // Age preference filter
+      if (selectedAgeFilter !== 'Any') {
+        if (
+          lobby.preferredAgeRange &&
+          lobby.preferredAgeRange !== 'All Ages (18+)' &&
+          lobby.preferredAgeRange !== selectedAgeFilter
+        ) {
+          return false;
+        }
+      }
+
+      return true;
     });
   }, [
     lobbiesWithDistance,
-    selectedGroup,
-    selectedCategory,
+    selectedBroadCategory,
+    selectedAgeFilter,
     radiusKm,
     statusFilter,
     activeUser.bannedUserIds,
@@ -556,7 +558,8 @@ export default function SeeMeHomePage() {
   }) => {
     if (isSignedOut) {
       showToast('Please sign in to host a meetup');
-      setIsGuestMode(false);
+      setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
       return;
     }
     setCreateModalCategory(options?.category);
@@ -617,7 +620,7 @@ export default function SeeMeHomePage() {
         fromUserAvatar: activeUser.avatar,
         toUserId,
         lobbyId,
-        lobbyTitle: targetLobby?.title || 'SeeMe Meetup',
+        lobbyTitle: targetLobby?.title || 'Leave The Room Meetup',
         stars,
         showedUp,
         comment,
@@ -818,7 +821,8 @@ export default function SeeMeHomePage() {
 
     if (isSignedOut) {
       showToast('Please sign in to join meetups');
-      setIsGuestMode(false);
+      setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
       return;
     }
 
@@ -877,118 +881,28 @@ export default function SeeMeHomePage() {
     }
   };
 
-  // Render a single compact My Meetup card
-  const renderMyMeetupItem = (room: LobbyWithDistance) => {
-    const isRoomHost = room.hostId === activeUser.id;
-    const isRoomMember = room.participants.some((p) => p.id === activeUser.id);
-    const pendingCount = room.pendingRequests.length;
 
+  if (!hasCheckedSession) {
     return (
-      <button
-        key={room.id}
-        type="button"
-        onClick={() => setSelectedLobbyId(room.id)}
-        className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-          selectedLobbyId === room.id
-            ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-600 shadow-sm'
-            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800 shadow-sm'
-        }`}
-      >
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="relative shrink-0">
-            <img
-              src={room.coverImage}
-              alt={room.title}
-              className="w-14 h-14 rounded-2xl object-cover bg-slate-200 dark:bg-slate-800"
-            />
-            <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[10px] font-extrabold">
-              {room.participants.length}/{room.maxParticipants}
-            </span>
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                <CategoryIcon category={room.category} className="w-3 h-3" />
-                {room.category}
-              </span>
-              <span className="text-slate-400">•</span>
-              <span
-                className={`inline-flex items-center gap-1 text-[11px] font-extrabold ${
-                  room.computedStatus === 'LIVE'
-                    ? 'text-emerald-700 dark:text-emerald-400'
-                    : room.computedStatus === 'UPCOMING'
-                    ? 'text-amber-700 dark:text-amber-400'
-                    : 'text-rose-700 dark:text-rose-400'
-                }`}
-              >
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    room.computedStatus === 'LIVE'
-                      ? 'bg-emerald-500'
-                      : room.computedStatus === 'UPCOMING'
-                      ? 'bg-amber-400'
-                      : 'bg-rose-500'
-                  }`}
-                />
-                {room.startTimeBadge}
-              </span>
-            </div>
-
-            <div className="text-sm font-extrabold text-slate-950 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-              {room.title}
-            </div>
-
-            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-              {isRoomHost ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600 text-white text-[10px] font-extrabold">
-                  <Crown className="w-2.5 h-2.5 text-amber-300" />
-                  Hosting
-                </span>
-              ) : isRoomMember ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 text-[10px] font-extrabold">
-                  <MessageCircle className="w-2.5 h-2.5" />
-                  Joined
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-950 text-[10px] font-extrabold">
-                  <Clock className="w-2.5 h-2.5" />
-                  Pending Approval
-                </span>
-              )}
-
-              {isRoomHost && pendingCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-extrabold">
-                  <Bell className="w-2.5 h-2.5" />
-                  {pendingCount} Request
-                </span>
-              )}
-
-              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 truncate">
-                · {room.distanceLabel}
-              </span>
-            </div>
-          </div>
+      <div className="min-h-screen bg-canvas text-ink flex items-center justify-center">
+        <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center animate-pulse">
+          <Compass className="w-5 h-5 stroke-[2.4]" />
         </div>
-
-        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-600 shrink-0" />
-      </button>
+      </div>
     );
-  };
+  }
 
-  if (!hasCheckedSession || isSignedOut) {
+  if (isSignedOut) {
     return (
       <WelcomeLoginScreen
         onGoogleSignIn={handleGoogleSignIn}
         onAppleSignIn={handleAppleSignIn}
-        onLogin={handleEmailLogin}
-        onCreateAccount={handleCreateAccount}
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-slate-100 flex flex-col transition-colors duration-200">
+    <div className="min-h-screen bg-canvas text-ink flex flex-col transition-colors duration-200">
       {/* Native iOS / Android Top Push Notification Banner */}
       <MobilePushBanner
         pushAlert={pushAlert}
@@ -1017,212 +931,106 @@ export default function SeeMeHomePage() {
            =================================================================== */}
         {activeNav === 'EXPLORE' && (
           <div className="space-y-5">
-            {/* Screen Header: Brand + Location + Primary Host Action */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-sm shrink-0">
-                  <Compass className="w-6 h-6 stroke-[2.3]" />
+            {/* Minimalist Editorial Discovery Strip (Starts immediately at top - Top bar eliminated) */}
+            <section
+              aria-label="Meetup Discovery Filters"
+              className="bg-white dark:bg-slate-900 rounded-[24px] p-4 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3.5"
+            >
+              {/* Broad Category Tabs (5 broad categories, zero emojis) */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
+                  (catName) => {
+                    const isSelected = selectedBroadCategory === catName;
+                    const catCount =
+                      catName === 'All Categories'
+                        ? lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length
+                        : lobbiesWithDistance.filter(
+                            (l) => getBroadCategory(l.category) === catName && l.distanceKm <= radiusKm
+                          ).length;
+
+                    return (
+                      <button
+                        key={catName}
+                        type="button"
+                        onClick={() => setSelectedBroadCategory(catName)}
+                        className={`min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                          isSelected
+                            ? 'bg-brand text-white border-brand shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        <span>{catName}</span>
+                        <span
+                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                            isSelected
+                              ? 'bg-white/20 text-white'
+                              : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          {catCount}
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+
+              {/* Age Preference & Location/Radius Filter Row */}
+              <div className="pt-2.5 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
+                {/* Age Filter Selector */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 shrink-0 uppercase tracking-wider">
+                    Age:
+                  </span>
+                  {(['Any', '18–25', '20s & 30s', '25–35', '30+', '40+'] as const).map((ageOpt) => (
+                    <button
+                      key={ageOpt}
+                      type="button"
+                      onClick={() => setSelectedAgeFilter(ageOpt)}
+                      className={`min-h-[36px] px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border ${
+                        selectedAgeFilter === ageOpt
+                          ? 'bg-brand text-white border-brand shadow-sm'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {ageOpt}
+                    </button>
+                  ))}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-                      SeeMe
-                    </h1>
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold border border-indigo-200 dark:border-indigo-800">
-                      Explore
-                    </span>
-                  </div>
+
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={handleNearMeGps}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 truncate"
+                    className="min-h-[36px] px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 inline-flex items-center gap-1.5 text-xs font-bold border border-slate-200 dark:border-slate-700"
                   >
                     <LocateFixed
-                      className={`w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0 ${
-                        isLocating ? 'animate-spin' : ''
-                      }`}
+                      className={`w-3.5 h-3.5 text-brand shrink-0 ${isLocating ? 'animate-spin' : ''}`}
                     />
-                    <span className="truncate">{userCoords.label}</span>
+                    <span className="truncate max-w-[120px]">{userCoords.label}</span>
                   </button>
-                </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  openHostModal({
-                    category:
-                      selectedCategory !== 'All'
-                        ? selectedCategory
-                        : selectedGroup !== 'All Activities'
-                        ? GROUPED_ACTIVITIES[selectedGroup][0]
-                        : undefined,
-                    startTime: 'Now',
-                  })
-                }
-                className="min-h-[44px] px-4 sm:px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm inline-flex items-center gap-1.5 shrink-0 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
-              >
-                <Plus className="w-4 h-4 stroke-[2.8]" />
-                <span>Host Meetup</span>
-              </button>
-            </div>
-
-            {/* Guest Mode Banner */}
-            {isSignedOut && (
-              <div className="bg-slate-900 text-white rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-sm border border-slate-800">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-xs font-semibold text-slate-200 truncate">
-                    Browsing as guest. Sign in to join meetups or host your own.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsGuestMode(false)}
-                  className="px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold shrink-0 hover:bg-slate-100 transition-colors"
-                >
-                  Log In
-                </button>
-              </div>
-            )}
-
-            {/* Scannable Filter Bar: Activity Pills + Meetup Status + Radius */}
-            <section
-              aria-label="Meetup Filters"
-              className="bg-white dark:bg-slate-900 rounded-[24px] p-4 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3.5"
-            >
-              {/* 1. Macro Group Filter Row */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedGroup('All Activities');
-                    setSelectedCategory('All');
-                  }}
-                  className={`min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-                    selectedGroup === 'All Activities'
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700'
-                  }`}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                  <span>All Activities</span>
-                  <span
-                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold ${
-                      selectedGroup === 'All Activities'
-                        ? 'bg-white/20 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
-                    }`}
-                  >
-                    {
-                      lobbiesWithDistance.filter(
-                        (l) => l.distanceKm <= radiusKm
-                      ).length
-                    }
-                  </span>
-                </button>
-
-                <div
-                  aria-hidden="true"
-                  className="h-6 w-[1.5px] bg-slate-200 dark:bg-slate-700 shrink-0"
-                />
-
-                {ACTIVITY_GROUPS.map((grp) => {
-                  const isGroupSelected = selectedGroup === grp;
-                  const groupCount = lobbiesWithDistance.filter(
-                    (l) =>
-                      getActivityGroup(l.category) === grp &&
-                      l.distanceKm <= radiusKm
-                  ).length;
-
-                  return (
-                    <button
-                      key={grp}
-                      type="button"
-                      onClick={() => {
-                        setSelectedGroup(grp);
-                        setSelectedCategory('All');
-                      }}
-                      className={`min-h-[44px] inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-                        isGroupSelected
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                          : 'bg-white dark:bg-slate-900 hover:bg-indigo-50/60 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
-                      }`}
-                    >
-                      <CategoryIcon
-                        category={grp}
-                        className={`w-3.5 h-3.5 ${
-                          isGroupSelected
-                            ? 'text-white'
-                            : 'text-indigo-600 dark:text-indigo-400'
-                        }`}
-                      />
-                      <span>{grp}</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                          isGroupSelected
-                            ? 'bg-indigo-800 text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        {groupCount}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* 1B. Sub-Activity Filter Strip (Refined for Selected Group) */}
-              {selectedGroup !== 'All Activities' && (
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1 shrink-0">
-                    {selectedGroup}:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCategory('All')}
-                    className={`min-h-[36px] px-3 py-1 rounded-full text-xs font-extrabold whitespace-nowrap transition-all border ${
-                      selectedCategory === 'All'
-                        ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    All {selectedGroup}
-                  </button>
-                  {GROUPED_ACTIVITIES[selectedGroup].map((subCat) => {
-                    const isSubSelected = selectedCategory === subCat;
-                    const subCount = lobbiesWithDistance.filter(
-                      (l) => l.category === subCat && l.distanceKm <= radiusKm
-                    ).length;
-                    return (
+                  {/* Distance Radius Selector */}
+                  <div className="inline-flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 border border-slate-300 dark:border-slate-700">
+                    {DISTANCE_RADII.map((km) => (
                       <button
-                        key={subCat}
+                        key={km}
                         type="button"
-                        onClick={() => setSelectedCategory(subCat)}
-                        className={`min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold whitespace-nowrap transition-all border ${
-                          isSubSelected
-                            ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm'
-                            : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                        onClick={() => setRadiusKm(km)}
+                        className={`min-h-[32px] px-3 py-1 rounded-full text-xs font-extrabold transition-all ${
+                          radiusKm === km
+                            ? 'bg-brand text-white shadow-sm'
+                            : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
                         }`}
                       >
-                        <CategoryIcon category={subCat} className="w-3 h-3" />
-                        <span>{subCat}</span>
-                        {subCount > 0 && (
-                          <span
-                            className={`px-1 py-0.2 rounded-full text-[10px] font-extrabold ${
-                              isSubSelected
-                                ? 'bg-white/20 text-white'
-                                : 'text-slate-500 dark:text-slate-400'
-                            }`}
-                          >
-                            {subCount}
-                          </span>
-                        )}
+                        {formatRadiusUnit(km)}
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-              )}
+              </div>
+
+
 
               {/* 2. Meetup Status + Distance Radius Row */}
               <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
@@ -1480,90 +1288,43 @@ export default function SeeMeHomePage() {
            =================================================================== */}
         {activeNav === 'MAP' && (
           <div className="space-y-3.5">
-            {/* Compact Map Header */}
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h1 className="text-xl font-extrabold text-slate-950 dark:text-white">
-                  Map Radar ({filteredLobbies.length})
-                </h1>
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                  Tap any pin to preview players or join in 1 tap
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  openHostModal({
-                    category:
-                      selectedCategory !== 'All'
-                        ? selectedCategory
-                        : selectedGroup !== 'All Activities'
-                        ? GROUPED_ACTIVITIES[selectedGroup][0]
-                        : undefined,
-                    startTime: 'Now',
-                  })
-                }
-                className="min-h-[44px] px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm inline-flex items-center gap-1.5 shrink-0"
-              >
-                <Plus className="w-4 h-4 stroke-[2.6]" />
-                <span>Host</span>
-              </button>
-            </div>
-
-            {/* Compact Single-Row Activity Group Filter Strip Above Map */}
+            {/* Broad Category Filter Strip Above Map (Zero emojis, Top bar eliminated) */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedGroup('All Activities');
-                  setSelectedCategory('All');
-                }}
-                className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap shrink-0 border ${
-                  selectedGroup === 'All Activities'
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
-                }`}
-              >
-                All ({filteredLobbies.length})
-              </button>
+              {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
+                (catName) => {
+                  const isSelected = selectedBroadCategory === catName;
+                  const count =
+                    catName === 'All Categories'
+                      ? lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length
+                      : lobbiesWithDistance.filter(
+                          (l) => getBroadCategory(l.category) === catName && l.distanceKm <= radiusKm
+                        ).length;
 
-              {ACTIVITY_GROUPS.map((grp) => {
-                const isGroupSelected = selectedGroup === grp;
-                const count = lobbiesWithDistance.filter(
-                  (l) =>
-                    getActivityGroup(l.category) === grp &&
-                    l.distanceKm <= radiusKm
-                ).length;
-
-                return (
-                  <button
-                    key={grp}
-                    type="button"
-                    onClick={() => {
-                      setSelectedGroup(grp);
-                      setSelectedCategory('All');
-                    }}
-                    className={`min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-extrabold whitespace-nowrap shrink-0 border ${
-                      isGroupSelected
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                        : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
-                    }`}
-                  >
-                    <CategoryIcon category={grp} className="w-3.5 h-3.5" />
-                    <span>{grp}</span>
-                    <span
-                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        isGroupSelected
-                          ? 'bg-indigo-800 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  return (
+                    <button
+                      key={catName}
+                      type="button"
+                      onClick={() => setSelectedBroadCategory(catName)}
+                      className={`min-h-[44px] inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap shrink-0 border transition-all ${
+                        isSelected
+                          ? 'bg-brand text-white border-brand shadow-sm'
+                          : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span>{catName}</span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                          isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                }
+              )}
             </div>
 
             {/* Full-Height Interactive Map Radar (Isolated z-0 stacking context) */}
@@ -1583,99 +1344,16 @@ export default function SeeMeHomePage() {
             DESTINATION 3: MY MEETUPS (Joined & Hosted Rooms + 1-Tap Chat)
            =================================================================== */}
         {activeNav === 'MY_MEETUPS' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white">
-                  My Meetups ({myActiveRooms.length})
-                </h1>
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                  Check in (&ldquo;I&apos;m Here&rdquo;), chat with players, or
-                  review join requests
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => openHostModal({ startTime: 'Now' })}
-                className="min-h-[44px] px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm inline-flex items-center gap-1.5 shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Host</span>
-              </button>
-            </div>
-
-            {myRoomCategories.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                <button
-                  type="button"
-                  onClick={() => setMyRoomsCategoryFilter('All')}
-                  className={`min-h-[44px] px-4 py-2 rounded-full text-xs font-extrabold ${
-                    myRoomsCategoryFilter === 'All'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700'
-                  }`}
-                >
-                  All ({myActiveRooms.length})
-                </button>
-                {myRoomCategories.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setMyRoomsCategoryFilter(cat)}
-                    className={`min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap ${
-                      myRoomsCategoryFilter === cat
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700'
-                    }`}
-                  >
-                    <CategoryIcon category={cat} className="w-3.5 h-3.5" />
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {filteredMyActiveRooms.length === 0 ? (
-              <div className="bg-white dark:bg-slate-900 rounded-[26px] p-8 text-center border border-slate-200 dark:border-slate-800 shadow-ambient space-y-4">
-                <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
-                  <Sparkles className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-base font-extrabold text-slate-950 dark:text-white">
-                    No Active Meetups Yet
-                  </h2>
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto">
-                    Join an open game nearby in Explore or host your own meetup.
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-center gap-2.5">
-                  {nearestOpenMeetup && (
-                    <button
-                      type="button"
-                      onClick={(e) => handleQuickJoin(nearestOpenMeetup, e)}
-                      className="min-h-[44px] px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm inline-flex items-center gap-1.5"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      Quick-Join {nearestOpenMeetup.category} (
-                      {nearestOpenMeetup.distanceLabel})
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setActiveNav('EXPLORE')}
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-extrabold"
-                  >
-                    Browse Available Games
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredMyActiveRooms.map((room) => renderMyMeetupItem(room))}
-              </div>
-            )}
-          </div>
+          <MyMeetupsView
+            activeUser={activeUser}
+            lobbies={lobbiesWithDistance}
+            selectedLobbyId={selectedLobbyId}
+            onSelectLobby={(id) => setSelectedLobbyId(id)}
+            onOpenHostModal={openHostModal}
+            onQuickJoin={handleQuickJoin}
+            onNavigateExplore={() => setActiveNav('EXPLORE')}
+            nearestOpenMeetup={nearestOpenMeetup}
+          />
         )}
 
         {/* ===================================================================
@@ -1691,7 +1369,7 @@ export default function SeeMeHomePage() {
                 </div>
                 <div>
                   <h1 className="text-xl font-extrabold text-slate-950 dark:text-white">
-                    Sign In to SeeMe
+                    Sign In to Leave The Room
                   </h1>
                   <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-1">
                     Sign in to your account to join meetups, check in, and chat
@@ -1710,6 +1388,15 @@ export default function SeeMeHomePage() {
 
                   <button
                     type="button"
+                    onClick={handleAppleSignIn}
+                    className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                  >
+                    <AppleIcon className="w-5 h-5 shrink-0" />
+                    <span>Continue with Apple</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => {
                       handleSwitchUser(activeUser.id);
                     }}
@@ -1721,11 +1408,12 @@ export default function SeeMeHomePage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setIsGuestMode(false);
+                      setAuthModalTab('LOGIN');
+                      setIsAuthModalOpen(true);
                     }}
                     className="min-h-[44px] w-full py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-extrabold shadow-sm"
                   >
-                    Open Sign In Screen
+                    More Sign In Options
                   </button>
                 </div>
               </div>
@@ -1920,7 +1608,7 @@ export default function SeeMeHomePage() {
                       <button
                         type="button"
                         onClick={() => setIsDarkMode(false)}
-                        className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 transition-all ${
+                        className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 transition-all ${
                           !isDarkMode
                             ? 'bg-white text-slate-950 shadow-sm'
                             : 'text-slate-400 hover:text-white'
@@ -1932,7 +1620,7 @@ export default function SeeMeHomePage() {
                       <button
                         type="button"
                         onClick={() => setIsDarkMode(true)}
-                        className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 transition-all ${
+                        className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 transition-all ${
                           isDarkMode
                             ? 'bg-indigo-600 text-white shadow-sm'
                             : 'text-slate-600 hover:text-slate-950'
@@ -2065,6 +1753,62 @@ export default function SeeMeHomePage() {
                   </button>
                 </section>
 
+                {/* 1-Tap Language Picker Card (EN, UK, PL, DE, FR - Zero Emojis) */}
+                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Language / Мова / Język / Sprache / Langue
+                    </h2>
+                    <span className="text-xs font-extrabold text-brand uppercase">
+                      {currentLang.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        type="button"
+                        onClick={() => handleLanguageSelect(lang.code)}
+                        className={`min-h-[44px] px-3 py-2 rounded-2xl border text-center font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                          currentLang === lang.code
+                            ? 'bg-brand text-white border-brand shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span className="font-extrabold text-[11px] px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                          {lang.flag}
+                        </span>
+                        <span>{lang.nativeName}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Community Policies & In-Person Safety Section */}
+                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3">
+                  <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Community Policies & In-Person Safety
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">Community Guidelines</h3>
+                      <p className="text-slate-600 dark:text-slate-400">Respectful, inclusive in-person interaction. Zero tolerance for harassment or flaking.</p>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">In-Person Safety</h3>
+                      <p className="text-slate-600 dark:text-slate-400">All meetups occur at verified public parks, cafes, and venues. Check in upon arrival.</p>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">Terms of Service</h3>
+                      <p className="text-slate-600 dark:text-slate-400">Verified identity standards, reliable attendance ratings, and participant accountability.</p>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">Privacy Policy</h3>
+                      <p className="text-slate-600 dark:text-slate-400">Precise location is never shared with third parties. No advertising tracking.</p>
+                    </div>
+                  </div>
+                </section>
+
                 {/* 5. Demo Perspective Switcher & Sign Out */}
                 <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3">
                   <div className="flex items-center justify-between">
@@ -2125,7 +1869,7 @@ export default function SeeMeHomePage() {
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="min-h-[44px] px-4 py-2 rounded-full text-xs font-extrabold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 inline-flex items-center gap-1.5 transition-colors"
+                      className="min-h-[44px] px-5 py-2 rounded-full text-xs font-extrabold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -2138,101 +1882,50 @@ export default function SeeMeHomePage() {
         )}
       </main>
 
+      {/* Ergonomic thumb-friendly Floating Action Button (FAB) for hosting meetups */}
+      <button
+        type="button"
+        onClick={() => openHostModal({ startTime: 'Now' })}
+        aria-label="Host Meetup"
+        className="fixed bottom-20 right-4 z-40 min-h-[52px] px-5 py-3 rounded-full bg-brand hover:bg-brand-hover active:scale-95 text-white text-sm font-extrabold shadow-ambient-lg inline-flex items-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      >
+        <Plus className="w-5 h-5 stroke-[2.8]" />
+        <span>Host Meetup</span>
+      </button>
+
       {/* =====================================================================
           PERSISTENT BOTTOM NAVIGATION (Explore, Map, My Meetups, Profile)
           >= 44x44px Touch Targets, No Cards Tab, No Top Nav Bar
          ===================================================================== */}
-      <nav
-        aria-label="Primary Navigation"
-        className="fixed bottom-0 inset-x-0 z-[500] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-ambient-lg"
-      >
-        <div className="max-w-lg mx-auto grid grid-cols-4 gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveNav('EXPLORE')}
-            className={`min-h-[50px] flex flex-col items-center justify-center gap-1 rounded-2xl text-xs font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-              activeNav === 'EXPLORE'
-                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Compass className="w-5 h-5" />
-            <span>Explore</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveNav('MAP')}
-            className={`min-h-[50px] flex flex-col items-center justify-center gap-1 rounded-2xl text-xs font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-              activeNav === 'MAP'
-                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <MapIcon className="w-5 h-5" />
-            <span>Map</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveNav('MY_MEETUPS')}
-            className={`relative min-h-[50px] flex flex-col items-center justify-center gap-1 rounded-2xl text-xs font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-              activeNav === 'MY_MEETUPS'
-                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span>My Meetups</span>
-            {myActiveRooms.length > 0 && (
-              <span
-                className={`absolute top-1 right-4 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-extrabold flex items-center justify-center ${
-                  totalPendingRequestsForMe > 0
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'bg-emerald-600 text-white'
-                }`}
-              >
-                {totalPendingRequestsForMe > 0
-                  ? totalPendingRequestsForMe
-                  : myActiveRooms.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveNav('PROFILE')}
-            className={`relative min-h-[50px] flex flex-col items-center justify-center gap-1 rounded-2xl text-xs font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
-              activeNav === 'PROFILE'
-                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            {isSignedOut ? (
-              <User className="w-5 h-5" />
-            ) : (
-              <img
-                src={activeUser.avatar}
-                alt={activeUser.name}
-                className={`w-5 h-5 rounded-full object-cover ${
-                  activeNav === 'PROFILE'
-                    ? 'ring-2 ring-indigo-600 dark:ring-indigo-400'
-                    : ''
-                }`}
-              />
-            )}
-            <span>Profile</span>
-            {unreadNotifCount > 0 && (
-              <span className="absolute top-1.5 right-6 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white dark:ring-slate-900" />
-            )}
-          </button>
-        </div>
-      </nav>
+      <BottomNav
+        activeTab={activeNav}
+        onChangeTab={(tab) => {
+          if (tab === 'MY_MEETUPS' && isSignedOut) {
+            showToast('Please sign in to view your meetups');
+            setAuthModalTab('LOGIN');
+            setIsAuthModalOpen(true);
+            return;
+          }
+          setActiveNav(tab);
+        }}
+        unreadCount={unreadNotifCount}
+        isDarkMode={isDarkMode}
+        meetupsCount={myActiveRooms.length}
+        hasPendingRequests={totalPendingRequestsForMe > 0}
+        userAvatar={activeUser.avatar}
+        userName={activeUser.name}
+        isSignedOut={isSignedOut}
+      />
 
       {/* Meetup Detail, Live Arrival Check-In, Approval Queue, Ratings & Chat Modal */}
       <RoomDetailModal
         lobby={selectedLobby}
         activeUser={activeUser}
+        isSignedOut={isSignedOut}
+        onRequestAuth={() => {
+          setAuthModalTab('LOGIN');
+          setIsAuthModalOpen(true);
+        }}
         onClose={() => setSelectedLobbyId(null)}
         onLobbyUpdated={async () => {
           await fetchLobbies();

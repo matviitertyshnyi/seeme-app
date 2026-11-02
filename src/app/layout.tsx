@@ -1,22 +1,22 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { I18nProvider } from '@/lib/i18n';
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
+const inter = Inter({
+  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'SeeMe: Real-Life Activity Meetups Near You',
+  title: 'Leave The Room — In-Person Activity Meetups Near You',
   description:
-    'Find 1-3 people nearby right now for over-the-board Chess, 1v1 Ping Pong, Tennis, Board Games, Basketball, Run Club, or Coffee.',
+    'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'SeeMe',
+    title: 'Leave The Room',
   },
 };
 
@@ -26,9 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${jakarta.className} bg-[#F8FAFC] text-[#0F172A] min-h-screen`}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=localStorage.getItem('leavetheroom_theme')||localStorage.getItem('seeme_theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');if(d==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className={`${inter.className} bg-canvas text-ink min-h-screen`}>
+        <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
   );

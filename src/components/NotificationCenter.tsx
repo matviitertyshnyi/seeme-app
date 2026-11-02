@@ -46,7 +46,7 @@ export function MobilePushBanner({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-indigo-300">
-              <span>SeeMe Push · iOS / Android</span>
+              <span>Leave The Room Push · iOS / Android</span>
               <span>•</span>
               <span>Now</span>
             </div>

@@ -7,7 +7,7 @@ import { Participant } from '@/types/lobby';
 interface SeatBubblesProps {
   participants: Participant[];
   maxParticipants: number;
-  hostId: string;
+  hostId?: string;
   activeUserId?: string;
   onEmptySeatClick?: (e: React.MouseEvent) => void;
   showSkillBadges?: boolean;
@@ -21,13 +21,14 @@ export function SeatBubbles({
   onEmptySeatClick,
   showSkillBadges = true,
 }: SeatBubblesProps) {
+  const actualHostId = hostId || participants[0]?.id || '';
   const openSeatsCount = Math.max(0, maxParticipants - participants.length);
   const openSeatsArray = Array.from({ length: openSeatsCount });
 
   return (
     <div className="flex flex-wrap items-start gap-2.5">
       {participants.map((person) => {
-        const isHost = person.id === hostId;
+        const isHost = person.id === actualHostId;
         const isMe = person.id === activeUserId;
         const skillLabel = person.skillBadge || (isHost ? 'Host' : 'Active');
         const isArrived = person.arrivalStatus === 'ARRIVED';
@@ -99,7 +100,7 @@ export function SeatBubbles({
             onClick={onEmptySeatClick}
             aria-label={`Claim open seat ${idx + 1}`}
             title="Tap to claim open seat"
-            className="w-11 h-11 rounded-full border-2 border-dashed border-indigo-400 dark:border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:border-indigo-600 active:scale-95 text-indigo-700 dark:text-indigo-300 flex items-center justify-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="w-11 h-11 rounded-full border-2 border-dashed border-indigo-400 dark:border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:border-indigo-600 active:scale-95 text-indigo-700 dark:text-indigo-300 flex items-center justify-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 dark:focus-visible:ring-indigo-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
           >
             <Plus className="w-4 h-4 stroke-[2.6]" />
           </button>

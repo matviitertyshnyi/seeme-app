@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
+import { requireAuth, errorResponse, AuthError } from '@/lib/auth-guard';
 import { ChatMessage } from '@/types/lobby';
 
 export const dynamic = 'force-dynamic';
@@ -18,44 +19,67 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await req.json();
-    const { senderId, senderName, senderAvatar, text } = body as {
-      senderId: string;
-      senderName: string;
-      senderAvatar: string;
-      text: string;
-    };
+    // 1. Authenticate caller session
+    const { user: authUser } = await requireAuth(req);
 
-    if (!senderId || !senderName || !text || !text.trim()) {
-      return NextResponse.json({ error: 'Message text and sender info required' }, { status: 400 });
+    const body = await req.json();
+    const text = (body.text || body.content || '').trim();
+
+    if (!text) {
+      return errorResponse('Message text is required', 400);
+    }
+
+    if (text.length > 1000) {
+      return errorResponse('Message exceeds 1000 character limit', 400);
     }
 
     const db = await readDb();
     const lobby = db.lobbies.find((item) => item.id === params.id);
 
     if (!lobby) {
-      return NextResponse.json({ error: 'Lobby not found' }, { status: 404 });
+      return errorResponse('Lobby not found', 404);
     }
 
+    // 2. Chat sender verification: Must be participant or host (or admin)
+    const isHost = lobby.hostId === authUser.id;
+    const isParticipant = lobby.participants.some((p) => p.id === authUser.id);
+    const isAdmin = authUser.role === 'ADMIN';
+
+    if (!isHost && !isParticipant && !isAdmin) {
+      return errorResponse(
+        'You must join this meetup to send messages',
+        403,
+        'FORBIDDEN'
+      );
+    }
+
+    // 3. Sender info derived securely from authenticated session user (never trust client body)
     const newMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       lobbyId: params.id,
-      senderId,
-      senderName,
-      senderAvatar,
-      text: text.trim(),
+      senderId: authUser.id,
+      senderName: authUser.name,
+      senderAvatar: authUser.avatar,
+      text,
       createdAt: new Date().toISOString(),
+      isSystem: false,
     };
 
     db.messages.push(newMessage);
     await writeDb(db);
 
     const messages = db.messages.filter((msg) => msg.lobbyId === params.id);
-    return NextResponse.json({ message: newMessage, messages }, { status: 201 });
-  } catch (err) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Failed to send message' },
-      { status: 500 }
+      { message: newMessage, messages, success: true },
+      { status: 201 }
+    );
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return errorResponse(err.message, err.status, err.code);
+    }
+    return errorResponse(
+      err instanceof Error ? err.message : 'Failed to send message',
+      500
     );
   }
 }

@@ -126,6 +126,7 @@ export function CreateLobbyModal({
   );
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
   const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
+  const [preferredAgeRange, setPreferredAgeRange] = useState<string>('All Ages (18+)');
   const [selectedCoHostId, setSelectedCoHostId] = useState<string | null>(
     initialCoHost?.id || null
   );
@@ -239,6 +240,7 @@ export function CreateLobbyModal({
           startTime,
           maxParticipants,
           joinMode,
+          preferredAgeRange,
           host: {
             id: activeUser.id,
             name: activeUser.name,
@@ -648,6 +650,29 @@ export function CreateLobbyModal({
                   Review requests and 1-tap accept or decline players.
                 </p>
               </button>
+            </div>
+          </div>
+
+          {/* 7. Preferred Age Range */}
+          <div>
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              7. Age Preference
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+              {['All Ages (18+)', '18–25', '20s & 30s', '25–35', '30+', '40+'].map((ageOpt) => (
+                <button
+                  key={ageOpt}
+                  type="button"
+                  onClick={() => setPreferredAgeRange(ageOpt)}
+                  className={`min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold border transition-all ${
+                    preferredAgeRange === ageOpt
+                      ? 'bg-brand text-white border-brand shadow-sm'
+                      : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {ageOpt}
+                </button>
+              ))}
             </div>
           </div>
 

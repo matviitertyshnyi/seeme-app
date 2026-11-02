@@ -18,6 +18,15 @@ import {
 } from 'lucide-react';
 import { ActivityCategory, ActivityGroup } from '@/types/lobby';
 
+export const BROAD_CATEGORIES = [
+  'Sports & Fitness',
+  'Gaming & Strategy',
+  'Social & Hangout',
+  'Co-Working',
+] as const;
+
+export type BroadCategory = (typeof BROAD_CATEGORIES)[number];
+
 export const ACTIVITY_GROUPS: ActivityGroup[] = [
   'Sports',
   'Gaming',
@@ -25,12 +34,42 @@ export const ACTIVITY_GROUPS: ActivityGroup[] = [
   'Co-working',
 ];
 
-export const GROUPED_ACTIVITIES: Record<ActivityGroup, string[]> = {
+export const GROUPED_ACTIVITIES: Record<string, string[]> = {
+  'Sports & Fitness': ['Ping Pong', 'Tennis', 'Basketball', 'Run Club', 'Pickleball'],
+  'Gaming & Strategy': ['Chess', 'Board Games', 'Card Games', 'Video Games'],
+  'Social & Hangout': ['Coffee', 'Park Walk', 'Food & Bites', 'Drinks & Chat'],
+  'Co-Working': ['Co-work', 'Study Session', 'Quiet Focus'],
   Sports: ['Ping Pong', 'Tennis', 'Basketball', 'Run Club', 'Pickleball'],
   Gaming: ['Chess', 'Board Games', 'Card Games', 'Video Games'],
   'Hanging Out': ['Coffee', 'Park Walk', 'Food & Bites', 'Drinks & Chat'],
   'Co-working': ['Co-work', 'Study Session', 'Quiet Focus'],
 };
+
+export function getBroadCategory(category: string): BroadCategory {
+  const c = category.toLowerCase();
+  if (
+    ['sports', 'fitness', 'ping pong', 'tennis', 'basketball', 'run club', 'pickleball', 'soccer', 'volleyball'].some(
+      (k) => c.includes(k)
+    )
+  ) {
+    return 'Sports & Fitness';
+  }
+  if (
+    ['gaming', 'strategy', 'chess', 'board games', 'card games', 'video games', 'poker', 'catan'].some(
+      (k) => c.includes(k)
+    )
+  ) {
+    return 'Gaming & Strategy';
+  }
+  if (
+    ['co-work', 'cowork', 'co-working', 'study', 'study session', 'coding', 'quiet focus'].some(
+      (k) => c.includes(k)
+    )
+  ) {
+    return 'Co-Working';
+  }
+  return 'Social & Hangout';
+}
 
 export const ALL_CATEGORIES: ActivityCategory[] = [
   'Chess',

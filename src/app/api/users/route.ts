@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb, writeDb } from '@/lib/db';
+import { readDb, writeDb, withDbMutation } from '@/lib/db';
+import { requireAuth, errorResponse, AuthError } from '@/lib/auth-guard';
 import {
   ActivityCategory,
   PlayerRating,
@@ -23,8 +24,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action } = body as { action: string };
-    const db = await readDb();
     const nowIso = new Date().toISOString();
+
+    return await withDbMutation(async (db) => {
 
     if (action === 'REGISTER_OR_CREATE_PROFILE') {
       const {
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Name is required' }, { status: 400 });
       }
 
-      const cleanEmail = (email || `${name.toLowerCase().replace(/\s+/g, '.')}@seeme.app`).trim().toLowerCase();
+      const cleanEmail = (email || `${name.toLowerCase().replace(/\s+/g, '.')}@leavetheroom.app`).trim().toLowerCase();
 
       // Check if email already registered
       const existingUser = db.personas.find(
@@ -78,7 +80,7 @@ export async function POST(req: NextRequest) {
           'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
         skillBadge: (skillBadge || 'New Member').trim(),
         tagline: (
-          tagline || 'New on SeeMe! Excited to connect for spontaneous games and meetups.'
+          tagline || 'New on Leave The Room! Excited to connect for spontaneous games and meetups.'
         ).trim(),
         neighborhood: (neighborhood || 'Greenwich Village').trim(),
         verified: false,
@@ -124,13 +126,12 @@ export async function POST(req: NextRequest) {
         id: `notif-${Date.now()}`,
         userId: newUserId,
         type: 'SYSTEM',
-        title: 'Welcome to SeeMe!',
+        title: 'Welcome to Leave The Room!',
         body: `Your account is created! You can request profile verification anytime from your profile tab.`,
         read: false,
         createdAt: nowIso,
       });
 
-      await writeDb(db);
       return NextResponse.json({
         persona: newPersona,
         personas: db.personas,
@@ -384,7 +385,7 @@ export async function POST(req: NextRequest) {
         userId,
         type: 'SYSTEM',
         title: 'Verification Request Received',
-        body: 'Your profile verification is under review by the SeeMe Admin team.',
+        body: 'Your profile verification is under review by the Leave The Room Admin team.',
         read: false,
         createdAt: nowIso,
       });
@@ -398,28 +399,38 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'ADMIN_ACTION') {
+      let authUser: UserPersona;
+      try {
+        const auth = await requireAuth(req);
+        authUser = auth.user;
+      } catch (err) {
+        if (err instanceof AuthError) {
+          return errorResponse(err.message, err.status, err.code);
+        }
+        return errorResponse('Authentication required', 401, 'UNAUTHORIZED');
+      }
+
+      const effectiveRole = authUser.role || (authUser.id === 'user-maya' ? 'ADMIN' : 'USER');
+      if (effectiveRole !== 'ADMIN') {
+        return errorResponse('Admin privileges required', 403, 'FORBIDDEN');
+      }
+
       const {
-        adminUserId,
         subAction,
         targetUserId,
         banReason,
         newRole,
       } = body as {
-        adminUserId: string;
+        adminUserId?: string;
         subAction: 'VERIFY_USER' | 'REVOKE_VERIFICATION' | 'BAN_USER' | 'UNBAN_USER' | 'CHANGE_ROLE' | 'DELETE_USER';
         targetUserId: string;
         banReason?: string;
         newRole?: 'ADMIN' | 'USER';
       };
 
-      const adminUser = db.personas.find((p) => p.id === adminUserId);
-      if (!adminUser || adminUser.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Admin privileges required' }, { status: 403 });
-      }
-
       const target = db.personas.find((p) => p.id === targetUserId);
       if (!target && subAction !== 'DELETE_USER') {
-        return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
+        return errorResponse('Target user not found', 404);
       }
 
       if (subAction === 'VERIFY_USER' && target) {
@@ -452,8 +463,8 @@ export async function POST(req: NextRequest) {
         db.personas = db.personas.filter((p) => p.id !== targetUserId);
       }
 
-      await writeDb(db);
       return NextResponse.json({
+        success: true,
         target,
         personas: db.personas,
         notifications: db.notifications,
@@ -721,8 +732,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ notifications: db.notifications });
     }
 
-    return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+      return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+    });
   } catch (err) {
+    if (err instanceof AuthError) {
+      return errorResponse(err.message, err.status, err.code);
+    }
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'User action failed' },
       { status: 500 }

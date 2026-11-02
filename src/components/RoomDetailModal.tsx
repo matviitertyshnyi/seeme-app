@@ -41,6 +41,8 @@ interface RoomDetailModalProps {
   lobby: LobbyWithDistance | null;
   activeUser: UserPersona;
   onClose: () => void;
+  isSignedOut?: boolean;
+  onRequestAuth?: () => void;
   onLobbyUpdated: (updatedLobbyId?: string) => Promise<void>;
   onLobbyDeleted: (deletedId: string) => void;
   onQuickRatePlayer?: (
@@ -69,6 +71,8 @@ export function RoomDetailModal({
   lobby,
   activeUser,
   onClose,
+  isSignedOut = false,
+  onRequestAuth,
   onLobbyUpdated,
   onLobbyDeleted,
   onQuickRatePlayer,
@@ -206,6 +210,10 @@ export function RoomDetailModal({
   const handleJoinOrRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoadingAction) return;
+    if (isSignedOut) {
+      if (onRequestAuth) onRequestAuth();
+      return;
+    }
     setIsLoadingAction(true);
     triggerSensoryFeedback('JOIN', activeUser.settings);
     try {
@@ -894,22 +902,38 @@ export function RoomDetailModal({
               mobileSection === 'CHAT' ? 'flex' : 'hidden lg:flex'
             } lg:w-[45%] flex-col bg-slate-50 dark:bg-slate-950 flex-1 min-h-[380px]`}
           >
-            <div className="hidden lg:flex px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 items-center justify-between shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5" />
+            <div className="flex px-4 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-brand-soft text-brand flex items-center justify-center shrink-0">
+                  <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-extrabold text-slate-950 dark:text-white">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-extrabold text-slate-950 dark:text-white truncate">
                     Live Meetup Chat
                   </h3>
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
                     {isParticipant
-                      ? 'Coordinate exact table, court, or arrival details'
-                      : 'Join this meetup to unlock group coordination chat'}
+                      ? 'Coordinate exact table, court, or arrival'
+                      : 'Join this meetup to coordinate'}
                   </p>
                 </div>
               </div>
+
+              {isParticipant && (
+                <button
+                  type="button"
+                  onClick={() => handleCheckInUpdate('ARRIVED')}
+                  disabled={isLoadingAction || myParticipantRecord?.arrivalStatus === 'ARRIVED'}
+                  className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 inline-flex items-center gap-1.5 ${
+                    myParticipantRecord?.arrivalStatus === 'ARRIVED'
+                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+                      : 'bg-brand hover:bg-brand-hover active:scale-95 text-white shadow-sm'
+                  }`}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{myParticipantRecord?.arrivalStatus === 'ARRIVED' ? 'Checked In' : "I'm Here!"}</span>
+                </button>
+              )}
             </div>
 
             {isParticipant ? (

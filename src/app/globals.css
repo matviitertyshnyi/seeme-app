@@ -5,13 +5,23 @@
 @tailwind utilities;
 
 :root {
-  --bg-canvas: #f8fafc;
-  --text-ink: #0f172a;
+  --bg-canvas: #faf8f5;
+  --text-ink: #1c1917;
+  --surface: #ffffff;
+  --surface-subtle: #f5f2eb;
+  --border: #e7e2d9;
+  --ring-focus: #ea580c;
+  --ring-focus-offset: #ffffff;
 }
 
 .dark {
-  --bg-canvas: #0b0f19;
-  --text-ink: #f8fafc;
+  --bg-canvas: #141210;
+  --text-ink: #faf8f5;
+  --surface: #1c1917;
+  --surface-subtle: #292524;
+  --border: #292524;
+  --ring-focus: #f97316;
+  --ring-focus-offset: #141210;
 }
 
 html,
@@ -43,12 +53,24 @@ textarea:disabled,
 
 /* Antislop Human R-32: High-contrast focus visible ring */
 :focus-visible {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid var(--ring-focus);
   outline-offset: 2px;
 }
 
 .dark :focus-visible {
-  outline-color: #818cf8;
+  outline-color: var(--ring-focus);
+}
+
+/* Standardized ergonomic touch & state helpers */
+.btn-touch {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
 
 /* Antislop Motion & Accessibility R-19 / R-39: prefers-reduced-motion */

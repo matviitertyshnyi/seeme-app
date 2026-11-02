@@ -82,11 +82,11 @@ export function SettingsModal({
         : 'Using In-App Banner'
     );
     fireNativeNotificationIfPermitted(
-      'SeeMe Push Enabled',
+      'Leave The Room Push Enabled',
       'You will now receive instant alerts for nearby meetups and check-ins.'
     );
     onTriggerSimulatedMobilePush(
-      'SeeMe: iOS / Android Push Active',
+      'Leave The Room: Push Active',
       'Instant alerts enabled for join requests, "I\'m Here" check-ins, and radar matches.'
     );
   };
