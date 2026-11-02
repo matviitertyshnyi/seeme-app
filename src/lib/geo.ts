@@ -136,5 +136,7 @@ export function getDefaultCoverForCategory(category: ActivityCategory): string {
       return 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80';
     case 'Co-work':
       return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80';
+    default:
+      return 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1000&q=80';
   }
 }
