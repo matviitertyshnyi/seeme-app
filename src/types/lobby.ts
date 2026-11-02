@@ -75,9 +75,13 @@ export interface AppNotification {
   createdAt: string;
 }
 
+export type UserRole = 'ADMIN' | 'USER';
+export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
+
 export interface UserPersona {
   id: string;
   email?: string;
+  password?: string;
   name: string;
   age: number;
   avatar: string;
@@ -85,6 +89,12 @@ export interface UserPersona {
   tagline: string;
   neighborhood: string;
   verified: boolean;
+  verificationStatus?: VerificationStatus;
+  verificationRequestedAt?: string;
+  verificationNote?: string;
+  role?: UserRole;
+  isBanned?: boolean;
+  banReason?: string;
   favoriteActivities: ActivityCategory[];
   reliabilityScore: number;
   meetupsAttended: number;
@@ -96,7 +106,7 @@ export interface UserPersona {
   regularPartnerIds: string[];
   beacon?: RadarBeacon;
   settings: UserSettings;
-  authProvider?: 'google' | 'email' | 'demo';
+  authProvider?: 'google' | 'apple' | 'email' | 'demo';
 }
 
 export interface Participant {

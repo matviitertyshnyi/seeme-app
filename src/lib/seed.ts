@@ -11,6 +11,8 @@ export const DEMO_PERSONAS: UserPersona[] = [
     tagline: 'Product designer. Always down for 1v1 ping pong or park chess.',
     neighborhood: 'Greenwich Village',
     verified: true,
+    verificationStatus: 'VERIFIED',
+    role: 'ADMIN',
     favoriteActivities: ['Ping Pong', 'Chess', 'Coffee'],
     reliabilityScore: 99,
     meetupsAttended: 18,

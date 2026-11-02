@@ -61,10 +61,11 @@ import {
 import { LobbyCard } from '@/components/LobbyCard';
 import { RoomDetailModal } from '@/components/RoomDetailModal';
 import { CreateLobbyModal } from '@/components/CreateLobbyModal';
-import { AuthProfileModal, GoogleIcon } from '@/components/AuthProfileModal';
+import { AuthProfileModal, GoogleIcon, AppleIcon } from '@/components/AuthProfileModal';
 import { MetricsModal } from '@/components/MetricsModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { WelcomeLoginScreen } from '@/components/WelcomeLoginScreen';
+import { AdminAccountsModal } from '@/components/AdminAccountsModal';
 import {
   MobilePushBanner,
   NotificationDrawer,
@@ -154,6 +155,8 @@ export default function SeeMeHomePage() {
   >('EDIT');
   const [isMetricsModalOpen, setIsMetricsModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [isRequestingVerification, setIsRequestingVerification] = useState(false);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
   const [pushAlert, setPushAlert] = useState<{
     title: string;
@@ -315,11 +318,84 @@ export default function SeeMeHomePage() {
     }
   };
 
-  const handleCreateQuickProfile = async (profile: {
+  const handleAppleSignIn = async () => {
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'APPLE_AUTH',
+          email: 'apple.member@icloud.com',
+          name: 'Jordan Miller',
+          avatar:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.personas)) setPersonas(data.personas);
+        if (data.persona) {
+          setActivePersonaId(data.persona.id);
+          setIsSignedOut(false);
+          setIsGuestMode(false);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('seeme_session_user_id', data.persona.id);
+          }
+          triggerSensoryFeedback('SUCCESS', data.persona.settings);
+          showToast(`Signed in with Apple ID as ${data.persona.name}!`);
+        }
+      }
+    } catch {
+      showToast('Could not sign in with Apple');
+    }
+  };
+
+  const handleEmailLogin = async (
+    emailOrName: string,
+    password?: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'LOGIN',
+          emailOrName,
+          password,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.personas)) setPersonas(data.personas);
+        if (data.persona) {
+          setActivePersonaId(data.persona.id);
+          setIsSignedOut(false);
+          setIsGuestMode(false);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('seeme_session_user_id', data.persona.id);
+          }
+          triggerSensoryFeedback('SUCCESS', data.persona.settings);
+          showToast(`Welcome back, ${data.persona.name}!`);
+          return true;
+        }
+      } else {
+        const errData = await res.json().catch(() => null);
+        if (errData?.error) showToast(errData.error);
+      }
+    } catch {
+      showToast('Login request failed');
+    }
+    return false;
+  };
+
+  const handleCreateAccount = async (profile: {
     name: string;
-    email?: string;
+    email: string;
+    password?: string;
+    age: number;
+    neighborhood: string;
     favoriteActivities: ActivityCategory[];
-  }) => {
+  }): Promise<boolean> => {
     try {
       const res = await fetch('/api/users', {
         method: 'POST',
@@ -328,6 +404,9 @@ export default function SeeMeHomePage() {
           action: 'REGISTER_OR_CREATE_PROFILE',
           name: profile.name,
           email: profile.email,
+          password: profile.password,
+          age: profile.age,
+          neighborhood: profile.neighborhood,
           favoriteActivities: profile.favoriteActivities,
           skillBadge: 'Active Member',
         }),
@@ -343,13 +422,38 @@ export default function SeeMeHomePage() {
             localStorage.setItem('seeme_session_user_id', data.persona.id);
           }
           triggerSensoryFeedback('SUCCESS', data.persona.settings);
-          showToast(`Welcome to SeeMe, ${data.persona.name}!`);
+          showToast(`Account created! Welcome to SeeMe, ${data.persona.name}!`);
+          return true;
         }
       } else {
-        showToast('Could not create profile. Try again.');
+        const errData = await res.json().catch(() => null);
+        if (errData?.error) showToast(errData.error);
       }
     } catch {
-      showToast('Network error while creating profile');
+      showToast('Network error while creating account');
+    }
+    return false;
+  };
+
+  const handleRequestVerification = async (note?: string) => {
+    setIsRequestingVerification(true);
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'REQUEST_VERIFICATION',
+          userId: activeUser.id,
+          note: note || 'Identity verification request for verified member checkmark',
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.personas)) setPersonas(data.personas);
+        showToast('Verification request submitted for admin review!');
+      }
+    } finally {
+      setIsRequestingVerification(false);
     }
   };
 
@@ -872,17 +976,13 @@ export default function SeeMeHomePage() {
     );
   };
 
-  if ((!hasCheckedSession || isSignedOut) && !isGuestMode) {
+  if (!hasCheckedSession || isSignedOut) {
     return (
       <WelcomeLoginScreen
-        personas={personas}
         onGoogleSignIn={handleGoogleSignIn}
-        onSelectPersona={(persona) => handleSwitchUser(persona.id)}
-        onCreateProfile={handleCreateQuickProfile}
-        onContinueAsGuest={() => {
-          setIsGuestMode(true);
-          showToast('Browsing in guest mode');
-        }}
+        onAppleSignIn={handleAppleSignIn}
+        onLogin={handleEmailLogin}
+        onCreateAccount={handleCreateAccount}
       />
     );
   }
@@ -1672,17 +1772,65 @@ export default function SeeMeHomePage() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthModalTab('EDIT');
-                        setIsAuthModalOpen(true);
-                      }}
-                      className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-extrabold inline-flex items-center gap-1.5 shrink-0 transition-colors"
-                    >
-                      <Edit3 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                      <span>Edit Profile</span>
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {activeUser.role === 'ADMIN' && (
+                        <button
+                          type="button"
+                          onClick={() => setIsAdminModalOpen(true)}
+                          className="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold inline-flex items-center gap-1.5 transition-colors shadow-sm"
+                        >
+                          <Crown className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Admin Console</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthModalTab('EDIT');
+                          setIsAuthModalOpen(true);
+                        }}
+                        className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-extrabold inline-flex items-center gap-1.5 transition-colors"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                        <span>Edit Profile</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Verification Status Banner */}
+                  <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                    {activeUser.verified ? (
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200">
+                        <span className="flex items-center gap-2 font-bold">
+                          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          Verified Member Identity
+                        </span>
+                        <span className="text-[10px] bg-emerald-200 dark:bg-emerald-900 text-emerald-950 dark:text-emerald-100 px-2 py-0.5 rounded-full font-extrabold">Active</span>
+                      </div>
+                    ) : activeUser.verificationStatus === 'PENDING' ? (
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
+                        <span className="flex items-center gap-2 font-bold">
+                          <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          Verification Under Review by Admin
+                        </span>
+                        <span className="text-[10px] bg-amber-200 dark:bg-amber-900 text-amber-950 dark:text-amber-100 px-2 py-0.5 rounded-full font-extrabold">Pending</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
+                        <div>
+                          <p className="font-bold">Account Unverified</p>
+                          <p className="text-[11px] text-slate-500">Request identity verification to get your verified badge.</p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={isRequestingVerification}
+                          onClick={() => handleRequestVerification()}
+                          className="px-3.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:bg-slate-800 transition-colors shrink-0 disabled:opacity-50"
+                        >
+                          {isRequestingVerification ? 'Submitting...' : 'Request Verification'}
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Favorite Activities Chips */}
@@ -2165,6 +2313,18 @@ export default function SeeMeHomePage() {
           triggerSimulatedPush(title, body, filteredLobbies[0]?.id)
         }
         onResetDemoData={handleResetDemoData}
+      />
+
+      {/* Admin Account Management Modal */}
+      <AdminAccountsModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        adminUser={activeUser}
+        personas={personas}
+        onPersonasUpdated={(updatedPersonas, toastMsg) => {
+          setPersonas(updatedPersonas);
+          showToast(toastMsg);
+        }}
       />
 
       {/* Notification Drawer */}

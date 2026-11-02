@@ -57,6 +57,14 @@ export function GoogleIcon({ className = 'w-5 h-5' }: { className?: string }) {
   );
 }
 
+export function AppleIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 170 170" fill="currentColor">
+      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.74-11.64-14.1-6.19-9.67-11.02-20.78-14.5-33.32-3.48-12.54-5.22-24.36-5.22-35.46 0-14.02 3.52-25.79 10.57-35.31 7.05-9.52 16.03-14.38 26.94-14.59 5.43 0 11.2 1.34 17.3 4.02 6.1 2.68 10.02 4.07 11.76 4.17 1.41 0 5.48-1.44 12.22-4.33 6.74-2.88 12.53-4.22 17.37-4.02 12.39.63 22.39 5.24 30 13.82-10.87 6.64-16.19 15.68-15.96 27.13.24 8.92 3.65 16.48 10.23 22.68 6.58 6.2 14.37 9.8 23.37 10.8-2.61 7.72-5.98 16.09-10.11 25.12zM119.22 31.84c0-7.72 2.76-14.88 8.28-21.48 5.53-6.6 12.33-10.36 20.4-11.28.22 1.09.33 2.18.33 3.27 0 7.61-2.83 14.82-8.49 21.63-5.65 6.81-12.61 10.63-20.88 11.45-.11-1.09-.16-2.18-.16-3.27z" />
+    </svg>
+  );
+}
+
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
@@ -207,6 +215,39 @@ export function AuthProfileModal({
     }
   };
 
+  const handleAppleAuth = async () => {
+    setIsSubmitting(true);
+    setLoginError('');
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'APPLE_AUTH',
+          email: 'apple.member@icloud.com',
+          name: 'Jordan Miller',
+          avatar:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setLoginError(data.error || 'Apple authentication failed');
+        return;
+      }
+      onUserCreatedOrUpdated(
+        data.persona,
+        data.personas,
+        `Signed in with Apple ID as ${data.persona.name}!`
+      );
+      onClose();
+    } catch {
+      setLoginError('Could not connect to Apple authentication');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -351,16 +392,28 @@ export function AuthProfileModal({
           {/* TAB 1: SIGN IN */}
           {activeTab === 'LOGIN' && (
             <div className="space-y-5">
-              {/* Modern 1-Tap Google OAuth */}
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleGoogleAuth}
-                className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
-              >
-                <GoogleIcon className="w-5 h-5 shrink-0" />
-                <span>Continue with Google</span>
-              </button>
+              {/* Modern OAuth (Google & Apple) */}
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={handleGoogleAuth}
+                  className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                >
+                  <GoogleIcon className="w-5 h-5 shrink-0" />
+                  <span>Continue with Google</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={handleAppleAuth}
+                  className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                >
+                  <AppleIcon className="w-5 h-5 shrink-0" />
+                  <span>Continue with Apple</span>
+                </button>
+              </div>
 
               <div className="flex items-center gap-3">
                 <div className="h-[1px] flex-1 bg-slate-200 dark:bg-slate-800" />
