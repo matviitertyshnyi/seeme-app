@@ -11,7 +11,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const db = readDb();
+  const db = await readDb();
   return NextResponse.json({
     personas: db.personas,
     ratings: db.ratings || [],
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action } = body as { action: string };
-    const db = readDb();
+    const db = await readDb();
     const nowIso = new Date().toISOString();
 
     if (action === 'REGISTER_OR_CREATE_PROFILE') {
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
         createdAt: nowIso,
       });
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         persona: newPersona,
         personas: db.personas,
@@ -219,7 +219,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         persona: found,
         personas: db.personas,
@@ -276,7 +276,7 @@ export async function POST(req: NextRequest) {
         });
       });
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         persona,
         personas: db.personas,
@@ -294,7 +294,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
       persona.settings = { ...persona.settings, ...settings };
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ persona, personas: db.personas });
     }
 
@@ -311,7 +311,7 @@ export async function POST(req: NextRequest) {
         ...beacon,
         updatedAt: nowIso,
       };
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ persona, personas: db.personas });
     }
 
@@ -398,7 +398,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         rating: newRating,
         personas: db.personas,
@@ -450,7 +450,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         persona,
         personas: db.personas,
@@ -475,7 +475,7 @@ export async function POST(req: NextRequest) {
       } else {
         persona.regularPartnerIds.push(partnerId);
       }
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ persona, personas: db.personas });
     }
 
@@ -484,7 +484,7 @@ export async function POST(req: NextRequest) {
       db.notifications = (db.notifications || []).map((n) =>
         n.userId === userId ? { ...n, read: true } : n
       );
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ notifications: db.notifications });
     }
 

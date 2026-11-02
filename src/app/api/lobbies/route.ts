@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb, resetDb, writeDb } from '@/lib/db';
+import { isCloudDatabaseConnected, readDb, resetDb, writeDb } from '@/lib/db';
 import { getDefaultCoverForCategory, getMapPinLabelForCategory } from '@/lib/geo';
 import {
   ActivityCategory,
@@ -33,12 +33,13 @@ function getRoomStatusFromStartTime(startTime: StartTimeOption): RoomStatus {
 }
 
 export async function GET() {
-  const db = readDb();
+  const db = await readDb();
   return NextResponse.json({
     personas: db.personas,
     lobbies: db.lobbies,
     ratings: db.ratings || [],
     notifications: db.notifications || [],
+    cloudDb: isCloudDatabaseConnected(),
   });
 }
 
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required meetup fields' }, { status: 400 });
     }
 
-    const db = readDb();
+    const db = await readDb();
     const nowIso = new Date().toISOString();
     const lobbyId = `lobby-${Date.now()}`;
     const clampedMax = Math.max(2, Math.min(8, Number(maxParticipants) || 2));
@@ -190,10 +191,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    writeDb(db);
+    await writeDb(db);
 
     return NextResponse.json(
-      { lobby: newLobby, notifications: db.notifications },
+      { lobby: newLobby, notifications: db.notifications, cloudDb: isCloudDatabaseConnected() },
       { status: 201 }
     );
   } catch (err) {
@@ -205,11 +206,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT() {
-  const db = resetDb();
+  const db = await resetDb();
   return NextResponse.json({
     personas: db.personas,
     lobbies: db.lobbies,
     ratings: db.ratings || [],
     notifications: db.notifications || [],
+    cloudDb: isCloudDatabaseConnected(),
   });
 }

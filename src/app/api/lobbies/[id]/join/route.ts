@@ -34,7 +34,7 @@ export async function POST(
       spotClue?: string;
     };
 
-    const db = readDb();
+    const db = await readDb();
     const lobby = db.lobbies.find((item) => item.id === params.id);
 
     if (!lobby) {
@@ -96,7 +96,7 @@ export async function POST(
         }
       });
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         lobby,
         notifications: db.notifications,
@@ -145,7 +145,7 @@ export async function POST(
         });
       }
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         lobby,
         personas: db.personas,
@@ -160,7 +160,7 @@ export async function POST(
       }
       lobby.participants = lobby.participants.filter((p) => p.id !== uid);
       lobby.pendingRequests = lobby.pendingRequests.filter((r) => r.user.id !== uid);
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ lobby, status: 'LEFT' });
     }
 
@@ -213,7 +213,7 @@ export async function POST(
         });
       }
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         lobby,
         notifications: db.notifications,
@@ -229,7 +229,7 @@ export async function POST(
         return NextResponse.json({ error: 'Pending request not found' }, { status: 404 });
       }
       lobby.pendingRequests.splice(reqIndex, 1);
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ lobby, status: 'DECLINED' });
     }
 
@@ -297,7 +297,7 @@ export async function POST(
         createdAt: nowIso,
       });
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         lobby,
         notifications: db.notifications,
@@ -308,7 +308,7 @@ export async function POST(
       if (existingReq) {
         if (note.trim()) {
           existingReq.note = note.trim();
-          writeDb(db);
+          await writeDb(db);
         }
         return NextResponse.json({ lobby, status: 'ALREADY_REQUESTED' });
       }
@@ -342,7 +342,7 @@ export async function POST(
         createdAt: nowIso,
       });
 
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({
         lobby,
         notifications: db.notifications,

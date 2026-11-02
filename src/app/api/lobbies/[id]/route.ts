@@ -7,7 +7,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = readDb();
+  const db = await readDb();
   const lobby = db.lobbies.find((item) => item.id === params.id);
 
   if (!lobby) {
@@ -22,7 +22,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = readDb();
+  const db = await readDb();
   const index = db.lobbies.findIndex((item) => item.id === params.id);
 
   if (index === -1) {
@@ -31,7 +31,7 @@ export async function DELETE(
 
   db.lobbies.splice(index, 1);
   db.messages = db.messages.filter((msg) => msg.lobbyId !== params.id);
-  writeDb(db);
+  await writeDb(db);
 
   return NextResponse.json({ deleted: true, id: params.id });
 }

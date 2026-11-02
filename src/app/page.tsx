@@ -64,6 +64,7 @@ import { CreateLobbyModal } from '@/components/CreateLobbyModal';
 import { AuthProfileModal, GoogleIcon } from '@/components/AuthProfileModal';
 import { MetricsModal } from '@/components/MetricsModal';
 import { SettingsModal } from '@/components/SettingsModal';
+import { WelcomeLoginScreen } from '@/components/WelcomeLoginScreen';
 import {
   MobilePushBanner,
   NotificationDrawer,
@@ -92,7 +93,9 @@ export default function SeeMeHomePage() {
   const [activePersonaId, setActivePersonaId] = useState<string>(
     DEMO_PERSONAS[0].id
   );
-  const [isSignedOut, setIsSignedOut] = useState<boolean>(false);
+  const [isSignedOut, setIsSignedOut] = useState<boolean>(true);
+  const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(false);
   const [rawLobbies, setRawLobbies] = useState<Lobby[]>(
     INITIAL_SEED_DATA.lobbies
   );
@@ -248,29 +251,32 @@ export default function SeeMeHomePage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedSession = localStorage.getItem('seeme_session_user_id');
-      if (savedSession === 'signed_out') {
-        setIsSignedOut(true);
-      } else if (savedSession) {
+      if (savedSession && savedSession !== 'signed_out') {
         setActivePersonaId(savedSession);
         setIsSignedOut(false);
+      } else {
+        setIsSignedOut(true);
       }
+      setHasCheckedSession(true);
     }
   }, []);
 
   const handleSwitchUser = (userId: string) => {
     setActivePersonaId(userId);
     setIsSignedOut(false);
+    setIsGuestMode(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem('seeme_session_user_id', userId);
     }
     const targetPersona = personas.find((p) => p.id === userId);
     if (targetPersona) {
-      showToast(`Switched account to ${targetPersona.name}`);
+      showToast(`Logged in as ${targetPersona.name}`);
     }
   };
 
   const handleSignOut = () => {
     setIsSignedOut(true);
+    setIsGuestMode(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem('seeme_session_user_id', 'signed_out');
     }
@@ -296,6 +302,7 @@ export default function SeeMeHomePage() {
         if (data.persona) {
           setActivePersonaId(data.persona.id);
           setIsSignedOut(false);
+          setIsGuestMode(false);
           if (typeof window !== 'undefined') {
             localStorage.setItem('seeme_session_user_id', data.persona.id);
           }
@@ -305,6 +312,44 @@ export default function SeeMeHomePage() {
       }
     } catch {
       showToast('Could not sign in with Google');
+    }
+  };
+
+  const handleCreateQuickProfile = async (profile: {
+    name: string;
+    email?: string;
+    favoriteActivities: ActivityCategory[];
+  }) => {
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'REGISTER_OR_CREATE_PROFILE',
+          name: profile.name,
+          email: profile.email,
+          favoriteActivities: profile.favoriteActivities,
+          skillBadge: 'Active Member',
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.personas)) setPersonas(data.personas);
+        if (data.persona) {
+          setActivePersonaId(data.persona.id);
+          setIsSignedOut(false);
+          setIsGuestMode(false);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('seeme_session_user_id', data.persona.id);
+          }
+          triggerSensoryFeedback('SUCCESS', data.persona.settings);
+          showToast(`Welcome to SeeMe, ${data.persona.name}!`);
+        }
+      } else {
+        showToast('Could not create profile. Try again.');
+      }
+    } catch {
+      showToast('Network error while creating profile');
     }
   };
 
@@ -405,6 +450,11 @@ export default function SeeMeHomePage() {
     startTime?: StartTimeOption;
     coHost?: UserPersona | null;
   }) => {
+    if (isSignedOut) {
+      showToast('Please sign in to host a meetup');
+      setIsGuestMode(false);
+      return;
+    }
     setCreateModalCategory(options?.category);
     setCreateModalStartTime(options?.startTime);
     setCreateModalCoHost(options?.coHost || null);
@@ -662,6 +712,12 @@ export default function SeeMeHomePage() {
     e.stopPropagation();
     if (joiningLobbyId) return;
 
+    if (isSignedOut) {
+      showToast('Please sign in to join meetups');
+      setIsGuestMode(false);
+      return;
+    }
+
     const alreadyIn = lobby.participants.some((p) => p.id === activeUser.id);
     if (alreadyIn) {
       setSelectedLobbyId(lobby.id);
@@ -816,6 +872,21 @@ export default function SeeMeHomePage() {
     );
   };
 
+  if ((!hasCheckedSession || isSignedOut) && !isGuestMode) {
+    return (
+      <WelcomeLoginScreen
+        personas={personas}
+        onGoogleSignIn={handleGoogleSignIn}
+        onSelectPersona={(persona) => handleSwitchUser(persona.id)}
+        onCreateProfile={handleCreateQuickProfile}
+        onContinueAsGuest={() => {
+          setIsGuestMode(true);
+          showToast('Browsing in guest mode');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-slate-100 flex flex-col transition-colors duration-200">
       {/* Native iOS / Android Top Push Notification Banner */}
@@ -895,6 +966,25 @@ export default function SeeMeHomePage() {
                 <span>Host Meetup</span>
               </button>
             </div>
+
+            {/* Guest Mode Banner */}
+            {isSignedOut && (
+              <div className="bg-slate-900 text-white rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-sm border border-slate-800">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <p className="text-xs font-semibold text-slate-200 truncate">
+                    Browsing as guest. Sign in to join meetups or host your own.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsGuestMode(false)}
+                  className="px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold shrink-0 hover:bg-slate-100 transition-colors"
+                >
+                  Log In
+                </button>
+              </div>
+            )}
 
             {/* Scannable Filter Bar: Activity Pills + Meetup Status + Radius */}
             <section
@@ -1531,12 +1621,11 @@ export default function SeeMeHomePage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setAuthModalTab('LOGIN');
-                      setIsAuthModalOpen(true);
+                      setIsGuestMode(false);
                     }}
-                    className="min-h-[44px] w-full py-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-extrabold"
+                    className="min-h-[44px] w-full py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-extrabold shadow-sm"
                   >
-                    Sign In with Email / Name
+                    Open Sign In Screen
                   </button>
                 </div>
               </div>

@@ -8,7 +8,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = readDb();
+  const db = await readDb();
   const messages = db.messages.filter((msg) => msg.lobbyId === params.id);
   return NextResponse.json({ messages });
 }
@@ -30,7 +30,7 @@ export async function POST(
       return NextResponse.json({ error: 'Message text and sender info required' }, { status: 400 });
     }
 
-    const db = readDb();
+    const db = await readDb();
     const lobby = db.lobbies.find((item) => item.id === params.id);
 
     if (!lobby) {
@@ -48,7 +48,7 @@ export async function POST(
     };
 
     db.messages.push(newMessage);
-    writeDb(db);
+    await writeDb(db);
 
     const messages = db.messages.filter((msg) => msg.lobbyId === params.id);
     return NextResponse.json({ message: newMessage, messages }, { status: 201 });
