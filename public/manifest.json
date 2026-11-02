@@ -1,0 +1,10 @@
+{
+  "name": "SeeMe — Real-Life Activity Meetups",
+  "short_name": "SeeMe",
+  "description": "Spontaneous real-life activity meetups for Chess, Ping Pong, Tennis, Board Games, Running, and Coffee.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary"
+}

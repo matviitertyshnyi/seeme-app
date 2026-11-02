@@ -1,0 +1,93 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-canvas: #f8fafc;
+  --text-ink: #0f172a;
+}
+
+.dark {
+  --bg-canvas: #0b0f19;
+  --text-ink: #f8fafc;
+}
+
+html,
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Antislop Human R-39: Explicit Interactive Cursor Affordances */
+button,
+a[href],
+summary,
+select,
+label[for],
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled],
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Antislop Human R-32: High-contrast focus visible ring */
+:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.dark :focus-visible {
+  outline-color: #818cf8;
+}
+
+/* Antislop Motion & Accessibility R-19 / R-39: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.lobby-pill-marker-wrapper,
+.lobby-user-marker-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  background-color: #e2e8f0;
+  z-index: 0 !important;
+}
+
+.dark .leaflet-container {
+  background-color: #0f172a;
+}
+
+.dark .leaflet-tile-pane {
+  filter: brightness(0.82) contrast(1.1) saturate(0.85);
+}
