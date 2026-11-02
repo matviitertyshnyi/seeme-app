@@ -69,23 +69,16 @@ export function readDb(): DatabaseSchema {
       parsed.notifications = INITIAL_SEED_DATA.notifications || [];
     }
     parsed.personas = parsed.personas.map((p) => ({
-      reliabilityScore: 98,
-      meetupsAttended: 10,
-      hoursPlayed: 18,
-      ratingAvg: 4.9,
-      ratingCount: 8,
-      streakWeeks: 3,
-      bannedUserIds: [],
-      regularPartnerIds: [],
+      ...p,
       settings: {
         iosAndroidPush: true,
         soundEffects: true,
         hapticFeedback: true,
-        distanceUnit: 'km',
+        distanceUnit: 'km' as const,
         profileVisible: true,
         showReliabilityScore: true,
+        ...p.settings,
       },
-      ...p,
     }));
     return parsed;
   } catch {
