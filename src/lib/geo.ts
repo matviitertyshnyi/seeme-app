@@ -140,3 +140,81 @@ export function getDefaultCoverForCategory(category: ActivityCategory): string {
       return 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1000&q=80';
   }
 }
+
+/**
+ * Parses an age range string (such as "18–24", "20s & 30s", "30+", "All Ages (18+)")
+ * into a numeric closed interval [minAge, maxAge].
+ */
+export function parseAgeRangeToInterval(rangeStr?: string): [number, number] {
+  if (!rangeStr || rangeStr.includes('All Ages') || rangeStr === 'Any') {
+    return [18, 99];
+  }
+
+  const normalized = rangeStr.replace(/\u2013/g, '-').trim();
+
+  if (/20s?\s*&\s*30s?/i.test(normalized)) {
+    return [20, 39];
+  }
+
+  const plusMatch = normalized.match(/(\d+)\+/);
+  if (plusMatch) {
+    return [parseInt(plusMatch[1], 10), 99];
+  }
+
+  const rangeMatch = normalized.match(/(\d+)\s*-\s*(\d+)/);
+  if (rangeMatch) {
+    return [parseInt(rangeMatch[1], 10), parseInt(rangeMatch[2], 10)];
+  }
+
+  return [18, 99];
+}
+
+/**
+ * Checks if a meetup's age preference overlaps with any of the selected age filter ranges.
+ * If no filters are selected, or the meetup is open to "All Ages (18+)", returns true.
+ */
+export function doesMeetupMatchAgeFilters(
+  meetupRangeStr: string | undefined,
+  selectedFilterIds: string[]
+): boolean {
+  if (!selectedFilterIds || selectedFilterIds.length === 0 || selectedFilterIds.includes('all')) {
+    return true;
+  }
+
+  if (!meetupRangeStr || meetupRangeStr.includes('All Ages') || meetupRangeStr === 'Any') {
+    return true;
+  }
+
+  const meetupInterval = parseAgeRangeToInterval(meetupRangeStr);
+
+  return selectedFilterIds.some((filterId) => {
+    let filterInterval: [number, number];
+    switch (filterId) {
+      case '18-24':
+      case '18–25':
+        filterInterval = [18, 24];
+        break;
+      case '25-34':
+      case '20s & 30s':
+        filterInterval = [25, 34];
+        break;
+      case '35-44':
+      case '25–35':
+        filterInterval = [35, 44];
+        break;
+      case '45+':
+      case '30+':
+      case '40+':
+        filterInterval = [45, 99];
+        break;
+      default:
+        filterInterval = parseAgeRangeToInterval(filterId);
+    }
+
+    return (
+      Math.max(meetupInterval[0], filterInterval[0]) <=
+      Math.min(meetupInterval[1], filterInterval[1])
+    );
+  });
+}
+

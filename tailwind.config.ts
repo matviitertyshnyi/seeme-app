@@ -12,21 +12,21 @@ const config: Config = {
       colors: {
         canvas: {
           DEFAULT: '#FAF8F5',
-          dark: '#181512',
+          dark: '#141210',
         },
         ink: {
           DEFAULT: '#1C1917',
           dark: '#FAF8F5',
-          muted: '#57534E',
+          muted: '#78716C',
           'muted-dark': '#A8A29E',
-          subtle: '#78716C',
-          'subtle-dark': '#D6D3D1',
+          subtle: '#A8A29E',
+          'subtle-dark': '#78716C',
         },
         surface: {
           DEFAULT: '#FFFFFF',
           dark: '#1C1917',
           subtle: '#F5F2EB',
-          'subtle-dark': '#292524',
+          'subtle-dark': '#262220',
         },
         border: {
           DEFAULT: '#E7E2D9',
@@ -35,13 +35,14 @@ const config: Config = {
           'strong-dark': '#44403C',
         },
         brand: {
-          DEFAULT: '#EA580C', // Warm Orange 600 (Passes AA on white)
+          DEFAULT: '#EA580C', // Warm Orange 600
           dark: '#C2410C',    // Orange 700 (Hover)
+          hover: '#C2410C',
           light: '#F97316',   // Orange 500
-          accent: '#FB923C',  // Orange 400 (Dark mode focus & links)
-          soft: '#FFF7ED',    // Orange 50 (Pills & active tab light)
-          'surface-dark': '#431407', // Orange 950 (Active tab dark)
-          'muted-dark': '#FDBA74',   // Orange 300
+          accent: '#FB923C',  // Orange 400
+          soft: '#FFF7ED',    // Orange 50
+          'surface-dark': '#2A170F',
+          'muted-dark': '#FDBA74',
         },
         amber: {
           DEFAULT: '#D97706', // Golden Amber 600

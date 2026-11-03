@@ -52,9 +52,7 @@ export async function POST(
     const isHost = lobby.hostId === authUser.id;
     const isAdmin = authUser.role === 'ADMIN';
 
-    // ------------------------------------------------------------------------
     // 1. CHECK_IN: Only confirmed participant (for themselves) or Admin
-    // ------------------------------------------------------------------------
     if (action === 'CHECK_IN') {
       const uid = targetUserId || authUser.id;
 
@@ -121,9 +119,7 @@ export async function POST(
       });
     }
 
-    // ------------------------------------------------------------------------
     // 2. BAN_FROM_LOBBY: Host-only permission (or Admin)
-    // ------------------------------------------------------------------------
     if (action === 'BAN_FROM_LOBBY' || action === 'KICK_OR_BAN') {
       if (!isHost && !isAdmin) {
         return errorResponse('Only the host can ban participants from this meetup', 403, 'FORBIDDEN');
@@ -176,9 +172,7 @@ export async function POST(
       });
     }
 
-    // ------------------------------------------------------------------------
     // 3. LEAVE: Participant-only permission (must match targetUserId)
-    // ------------------------------------------------------------------------
     if (action === 'LEAVE') {
       const uid = targetUserId || authUser.id;
 
@@ -200,9 +194,7 @@ export async function POST(
       return NextResponse.json({ lobby, status: 'LEFT', success: true });
     }
 
-    // ------------------------------------------------------------------------
     // 4. ACCEPT_REQUEST: Host-only permission + Capacity Guard
-    // ------------------------------------------------------------------------
     if (action === 'ACCEPT_REQUEST') {
       if (!isHost && !isAdmin) {
         return errorResponse('Only the host can accept join requests', 403, 'FORBIDDEN');
@@ -267,9 +259,7 @@ export async function POST(
       });
     }
 
-    // ------------------------------------------------------------------------
     // 5. DECLINE_REQUEST: Host-only permission
-    // ------------------------------------------------------------------------
     if (action === 'DECLINE_REQUEST') {
       if (!isHost && !isAdmin) {
         return errorResponse('Only the host can decline join requests', 403, 'FORBIDDEN');
@@ -287,9 +277,7 @@ export async function POST(
       return NextResponse.json({ lobby, status: 'DECLINED', success: true });
     }
 
-    // ------------------------------------------------------------------------
     // 6. JOIN / REQUEST_JOIN / JOIN_OR_REQUEST
-    // ------------------------------------------------------------------------
     const joiningUser = authUser;
 
     // Check if banned from this lobby or by the host

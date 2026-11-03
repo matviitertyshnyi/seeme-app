@@ -6,14 +6,14 @@ Mobile-first social matchmaking web app for spontaneous real-life in-person acti
 
 Leave The Room is structured into a modular, clean-layered architecture:
 1. **Design System & Shell Layer (`src/components/`, `src/app/globals.css`, `tailwind.config.ts`)**:
-   - Centralized design tokens: Canvas (`#F8FAFC` light / `#0B0F19` dark), Ink (`#0F172A` / `#F8FAFC`), Brand (`#4F46E5`), and semantic status colors.
-   - Reusable components: `BottomNav`, `LobbyCard`, `CategoryIcon`, `SeatBubbles`, `StatusBadge`, modals, and accessible form controls.
-   - Light/dark mode toggle with class-based switching and WCAG AA contrast compliance.
+   - Centralized design tokens: Warm Canvas (`#FAF8F5` light / `#141210` dark), Tactile Card Surfaces (`#FFFFFF` / `#1C1917` & `#262220`), Borders (`#E7E2D9` / `#292524`), and Radiant Brand Accent (`#EA580C` Warm Orange / `#F97316` / `#F59E0B` Amber).
+   - Reusable components: `BottomNav`, `LobbyCard`, `CategoryIcon`, `SeatBubbles`, `StatusBadge`, `AgeSelectorBottomSheet`, modals, and accessible form controls.
+   - Light/dark mode toggle with class-based switching, antislop-ui compliance, and WCAG AA contrast compliance.
    - Navigation shell: 4 primary destinations (Explore, Map Radar, My Meetups, Profile) with touch targets >= 44x44px and safe-area padding (`pb-28`).
 
 2. **Domain Views & Meetup Lifecycle Layer (`src/app/`, `src/components/`)**:
-   - Explore Feed: Macro activity group pills, sub-activity chips, status pills (Live/Upcoming/Finished), distance radius selector (2/5/15/50km), and full empty/error states.
-   - Interactive Map Radar (`MapRadar.tsx`): Dynamic SSR-disabled Leaflet map, custom pill `divIcon`s with live capacity, user radar circle, bottom preview sheet, and isolate z-index stacking.
+   - Explore Feed: Tactile category tabs, sub-activity chips, status pills (Live/Upcoming/Finished), distance radius selector (2/5/15/50km), sliding bottom sheet age selector, and full empty/error states.
+   - Interactive Map Radar (`MapRadar.tsx`): Dynamic SSR-disabled Leaflet map, custom pill `divIcon`s with live capacity, user radar circle, bottom preview sheet, dark Leaflet zoom controls, and isolate z-index stacking.
    - My Meetups: Segmented tab controls (`Hosting`, `Joined`, `Past / Saved`), role indicators, pending request badges, and arrival check-ins.
    - Profile & Account: Google and Apple authentication exclusively, official AppleIcon SVG mark, avatar/bio, stats (show-up %, ratings, hours played), availability beacon.
    - Host Meetup Flow (`CreateLobbyModal.tsx`): 6-step creation wizard. Co-host is strictly optional and sequestered in host settings accordion, completely absent from global UI.
@@ -24,12 +24,13 @@ Leave The Room is structured into a modular, clean-layered architecture:
    - Access Control Matrix: Only host can edit/delete meetups or accept/decline joins; only participants and host can post chat messages; only role `ADMIN` can invoke admin actions.
    - Standardized API contracts: `/api/meetups` (with backward-compatible `/api/lobbies` proxies), `/api/users/profile`, `/api/auth/session`.
    - Zod runtime validation for all payload schemas.
-   - Pluggable storage repository: Atomic file write-and-rename for local development/staging, Upstash Redis REST entity store for cloud deployment.
+   - Pluggable storage repository: Atomic file write-and-rename for local development/staging (`data/db.json`), Upstash Redis REST entity store for cloud deployment.
 
-4. **Automated QA & Verification Layer (`tests/`, `src/__tests__/`)**:
-   - Vitest automated test harness designed from scratch.
-   - 4-Tier opaque-box requirement-driven E2E test suite + security permission tests + a11y tests.
-   - 25-point Release Readiness Checklist.
+4. **Automated QA & Verification Layer (`tests/`, `scripts/`)**:
+   - Opaque-box TypeScript test execution harness (`npm run test:e2e`).
+   - 4-Tier requirement-driven test suite (Feature, Boundary, Combinations, Real-World) + security permission tests + a11y tests.
+   - 5-Language dictionary completeness, encoding, and anti-slop integrity verification (`scripts/verify-languages.js`).
+   - Clean test data snapshot isolation (`backupDatabase` / `restoreDatabase`) ensuring zero data pollution.
 
 ---
 
@@ -58,6 +59,10 @@ Leave The Room is structured into a modular, clean-layered architecture:
 | 19 | Warm Energetic Color Palette | Warm Orange (#EA580C / #F97316) & Golden Amber (#F59E0B / #D97706) brand; cream/sand light surfaces (#FAF8F5 / #FFFDF7); warm stone dark mode (#181512 / #1C1917); WCAG AA compliant | M3 | User update |
 | 20 | Multilingual Support (i18n) | 5 languages: English (en), Ukrainian (uk), Polish (pl), German (de), French (fr) with navigation/settings language switcher | M3 | User update |
 | 21 | Native Typography & Font Subsets | Next.js Inter/font configuration with subsets ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'] for native Ukrainian and Polish rendering | M3 | User update |
+| 22 | Dark Tactile Aesthetic & Glowing Orange Accents | Elevated tactile dark surfaces (#141210 / #1C1917), micro-bevel rim lighting, glowing orange accents (#EA580C/#F97316), antislop-ui compliance, custom dark Leaflet controls, radiant FAB & BottomNav | M5 | R1, survey |
+| 23 | Multi-Select Sliding Bottom Sheet Age Selector | Extracted AgeSelectorBottomSheet with dimmed backdrop, preset chips (18-24, 25-34, 35-44, 45+, All Ages), interval-overlap matching algorithm, apply/dismiss interactions, /api/meetups persistence fix | M5 | R2, survey |
+| 24 | Deployment Readiness & Zero-Pollution Verification | Production build (`npm run build`) exit 0, TypeScript checks (`npx tsc --noEmit`) exit 0, 100% E2E test pass (`npm run test:e2e`), zero data pollution in `data/db.json` | M5 | R3, survey |
+| 25 | Code Comment Hygiene & Anti-Slop | Scrub decorative banner comments (`// ===`, `// ---`) and generic AI-slop narration while preserving developer docs, platform workarounds, antislop citations, and type aliases with zero logic changes | M5 | R4, survey |
 
 ---
 
@@ -70,6 +75,7 @@ Leave The Room is structured into a modular, clean-layered architecture:
 | M2 | Backend Data Models, Security & APIs | Server-side auth helper (`requireAuth`), Zod validation schemas, access control matrix (host-only delete, participant-only chat, host-only join decisions), repository persistence, API contracts | none | DONE |
 | M3 | Meetup Discovery, Lifecycle, UX & i18n | Rebrand to "Leave The Room", complete IRL purge, zero emojis editorial design, Explore filters/cards, Leaflet Map Radar, Host wizard (isolated co-host), arrival check-in, chat, Warm Color Palette, 5-language i18n switcher, font subsets, and Hard Auth Gate | M1, M2 | DONE |
 | M4 | Final Milestone (E2E Pass & Hardening) | Phase 1: Pass 100% of Tiers 1-4 E2E tests (`TEST_READY.md`). Phase 2: Tier 5 Adversarial Coverage Hardening, 513/513 assertions pass, production build clean | E2E, M3 | DONE |
+| M5 | Dark Tactile Overhaul, Multi-Select Age Bottom Sheet, Deployment Readiness & Comment Hygiene | Implement dark tactile surfaces (#141210 / #1C1917) and glowing orange accents (#EA580C) across Explore, Map, My Meetups, Profile; build AgeSelectorBottomSheet with multi-option chips & interval matching; clean banner & AI-slop comments; verify clean build, TypeScript, and test suite | M4 | DONE |
 
 ---
 
@@ -98,6 +104,13 @@ Leave The Room is structured into a modular, clean-layered architecture:
   - Verifies caller session is a joined participant or host.
   - Returns 403 if caller is not in `lobby.participants` and not host.
 
+### M5 (Age Selector Bottom Sheet & Design Tokens) ↔ Client Views
+- `AgeSelectorBottomSheet.tsx`:
+  - Props: `isOpen: boolean`, `onClose: () => void`, `selectedAgeRanges: string[]`, `onApply: (selectedIds: string[]) => void`, `onHaptic?: () => void`, `matchingCount?: number`
+  - Behavior: Sliding window from bottom, dimmed backdrop with tap-to-dismiss, preset multi-select chips (`18-24`, `25-34`, `35-44`, `45+`, and `All Ages (18+)`), staged selection state, apply/reset actions, focus trap, Escape key dismiss, and body scroll locking.
+- `doesMeetupMatchAgeFilters(meetupRangeStr?: string, selectedFilterIds: string[]): boolean`:
+  - Mathematical interval-overlap evaluation: `Math.max(meetupMin, filterMin) <= Math.min(meetupMax, filterMax)`.
+
 ---
 
 ## Code Layout
@@ -118,22 +131,23 @@ src/
 │   │   └── users/
 │   │       ├── route.ts                # User registration/auth actions
 │   │       └── profile/route.ts        # GET, PUT user profile
-│   ├── globals.css                     # Global styles, token definitions, 44px ergonomics
+│   ├── globals.css                     # Global styles, token definitions, 44px ergonomics, dark Leaflet styles
 │   ├── layout.tsx                      # Root layout with viewport metadata
 │   └── page.tsx                        # Main application shell
 ├── components/
+│   ├── AgeSelectorBottomSheet.tsx      # Multi-select sliding bottom sheet age selector
 │   ├── AuthProfileModal.tsx            # Auth modal with official Apple SVG & Google
-│   ├── BottomNav.tsx                   # Extracted shared bottom navigation
+│   ├── BottomNav.tsx                   # Extracted shared bottom navigation with glowing accents
 │   ├── CategoryIcon.tsx                # Activity category badge icons
 │   ├── CreateLobbyModal.tsx            # Host creation modal with isolated co-host
-│   ├── LobbyCard.tsx                   # Reusable meetup card
-│   ├── MapRadar.tsx                    # Dynamic Leaflet radar view with pill markers
+│   ├── LobbyCard.tsx                   # Reusable meetup card with tactile rim & orange gradient CTA
+│   ├── MapRadar.tsx                    # Dynamic Leaflet radar view with dark stone styling & pill markers
 │   ├── RoomDetailModal.tsx             # Meetup details, live chat, arrival check-in
 │   └── SeatBubbles.tsx                 # Participant seat avatars and status rings
 ├── lib/
 │   ├── auth-guard.ts                   # Server-side auth and permission verifier
 │   ├── db.ts                           # Pluggable repository (atomic file / Upstash Redis)
-│   ├── geo.ts                          # Haversine distance and sorting logic
+│   ├── geo.ts                          # Haversine distance and interval-overlap age filter logic
 │   ├── seed.ts                         # Initial database seed data
 │   └── types.ts                        # Zod schemas and TypeScript interfaces
 └── __tests__/                          # Automated test suites

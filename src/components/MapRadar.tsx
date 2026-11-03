@@ -183,12 +183,11 @@ export default function MapRadar({
 
   return (
     /* CRITICAL: isolate + z-0 creates a strict stacking context so Leaflet panes and internal overlays NEVER bleed over modals */
-    <div className="relative isolate z-0 w-full h-[calc(100vh-240px)] min-h-[460px] max-h-[680px] rounded-[26px] overflow-hidden bg-white dark:bg-slate-900 shadow-ambient border border-slate-200 dark:border-slate-800">
+    <div className="relative isolate z-0 w-full h-[calc(100vh-240px)] min-h-[460px] max-h-[680px] rounded-[26px] overflow-hidden bg-white dark:bg-[#141210] shadow-ambient dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.6)] border border-stone-200 dark:border-stone-800">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-      {/* Top-Left Radar Status + Color Legend (z-[1000] so it sits reliably above Leaflet panes) */}
       <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 pointer-events-auto">
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3.5 py-2 rounded-full shadow-ambient border border-slate-200 dark:border-slate-700 flex items-center gap-3 text-xs font-extrabold text-slate-900 dark:text-slate-100">
+        <div className="bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md px-3.5 py-2 rounded-full shadow-md dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.4)] border border-stone-200 dark:border-stone-700/80 flex items-center gap-3 text-xs font-extrabold text-stone-900 dark:text-stone-100">
           <span className="inline-flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             Live
@@ -206,21 +205,20 @@ export default function MapRadar({
         <button
           type="button"
           onClick={handleRecenter}
-          className="min-h-[44px] bg-white/95 dark:bg-slate-900/95 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-md px-4 py-2 rounded-full shadow-ambient border border-slate-200 dark:border-slate-700 inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 dark:text-slate-100 transition-all cursor-pointer"
+          className="min-h-[44px] bg-white/95 dark:bg-[#1C1917]/95 hover:bg-white dark:hover:bg-stone-800 backdrop-blur-md px-4 py-2 rounded-full shadow-md dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.4)] border border-stone-200 dark:border-stone-700/80 hover:border-orange-500/50 dark:hover:border-orange-500/60 dark:hover:shadow-[0_0_12px_rgba(234,88,12,0.25)] inline-flex items-center gap-1.5 text-xs font-extrabold text-stone-900 dark:text-stone-100 transition-all cursor-pointer"
         >
-          <LocateFixed className="w-4 h-4 text-brand dark:text-brand" />
+          <LocateFixed className="w-4 h-4 text-orange-600 dark:text-orange-400" />
           Center
         </button>
       </div>
 
-      {/* Bottom Selected Meetup Preview Card (z-[1000]) */}
       {selectedPreviewLobby && (
-        <div className="absolute bottom-3 left-3 right-3 md:left-auto md:right-4 md:w-[420px] z-[1000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[24px] p-4 shadow-ambient-lg border border-slate-200 dark:border-slate-700">
+        <div className="absolute bottom-3 left-3 right-3 md:left-auto md:right-4 md:w-[420px] z-[1000] bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md rounded-[24px] p-4 shadow-ambient-lg dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(234,88,12,0.12)] border border-stone-200 dark:border-stone-700/80">
           <div className="flex items-start gap-3">
             <img
               src={selectedPreviewLobby.coverImage}
               alt={selectedPreviewLobby.title}
-              className="w-16 h-16 rounded-2xl object-cover shrink-0 bg-slate-100 dark:bg-slate-800"
+              className="w-16 h-16 rounded-2xl object-cover shrink-0 bg-stone-100 dark:bg-stone-800"
             />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -229,7 +227,7 @@ export default function MapRadar({
                   timeLabel={selectedPreviewLobby.startTimeBadge}
                   variant="subtle"
                 />
-                <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand dark:text-brand">
+                <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-orange-600 dark:text-orange-400">
                   <Navigation className="w-3 h-3" />
                   {selectedPreviewLobby.distanceLabel}
                 </span>
@@ -237,19 +235,19 @@ export default function MapRadar({
 
               <h4
                 onClick={() => onSelectLobby(selectedPreviewLobby)}
-                className="mt-1 text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate cursor-pointer hover:text-brand dark:hover:text-brand"
+                className="mt-1 text-sm sm:text-base font-extrabold text-stone-900 dark:text-white truncate cursor-pointer hover:text-orange-600 dark:hover:text-orange-400"
               >
                 {selectedPreviewLobby.title}
               </h4>
 
-              <div className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-300 truncate">
-                <MapPin className="w-3.5 h-3.5 text-brand dark:text-brand shrink-0" />
+              <div className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-stone-600 dark:text-stone-300 truncate">
+                <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                 <span className="truncate">{selectedPreviewLobby.venueName}</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+          <div className="mt-3 pt-3 border-t border-stone-200/80 dark:border-stone-800 flex items-center justify-between gap-2">
             <SeatBubbles
               participants={selectedPreviewLobby.participants}
               maxParticipants={selectedPreviewLobby.maxParticipants}
@@ -265,9 +263,9 @@ export default function MapRadar({
                 rel="noopener noreferrer"
                 title="Open in Google Maps"
                 aria-label="Open in Google Maps"
-                className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors"
+                className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 flex items-center justify-center transition-colors border border-stone-200/60 dark:border-stone-700"
               >
-                <ExternalLink className="w-4 h-4 text-brand dark:text-brand" />
+                <ExternalLink className="w-4 h-4 text-orange-600 dark:text-orange-400" />
               </a>
 
               {selectedPreviewLobby.participants.some(
@@ -276,7 +274,7 @@ export default function MapRadar({
                 <button
                   type="button"
                   onClick={() => onSelectLobby(selectedPreviewLobby)}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow-[0_2px_12px_rgba(16,185,129,0.35)] border border-emerald-400/30 transition-all"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   Open Chat
@@ -285,7 +283,7 @@ export default function MapRadar({
                 <button
                   type="button"
                   onClick={(e) => onQuickJoin(selectedPreviewLobby, e)}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-extrabold shadow-sm transition-all"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-extrabold shadow-[0_2px_14px_rgba(234,88,12,0.4)] border border-orange-400/30 transition-all"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   {selectedPreviewLobby.joinMode === 'OPEN' ? 'Join' : 'Request'}

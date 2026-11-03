@@ -69,9 +69,7 @@ function ensureDirExists(dirPath: string) {
   }
 }
 
-// -------------------------------------------------------------
-// Mutex & Atomic File Write Implementation
-// -------------------------------------------------------------
+// Mutex and atomic file write implementation
 let writeMutex: Promise<unknown> = Promise.resolve();
 
 function enqueueWrite<T>(op: () => Promise<T>): Promise<T> {
@@ -114,9 +112,7 @@ async function atomicWriteLocalFile(targetPath: string, data: DatabaseSchema): P
   }
 }
 
-// -------------------------------------------------------------
-// Local DB Read / Write Fallbacks
-// -------------------------------------------------------------
+// Local DB read and write fallbacks
 function readLocalDb(): DatabaseSchema {
   resolveDbPaths();
   ensureDirExists(activeDbDir);
@@ -191,9 +187,7 @@ function writeLocalDb(data: DatabaseSchema): void {
   }
 }
 
-// -------------------------------------------------------------
-// Core Persistent readDb() & writeDb()
-// -------------------------------------------------------------
+// Core persistent readDb and writeDb
 export async function readDb(): Promise<DatabaseSchema> {
   const activeTxDb = txStorage.getStore();
   if (activeTxDb) {
@@ -369,9 +363,7 @@ export async function withDbMutation<T>(
 
 export { withDbMutation as mutateDb };
 
-// -------------------------------------------------------------
-// Pluggable Repository Implementation (IMeetupRepository)
-// -------------------------------------------------------------
+// Pluggable repository implementation (IMeetupRepository)
 export interface MeetupFilters {
   category?: string;
   status?: string;

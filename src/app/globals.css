@@ -26,10 +26,16 @@
 
 html,
 body {
-  background-color: var(--bg-canvas);
-  color: var(--text-ink);
+  background-color: var(--bg-canvas) !important;
+  color: var(--text-ink) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark,
+.dark body {
+  background-color: #141210 !important;
+  color: #faf8f5 !important;
 }
 
 /* Antislop Human R-39: Explicit Interactive Cursor Affordances */
@@ -107,9 +113,28 @@ textarea:disabled,
 }
 
 .dark .leaflet-container {
-  background-color: #0f172a;
+  background-color: #141210 !important;
 }
 
 .dark .leaflet-tile-pane {
-  filter: brightness(0.82) contrast(1.1) saturate(0.85);
+  filter: brightness(0.78) contrast(1.15) saturate(0.85) hue-rotate(5deg);
 }
+
+.dark .leaflet-bar {
+  border: 1px solid #292524 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.dark .leaflet-bar a {
+  background-color: #1c1917 !important;
+  color: #faf8f5 !important;
+  border-bottom: 1px solid #292524 !important;
+}
+
+.dark .leaflet-bar a:hover {
+  background-color: #262220 !important;
+  color: #ea580c !important;
+}
+

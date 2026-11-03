@@ -10,9 +10,7 @@ import type {
   VerificationStatus as LegacyVerificationStatus,
 } from '@/types/lobby';
 
-// -------------------------------------------------------------
-// Validation Helper
-// -------------------------------------------------------------
+// Validation helper
 export type ValidationResult<T> =
   | { success: true; data: T; error?: never }
   | { success: false; error: string; data?: never };
@@ -39,9 +37,7 @@ export function validatePayload<T>(
   return { data: result.data };
 }
 
-// -------------------------------------------------------------
-// Activity & Status Schemas
-// -------------------------------------------------------------
+// Activity and status schemas
 export const ActivityCategorySchema = z.string().min(1, 'Category is required');
 export type ActivityCategory = z.infer<typeof ActivityCategorySchema>;
 
@@ -84,9 +80,7 @@ export const VerificationStatusSchema = z.enum([
 ]);
 export type VerificationStatus = z.infer<typeof VerificationStatusSchema>;
 
-// -------------------------------------------------------------
-// User Settings & Beacon Schemas
-// -------------------------------------------------------------
+// User settings and beacon schemas
 export const UserSettingsSchema = z.object({
   iosAndroidPush: z.boolean().default(true),
   soundEffects: z.boolean().default(true),
@@ -107,9 +101,7 @@ export const RadarBeaconSchema = z.object({
 });
 export type RadarBeacon = z.infer<typeof RadarBeaconSchema>;
 
-// -------------------------------------------------------------
-// Participant & Join Request Schemas
-// -------------------------------------------------------------
+// Participant and join request schemas
 export const ParticipantSchema = z.object({
   id: z.string().min(1, 'Participant ID is required'),
   name: z.string().min(1, 'Name is required'),
@@ -136,9 +128,7 @@ export const JoinRequestSchema = z.object({
 });
 export type JoinRequest = z.infer<typeof JoinRequestSchema>;
 
-// -------------------------------------------------------------
-// User / Persona Schemas
-// -------------------------------------------------------------
+// User and persona schemas
 export const UserSchema = z.object({
   id: z.string().min(1),
   email: z.string().email().optional(),
@@ -195,9 +185,7 @@ export const UpdateProfileInputSchema = z.object({
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileInputSchema>;
 
-// -------------------------------------------------------------
-// Age Preference Schema
-// -------------------------------------------------------------
+// Age preference schema
 export const AgeRangeOptionSchema = z.enum([
   'All Ages (18+)',
   '18–25',
@@ -217,9 +205,7 @@ export const AGE_RANGE_OPTIONS: AgeRangeOption[] = [
   '40+',
 ];
 
-// -------------------------------------------------------------
-// Meetup Schemas
-// -------------------------------------------------------------
+// Meetup schemas
 export const CreateMeetupInputSchema = z.object({
   title: z
     .string()
@@ -304,9 +290,7 @@ export const MeetupSchema = z.object({
 export type Meetup = z.infer<typeof MeetupSchema>;
 export type Lobby = Meetup; // Backward-compatible alias
 
-// -------------------------------------------------------------
-// Join Action Schema
-// -------------------------------------------------------------
+// Join action schema
 export const JoinActionTypeSchema = z.enum([
   'JOIN_OR_REQUEST',
   'JOIN',
@@ -331,9 +315,7 @@ export const JoinActionSchema = z.object({
 });
 export type JoinActionInput = z.infer<typeof JoinActionSchema>;
 
-// -------------------------------------------------------------
-// Message Schemas
-// -------------------------------------------------------------
+// Message schemas
 export const SendMessageInputSchema = z
   .object({
     text: z.string().trim().max(1000, 'Message cannot exceed 1000 characters').optional(),

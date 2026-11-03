@@ -32,6 +32,9 @@ import {
   Edit3,
   LogOut,
   Users,
+  ChevronDown,
+  Check,
+  X,
 } from 'lucide-react';
 import {
   ActivityCategory,
@@ -46,7 +49,7 @@ import {
   UserSettings,
 } from '@/types/lobby';
 import { DEMO_PERSONAS, INITIAL_SEED_DATA } from '@/lib/seed';
-import { attachAndSortByDistance, DEFAULT_USER_COORDS } from '@/lib/geo';
+import { attachAndSortByDistance, DEFAULT_USER_COORDS, doesMeetupMatchAgeFilters } from '@/lib/geo';
 import {
   triggerSensoryFeedback,
   fireNativeNotificationIfPermitted,
@@ -75,6 +78,7 @@ import { WelcomeLoginScreen } from '@/components/WelcomeLoginScreen';
 import { AdminAccountsModal } from '@/components/AdminAccountsModal';
 import { BottomNav } from '@/components/BottomNav';
 import { MyMeetupsView } from '@/components/MyMeetupsView';
+import { AgeSelectorBottomSheet, AGE_PRESETS } from '@/components/AgeSelectorBottomSheet';
 import {
   MobilePushBanner,
   NotificationDrawer,
@@ -83,11 +87,11 @@ import {
 const MapRadar = dynamic(() => import('@/components/MapRadar'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[520px] rounded-[26px] bg-white dark:bg-slate-900 shadow-ambient border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
-      <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+    <div className="w-full h-[520px] rounded-[26px] bg-white dark:bg-[#141210] shadow-ambient border border-stone-200 dark:border-stone-800 flex flex-col items-center justify-center gap-3">
+      <div className="w-12 h-12 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center">
         <MapIcon className="w-6 h-6" />
       </div>
-      <p className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+      <p className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
         Loading Live Map Radar...
       </p>
     </div>
@@ -95,6 +99,13 @@ const MapRadar = dynamic(() => import('@/components/MapRadar'), {
 });
 
 const DISTANCE_RADII = [2, 5, 15, 50];
+
+const RADIUS_OPTIONS = [
+  { value: 2, label: '2 km', desc: 'Walking distance (under 25 min walk)' },
+  { value: 5, label: '5 km', desc: 'Nearby neighborhood & short cycle' },
+  { value: 15, label: '15 km', desc: 'Across town & rapid transit access' },
+  { value: 50, label: '50 km', desc: 'Full metropolitan area' },
+];
 
 type NavDestination = 'EXPLORE' | 'MAP' | 'MY_MEETUPS' | 'PROFILE';
 
@@ -116,14 +127,14 @@ export default function LeaveTheRoomHomePage() {
     INITIAL_SEED_DATA.notifications || []
   );
 
-  // Primary Bottom Navigation Destination (Explore, Map, My Meetups, Profile)
   const [activeNav, setActiveNav] = useState<NavDestination>('EXPLORE');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const isThemeInitialized = React.useRef(false);
 
-  // Filters (Directly in Explore & Map)
   const [selectedBroadCategory, setSelectedBroadCategory] = useState<string>('All Categories');
-  const [selectedAgeFilter, setSelectedAgeFilter] = useState<string>('Any');
+  const [selectedAgeFilters, setSelectedAgeFilters] = useState<string[]>([]);
+  const [isAgeSheetOpen, setIsAgeSheetOpen] = useState<boolean>(false);
+  const [isRadiusSheetOpen, setIsRadiusSheetOpen] = useState<boolean>(false);
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>('en');
   const [selectedGroup, setSelectedGroup] = useState<
     ActivityGroup | 'All Activities'
@@ -446,6 +457,23 @@ export default function LeaveTheRoomHomePage() {
     return attachAndSortByDistance(rawLobbies, userCoords.lat, userCoords.lng);
   }, [rawLobbies, userCoords.lat, userCoords.lng]);
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      'All Categories': lobbiesWithDistance.length,
+      'Sports & Fitness': 0,
+      'Gaming & Strategy': 0,
+      'Social & Hangout': 0,
+      'Co-Working': 0,
+    };
+    lobbiesWithDistance.forEach((lobby) => {
+      const broad = getBroadCategory(lobby.category);
+      if (counts[broad] !== undefined) {
+        counts[broad]++;
+      }
+    });
+    return counts;
+  }, [lobbiesWithDistance]);
+
   // Filtered meetups for Explore and Map
   const filteredLobbies: LobbyWithDistance[] = useMemo(() => {
     const bannedIds = activeUser.bannedUserIds || [];
@@ -473,13 +501,8 @@ export default function LeaveTheRoomHomePage() {
         }
       }
 
-      // Age preference filter
-      if (selectedAgeFilter !== 'Any') {
-        if (
-          lobby.preferredAgeRange &&
-          lobby.preferredAgeRange !== 'All Ages (18+)' &&
-          lobby.preferredAgeRange !== selectedAgeFilter
-        ) {
+      if (selectedAgeFilters.length > 0) {
+        if (!doesMeetupMatchAgeFilters(lobby.preferredAgeRange, selectedAgeFilters)) {
           return false;
         }
       }
@@ -489,7 +512,7 @@ export default function LeaveTheRoomHomePage() {
   }, [
     lobbiesWithDistance,
     selectedBroadCategory,
-    selectedAgeFilter,
+    selectedAgeFilters,
     radiusKm,
     statusFilter,
     activeUser.bannedUserIds,
@@ -902,7 +925,7 @@ export default function LeaveTheRoomHomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas text-ink flex flex-col transition-colors duration-200">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#141210] text-stone-900 dark:text-stone-100 flex flex-col transition-colors duration-200">
       {/* Native iOS / Android Top Push Notification Banner */}
       <MobilePushBanner
         pushAlert={pushAlert}
@@ -915,59 +938,46 @@ export default function LeaveTheRoomHomePage() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[900] bg-slate-900 dark:bg-indigo-600 text-white px-5 py-3 rounded-full shadow-ambient-lg flex items-center gap-2.5 text-xs font-extrabold border border-white/15 max-w-[90vw]"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[900] bg-stone-900 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-2.5 text-xs font-semibold border border-white/10 max-w-[90vw]"
         >
-          <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className="truncate">{toastMessage}</span>
         </div>
       )}
 
-      {/* =====================================================================
-          MAIN CONTENT CONTAINER (Safe-area bottom padding prevents nav overlap)
-         ===================================================================== */}
-      <main className="w-full max-w-4xl mx-auto flex-1 px-4 sm:px-6 pt-4 pb-28">
-        {/* ===================================================================
-            DESTINATION 1: EXPLORE (Primary Meetup Discovery + Scannable Filters)
-           =================================================================== */}
+      <main className="w-full max-w-xl mx-auto flex-1 px-4 pt-3 pb-24">
         {activeNav === 'EXPLORE' && (
-          <div className="space-y-5">
-            {/* Minimalist Editorial Discovery Strip (Starts immediately at top - Top bar eliminated) */}
+          <div className="space-y-4">
             <section
               aria-label="Meetup Discovery Filters"
-              className="bg-white dark:bg-slate-900 rounded-[24px] p-4 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3.5"
+              className="bg-white dark:bg-[#1C1917] rounded-2xl p-3 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
             >
-              {/* Broad Category Tabs (5 broad categories, zero emojis) */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
                   (catName) => {
                     const isSelected = selectedBroadCategory === catName;
-                    const catCount =
-                      catName === 'All Categories'
-                        ? lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length
-                        : lobbiesWithDistance.filter(
-                            (l) => getBroadCategory(l.category) === catName && l.distanceKm <= radiusKm
-                          ).length;
-
+                    const catLabel = catName === 'All Categories' ? 'All Meetups' : catName;
+                    const count = categoryCounts[catName] || 0;
                     return (
                       <button
                         key={catName}
                         type="button"
                         onClick={() => setSelectedBroadCategory(catName)}
-                        className={`min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                        className={`min-h-[36px] px-3 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 ${
                           isSelected
-                            ? 'bg-brand text-white border-brand shadow-sm'
-                            : 'bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                            ? 'bg-stone-950 dark:bg-stone-800 text-white border border-stone-800 dark:border-orange-500/50 shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_0_14px_rgba(234,88,12,0.22)]'
+                            : 'bg-stone-100/80 dark:bg-stone-800/70 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/70 border border-transparent dark:border-stone-800/50'
                         }`}
                       >
-                        <span>{catName}</span>
+                        <span>{catLabel}</span>
                         <span
-                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                             isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                              ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.4)]'
+                              : 'bg-stone-200/90 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                           }`}
                         >
-                          {catCount}
+                          {count}
                         </span>
                       </button>
                     );
@@ -975,200 +985,81 @@ export default function LeaveTheRoomHomePage() {
                 )}
               </div>
 
-              {/* Age Preference & Location/Radius Filter Row */}
-              <div className="pt-2.5 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
-                {/* Age Filter Selector */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 shrink-0 uppercase tracking-wider">
-                    Age:
-                  </span>
-                  {(['Any', '18–25', '20s & 30s', '25–35', '30+', '40+'] as const).map((ageOpt) => (
-                    <button
-                      key={ageOpt}
-                      type="button"
-                      onClick={() => setSelectedAgeFilter(ageOpt)}
-                      className={`min-h-[36px] px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border ${
-                        selectedAgeFilter === ageOpt
-                          ? 'bg-brand text-white border-brand shadow-sm'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {ageOpt}
-                    </button>
-                  ))}
-                </div>
-
+              <div className="flex items-center justify-between gap-2 text-xs text-stone-500 dark:text-stone-400 pt-2 border-t border-stone-100 dark:border-stone-800/80">
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={handleNearMeGps}
-                    className="min-h-[36px] px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 inline-flex items-center gap-1.5 text-xs font-bold border border-slate-200 dark:border-slate-700"
+                    className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1.5 text-xs"
+                    title="Tap to update current location"
                   >
-                    <LocateFixed
-                      className={`w-3.5 h-3.5 text-brand shrink-0 ${isLocating ? 'animate-spin' : ''}`}
-                    />
-                    <span className="truncate max-w-[120px]">{userCoords.label}</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <span className="truncate max-w-[110px] sm:max-w-none">{userCoords.label.split(',')[0]}</span>
                   </button>
-
-                  {/* Distance Radius Selector */}
-                  <div className="inline-flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 border border-slate-300 dark:border-slate-700">
-                    {DISTANCE_RADII.map((km) => (
-                      <button
-                        key={km}
-                        type="button"
-                        onClick={() => setRadiusKm(km)}
-                        className={`min-h-[32px] px-3 py-1 rounded-full text-xs font-extrabold transition-all ${
-                          radiusKm === km
-                            ? 'bg-brand text-white shadow-sm'
-                            : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
-                        }`}
-                      >
-                        {formatRadiusUnit(km)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-
-
-              {/* 2. Meetup Status + Distance Radius Row */}
-              <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
-                {/* Meetup Status Pills */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  <span className="text-stone-300 dark:text-stone-700">·</span>
                   <button
                     type="button"
-                    onClick={() => setStatusFilter('ALL')}
-                    className={`min-h-[44px] px-3.5 py-2 rounded-full text-xs font-extrabold border transition-all ${
-                      statusFilter === 'ALL'
-                        ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                    onClick={() => setIsRadiusSheetOpen(true)}
+                    className="min-h-[30px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+                  >
+                    <span>{formatRadiusUnit(radiusKm)}</span>
+                    <ChevronDown className="w-3 h-3 text-stone-400" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsAgeSheetOpen(true)}
+                    className={`min-h-[30px] inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all ${
+                      selectedAgeFilters.length > 0
+                        ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
                     }`}
                   >
-                    All Status
+                    <span className="text-stone-400 text-[11px] font-normal">Age:</span>
+                    <span>
+                      {selectedAgeFilters.length === 0
+                        ? 'All ages'
+                        : selectedAgeFilters.length === 1
+                        ? AGE_PRESETS.find((p) => p.id === selectedAgeFilters[0])?.label || selectedAgeFilters[0]
+                        : `${selectedAgeFilters.length} selected`}
+                    </span>
+                    <ChevronDown className="w-3 h-3 text-stone-400" />
                   </button>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setStatusFilter(
-                        statusFilter === 'LIVE' ? 'ALL' : 'LIVE'
-                      )
-                    }
-                    className={`min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-extrabold border transition-all ${
+                    onClick={() => setStatusFilter(statusFilter === 'LIVE' ? 'ALL' : 'LIVE')}
+                    className={`min-h-[30px] px-2.5 py-0.5 rounded-lg text-[11px] font-semibold transition-colors inline-flex items-center gap-1 ${
                       statusFilter === 'LIVE'
-                        ? 'bg-emerald-700 text-white border-emerald-700'
-                        : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800'
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        statusFilter === 'LIVE'
-                          ? 'bg-white'
-                          : 'bg-emerald-500'
-                      }`}
-                    />
-                    Live Now
+                    <span className={`w-1.5 h-1.5 rounded-full ${statusFilter === 'LIVE' ? 'bg-white' : 'bg-emerald-500'}`} />
+                    <span>Live now</span>
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setStatusFilter(
-                        statusFilter === 'UPCOMING' ? 'ALL' : 'UPCOMING'
-                      )
-                    }
-                    className={`min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-extrabold border transition-all ${
-                      statusFilter === 'UPCOMING'
-                        ? 'bg-amber-400 text-slate-950 border-amber-500'
-                        : 'bg-amber-50 dark:bg-amber-950/50 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-800'
-                    }`}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    Upcoming
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setStatusFilter(
-                        statusFilter === 'FINISHED' ? 'ALL' : 'FINISHED'
-                      )
-                    }
-                    className={`min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-extrabold border transition-all ${
-                      statusFilter === 'FINISHED'
-                        ? 'bg-rose-700 text-white border-rose-700'
-                        : 'bg-rose-50 dark:bg-rose-950/50 text-rose-950 dark:text-rose-200 border-rose-300 dark:border-rose-800'
-                    }`}
-                  >
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        statusFilter === 'FINISHED'
-                          ? 'bg-white'
-                          : 'bg-rose-500'
-                      }`}
-                    />
-                    Finished
-                  </button>
-                </div>
-
-                {/* Distance Radius Selector */}
-                <div className="inline-flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 border border-slate-300 dark:border-slate-700">
-                  {DISTANCE_RADII.map((km) => (
-                    <button
-                      key={km}
-                      type="button"
-                      onClick={() => setRadiusKm(km)}
-                      className={`min-h-[36px] px-3 py-1 rounded-full text-xs font-extrabold transition-all ${
-                        radiusKm === km
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
-                      }`}
-                    >
-                      {formatRadiusUnit(km)}
-                    </button>
-                  ))}
                 </div>
               </div>
             </section>
 
-            {/* EXPLORE RESULTS OR EMPTY STATE */}
             {filteredLobbies.length === 0 ? (
-              <div className="bg-white dark:bg-slate-900 rounded-[26px] p-8 sm:p-10 text-center shadow-ambient border border-slate-200 dark:border-slate-800 max-w-lg mx-auto space-y-4">
-                <div className="w-14 h-14 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
-                  {statusFilter === 'UPCOMING' ? (
-                    <CalendarClock className="w-7 h-7" />
-                  ) : (
-                    <SearchX className="w-7 h-7" />
-                  )}
+              <div className="bg-white dark:bg-[#1C1917] rounded-3xl p-8 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.5)] max-w-lg mx-auto space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/15 to-amber-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto shadow-[0_0_16px_rgba(234,88,12,0.2)]">
+                  <SearchX className="w-6 h-6" />
                 </div>
 
                 <div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 dark:text-white">
-                    {statusFilter === 'UPCOMING'
-                      ? `No Upcoming ${
-                          selectedCategory !== 'All'
-                            ? selectedCategory
-                            : selectedGroup !== 'All Activities'
-                            ? selectedGroup
-                            : ''
-                        } Meetups`
-                      : `No ${
-                          selectedCategory !== 'All'
-                            ? selectedCategory
-                            : selectedGroup !== 'All Activities'
-                            ? selectedGroup
-                            : ''
-                        } Meetups Within ${formatRadiusUnit(radiusKm)}`}
+                  <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
+                    No Meetups Found Nearby
                   </h2>
-                  <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    No active meetups matched your current filters. Reset your
-                    filters to view all nearby games, or start a new meetup in
-                    2 taps.
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
+                    No active meetups matched your current filters. Expand your radius, switch categories, or start a meetup.
                   </p>
                 </div>
 
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
+                <div className="pt-1 flex flex-wrap items-center justify-center gap-2">
                   <button
                     type="button"
                     onClick={() =>
@@ -1183,58 +1074,44 @@ export default function LeaveTheRoomHomePage() {
                           statusFilter === 'UPCOMING' ? 'In 30 mins' : 'Now',
                       })
                     }
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm inline-flex items-center gap-1.5"
+                    className="min-h-[42px] px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-[0_4px_16px_rgba(234,88,12,0.4)] border border-orange-400/30 inline-flex items-center gap-1.5 transition active:scale-[0.98]"
                   >
-                    <Plus className="w-4 h-4" />
-                    Host{' '}
-                    {selectedCategory !== 'All'
-                      ? selectedCategory
-                      : selectedGroup !== 'All Activities'
-                      ? selectedGroup
-                      : 'a Meetup'}
+                    <Plus className="w-4 h-4 stroke-[2.5]" />
+                    <span>Host a Meetup</span>
                   </button>
-
-                  {radiusKm < 50 && (
-                    <button
-                      type="button"
-                      onClick={() => setRadiusKm(50)}
-                      className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-extrabold"
-                    >
-                      Expand to {formatRadiusUnit(50)}
-                    </button>
-                  )}
 
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedGroup('All Activities');
+                      setSelectedBroadCategory('All Categories');
                       setSelectedCategory('All');
                       setStatusFilter('ALL');
                       setRadiusKm(50);
+                      setSelectedAgeFilters([]);
                     }}
-                    className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-extrabold text-slate-900 dark:text-slate-200"
+                    className="min-h-[42px] px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700 transition active:scale-[0.98]"
                   >
                     Reset Filters
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-7">
+              <div className="space-y-5">
                 {/* SECTION A: AVAILABLE MEETUPS TO JOIN */}
                 {availableToJoinLobbies.length > 0 && (
-                  <section className="space-y-3.5">
-                    <div className="flex items-center justify-between px-1">
+                  <section className="space-y-3">
+                    <div className="flex items-center justify-between px-0.5">
                       <div>
-                        <h2 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white">
+                        <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100">
                           Available Meetups ({availableToJoinLobbies.length})
                         </h2>
-                        <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          Sorted by Live status and nearest distance
+                        <p className="text-xs text-stone-500 dark:text-stone-400">
+                          Sorted by distance and live status
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-3.5">
                       {availableToJoinLobbies.map((lobby) => (
                         <LobbyCard
                           key={lobby.id}
@@ -1251,20 +1128,20 @@ export default function LeaveTheRoomHomePage() {
 
                 {/* SECTION B: MEETUPS YOU ARE IN */}
                 {joinedFilteredLobbies.length > 0 && (
-                  <section className="space-y-3.5 pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center justify-between px-1">
+                  <section className="space-y-3 pt-3 border-t border-stone-200/80 dark:border-stone-800/80">
+                    <div className="flex items-center justify-between px-0.5">
                       <div>
-                        <h2 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                          Meetups You Are In ({joinedFilteredLobbies.length})
+                        <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span>Meetups You Are In ({joinedFilteredLobbies.length})</span>
                         </h2>
-                        <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          Tap any meetup to check in or open group chat
+                        <p className="text-xs text-stone-500 dark:text-stone-400">
+                          Tap to check in or open chat
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-3.5">
                       {joinedFilteredLobbies.map((lobby) => (
                         <LobbyCard
                           key={lobby.id}
@@ -1283,12 +1160,8 @@ export default function LeaveTheRoomHomePage() {
           </div>
         )}
 
-        {/* ===================================================================
-            DESTINATION 2: MAP (Direct Interactive Radar with Compact Filters)
-           =================================================================== */}
         {activeNav === 'MAP' && (
           <div className="space-y-3.5">
-            {/* Broad Category Filter Strip Above Map (Zero emojis, Top bar eliminated) */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
               {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
                 (catName) => {
@@ -1305,18 +1178,18 @@ export default function LeaveTheRoomHomePage() {
                       key={catName}
                       type="button"
                       onClick={() => setSelectedBroadCategory(catName)}
-                      className={`min-h-[44px] inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap shrink-0 border transition-all ${
+                      className={`min-h-[38px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 border transition-all ${
                         isSelected
-                          ? 'bg-brand text-white border-brand shadow-sm'
-                          : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                          ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white border-orange-500 shadow-xs'
+                          : 'bg-white dark:bg-[#1C1917] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800'
                       }`}
                     >
-                      <span>{catName}</span>
+                      <span>{catName === 'All Categories' ? 'All Meetups' : catName}</span>
                       <span
-                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                           isSelected
                             ? 'bg-white/20 text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
                         }`}
                       >
                         {count}
@@ -1327,7 +1200,6 @@ export default function LeaveTheRoomHomePage() {
               )}
             </div>
 
-            {/* Full-Height Interactive Map Radar (Isolated z-0 stacking context) */}
             <MapRadar
               lobbies={filteredLobbies}
               userLat={userCoords.lat}
@@ -1340,9 +1212,6 @@ export default function LeaveTheRoomHomePage() {
           </div>
         )}
 
-        {/* ===================================================================
-            DESTINATION 3: MY MEETUPS (Joined & Hosted Rooms + 1-Tap Chat)
-           =================================================================== */}
         {activeNav === 'MY_MEETUPS' && (
           <MyMeetupsView
             activeUser={activeUser}
@@ -1356,22 +1225,18 @@ export default function LeaveTheRoomHomePage() {
           />
         )}
 
-        {/* ===================================================================
-            DESTINATION 4: PROFILE (Logged-In User Profile, Dark Mode, Metrics & Settings)
-           =================================================================== */}
         {activeNav === 'PROFILE' && (
           <div className="space-y-5">
             {isSignedOut ? (
-              /* Signed-Out State (Only shown if user explicitly signs out) */
-              <div className="bg-white dark:bg-slate-900 rounded-[26px] p-8 text-center border border-slate-200 dark:border-slate-800 shadow-ambient space-y-4 max-w-md mx-auto mt-6">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mx-auto shadow-sm">
+              <div className="bg-white dark:bg-[#1C1917] rounded-[26px] p-8 text-center border border-stone-200 dark:border-stone-800 shadow-ambient space-y-4 max-w-md mx-auto mt-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center mx-auto shadow-md">
                   <Compass className="w-7 h-7" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-extrabold text-slate-950 dark:text-white">
+                  <h1 className="text-xl font-extrabold text-stone-950 dark:text-white">
                     Sign In to Leave The Room
                   </h1>
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-1">
+                  <p className="text-xs font-medium text-stone-600 dark:text-stone-300 mt-1">
                     Sign in to your account to join meetups, check in, and chat
                     with players nearby.
                   </p>
@@ -1380,7 +1245,7 @@ export default function LeaveTheRoomHomePage() {
                   <button
                     type="button"
                     onClick={handleGoogleSignIn}
-                    className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                    className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700/80 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
                   >
                     <GoogleIcon className="w-5 h-5 shrink-0" />
                     <span>Continue with Google</span>
@@ -1389,7 +1254,7 @@ export default function LeaveTheRoomHomePage() {
                   <button
                     type="button"
                     onClick={handleAppleSignIn}
-                    className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                    className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
                   >
                     <AppleIcon className="w-5 h-5 shrink-0" />
                     <span>Continue with Apple</span>
@@ -1400,7 +1265,7 @@ export default function LeaveTheRoomHomePage() {
                     onClick={() => {
                       handleSwitchUser(activeUser.id);
                     }}
-                    className="min-h-[44px] w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm"
+                    className="min-h-[44px] w-full py-3 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-sm transition-all"
                   >
                     Continue as {activeUser.name}
                   </button>
@@ -1411,7 +1276,7 @@ export default function LeaveTheRoomHomePage() {
                       setAuthModalTab('LOGIN');
                       setIsAuthModalOpen(true);
                     }}
-                    className="min-h-[44px] w-full py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-extrabold shadow-sm"
+                    className="min-h-[44px] w-full py-3 rounded-full bg-stone-900 hover:bg-black dark:bg-white text-white dark:text-stone-900 text-xs font-extrabold shadow-sm transition-all"
                   >
                     More Sign In Options
                   </button>
@@ -1420,161 +1285,94 @@ export default function LeaveTheRoomHomePage() {
             ) : (
               /* Logged-In Profile Screen (No Register or Sign-Up Prompts!) */
               <>
-                {/* 1. Logged-In User Identity Card */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-5">
+                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_20px_-4px_rgba(0,0,0,0.5)] space-y-4">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex items-center gap-3.5 min-w-0">
                       <div className="relative shrink-0">
                         <img
                           src={activeUser.avatar}
                           alt={activeUser.name}
-                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-indigo-600"
+                          className="w-16 h-16 rounded-full object-cover ring-2 ring-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.3)]"
                         />
                         {activeUser.verified && (
                           <span
-                            title="Verified Player"
-                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-slate-900"
+                            title="Verified Member"
+                            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900"
                           >
-                            <ShieldCheck className="w-3.5 h-3.5" />
+                            <ShieldCheck className="w-3 h-3" />
                           </span>
                         )}
                       </div>
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h1 className="text-lg sm:text-xl font-extrabold text-slate-950 dark:text-white">
+                          <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100">
                             {activeUser.name}, {activeUser.age}
                           </h1>
-                          <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800 text-xs font-extrabold">
+                          <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold text-[11px]">
                             {activeUser.skillBadge}
                           </span>
                         </div>
 
-                        <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-0.5">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                           {activeUser.neighborhood}
                         </p>
 
-                        <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 leading-relaxed">
+                        <p className="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
                           {activeUser.tagline}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {activeUser.role === 'ADMIN' && (
-                        <button
-                          type="button"
-                          onClick={() => setIsAdminModalOpen(true)}
-                          className="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold inline-flex items-center gap-1.5 transition-colors shadow-sm"
-                        >
-                          <Crown className="w-3.5 h-3.5 text-amber-300" />
-                          <span>Admin Console</span>
-                        </button>
-                      )}
                       <button
                         type="button"
                         onClick={() => {
                           setAuthModalTab('EDIT');
                           setIsAuthModalOpen(true);
                         }}
-                        className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-extrabold inline-flex items-center gap-1.5 transition-colors"
+                        className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors border border-stone-200 dark:border-stone-700/60"
                       >
-                        <Edit3 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                        <span>Edit Profile</span>
+                        <Edit3 className="w-3.5 h-3.5 text-stone-600 dark:text-stone-400" />
+                        <span>Edit</span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Verification Status Banner */}
-                  <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800">
-                    {activeUser.verified ? (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200">
-                        <span className="flex items-center gap-2 font-bold">
-                          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          Verified Member Identity
-                        </span>
-                        <span className="text-[10px] bg-emerald-200 dark:bg-emerald-900 text-emerald-950 dark:text-emerald-100 px-2 py-0.5 rounded-full font-extrabold">Active</span>
-                      </div>
-                    ) : activeUser.verificationStatus === 'PENDING' ? (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
-                        <span className="flex items-center gap-2 font-bold">
-                          <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                          Verification Under Review by Admin
-                        </span>
-                        <span className="text-[10px] bg-amber-200 dark:bg-amber-900 text-amber-950 dark:text-amber-100 px-2 py-0.5 rounded-full font-extrabold">Pending</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
-                        <div>
-                          <p className="font-bold">Account Unverified</p>
-                          <p className="text-[11px] text-slate-500">Request identity verification to get your verified badge.</p>
-                        </div>
-                        <button
-                          type="button"
-                          disabled={isRequestingVerification}
-                          onClick={() => handleRequestVerification()}
-                          className="px-3.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:bg-slate-800 transition-colors shrink-0 disabled:opacity-50"
-                        >
-                          {isRequestingVerification ? 'Submitting...' : 'Request Verification'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Favorite Activities Chips */}
-                  <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-200/80 dark:border-slate-800">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1">
-                      Plays:
-                    </span>
-                    {activeUser.favoriteActivities.map((act) => (
-                      <span
-                        key={act}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-extrabold"
-                      >
-                        <CategoryIcon
-                          category={act}
-                          className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400"
-                        />
-                        {act}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Reliability, Rating & Attendance Metrics Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-                    <div className="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                      <div className="text-lg font-extrabold text-emerald-900 dark:text-emerald-300">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
+                      <div className="text-base font-bold text-emerald-700 dark:text-emerald-400">
                         {activeUser.reliabilityScore}%
                       </div>
-                      <div className="text-xs font-bold text-emerald-800 dark:text-emerald-400">
+                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
                         Show-Up Rate
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-                      <div className="text-lg font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
+                      <div className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
                         {activeUser.ratingAvg}
                       </div>
-                      <div className="text-xs font-bold text-amber-900 dark:text-amber-400">
-                        Player Rating ({activeUser.ratingCount})
+                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
+                        Rating ({activeUser.ratingCount})
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
-                      <div className="text-lg font-extrabold text-indigo-950 dark:text-indigo-200">
+                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
+                      <div className="text-base font-bold text-orange-600 dark:text-orange-400 drop-shadow-[0_0_8px_rgba(234,88,12,0.25)]">
                         {activeUser.meetupsAttended}
                       </div>
-                      <div className="text-xs font-bold text-indigo-800 dark:text-indigo-300">
+                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
                         Meetups Joined
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <div className="text-lg font-extrabold text-slate-950 dark:text-white">
+                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
+                      <div className="text-base font-bold text-stone-900 dark:text-stone-100">
                         {activeUser.hoursPlayed}h
                       </div>
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
                         Hours Played
                       </div>
                     </div>
@@ -1582,85 +1380,76 @@ export default function LeaveTheRoomHomePage() {
                 </section>
 
                 {/* 2. Dark Mode & Appearance Toggle Card */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient">
+                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200/90 dark:border-stone-800/90 shadow-2xs">
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                        {isDarkMode ? (
-                          <Moon className="w-5 h-5" />
-                        ) : (
-                          <Sun className="w-5 h-5" />
-                        )}
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
+                        {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                       </div>
                       <div>
-                        <h2 className="text-sm sm:text-base font-extrabold text-slate-950 dark:text-white">
-                          Appearance & Dark Mode
+                        <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                          Appearance & Theme
                         </h2>
-                        <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          {isDarkMode
-                            ? 'Dark theme active: high-contrast night palette'
-                            : 'Light theme active: switch to Dark Mode anytime'}
+                        <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                          {isDarkMode ? 'Dark warm stone palette' : 'Warm cream light mode'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="inline-flex items-center p-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shrink-0">
+                    <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shrink-0">
                       <button
                         type="button"
                         onClick={() => setIsDarkMode(false)}
-                        className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 transition-all ${
+                        className={`min-h-[32px] px-3 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
                           !isDarkMode
-                            ? 'bg-white text-slate-950 shadow-sm'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-white text-stone-950 shadow-2xs'
+                            : 'text-stone-400 hover:text-stone-200'
                         }`}
                       >
-                        <Sun className="w-3.5 h-3.5" />
-                        Light
+                        <Sun className="w-3 h-3" />
+                        <span>Light</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setIsDarkMode(true)}
-                        className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 transition-all ${
+                        className={`min-h-[32px] px-3 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
                           isDarkMode
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-slate-950'
+                            ? 'bg-orange-600 text-white shadow-2xs'
+                            : 'text-stone-600 dark:text-stone-400'
                         }`}
                       >
-                        <Moon className="w-3.5 h-3.5" />
-                        Dark
+                        <Moon className="w-3 h-3" />
+                        <span>Dark</span>
                       </button>
                     </div>
                   </div>
                 </section>
 
-                {/* 3. "Want-to-Play" Availability Beacon (Cleanly Housed in Profile) */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient">
+                <section className={`bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs transition-all ${activeUser.beacon?.active ? 'dark:border-orange-500/40 dark:shadow-[0_0_20px_rgba(234,88,12,0.15)]' : ''}`}>
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-3">
                       <div
-                        className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                           activeUser.beacon?.active
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                            ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_10px_rgba(234,88,12,0.4)]'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                         }`}
                       >
-                        <Radio className="w-5 h-5" />
+                        <Radio className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-sm sm:text-base font-extrabold text-slate-950 dark:text-white">
-                            Want-to-Play Alerts
+                        <div className="flex items-center gap-1.5">
+                          <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                            Want-to-Play Beacon
                           </h2>
                           {activeUser.beacon?.active && (
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 text-[10px] font-extrabold">
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          Get notified when a matching{' '}
-                          {activeUser.favoriteActivities.join(' or ')} meetup
-                          starts nearby
+                        <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                          Notify nearby players when you are open for activities
                         </p>
                       </div>
                     </div>
@@ -1668,114 +1457,39 @@ export default function LeaveTheRoomHomePage() {
                     <button
                       type="button"
                       onClick={handleToggleBeacon}
-                      className={`min-h-[44px] px-4 py-2 rounded-full text-xs font-extrabold shrink-0 transition-all ${
+                      className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
                         activeUser.beacon?.active
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700'
+                          ? 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-[0_2px_10px_rgba(234,88,12,0.35)] border border-orange-400/30'
+                          : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/60'
                       }`}
                     >
-                      {activeUser.beacon?.active ? 'Alerts ON' : 'Turn On'}
+                      {activeUser.beacon?.active ? 'Beacon ON' : 'Turn On'}
                     </button>
                   </div>
                 </section>
 
-                {/* 4. Logged-In Profile & Account Actions List */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] border border-slate-200 dark:border-slate-800 shadow-ambient divide-y divide-slate-200/80 dark:divide-slate-800 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setIsMetricsModalOpen(true)}
-                    className="w-full min-h-[56px] px-5 py-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                        <BarChart3 className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-extrabold text-slate-950 dark:text-white">
-                          Metrics, Ratings & Regular Partners
-                        </div>
-                        <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          Rate players you met and view activity stats
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsNotifDrawerOpen(true)}
-                    className="w-full min-h-[56px] px-5 py-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                        <Bell className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-extrabold text-slate-950 dark:text-white">
-                            Notifications
-                          </span>
-                          {unreadNotifCount > 0 && (
-                            <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold">
-                              {unreadNotifCount} New
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          Join requests, check-ins & mobile push alerts
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsSettingsModalOpen(true)}
-                    className="w-full min-h-[56px] px-5 py-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center">
-                        <Settings className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-extrabold text-slate-950 dark:text-white">
-                          App Settings, Push & Blocked Players
-                        </div>
-                        <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                          Distance units ({distanceUnit}), audio/haptics, and
-                          ban list
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                  </button>
-                </section>
-
-                {/* 1-Tap Language Picker Card (EN, UK, PL, DE, FR - Zero Emojis) */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3">
+                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
                       Language / Мова / Język / Sprache / Langue
                     </h2>
-                    <span className="text-xs font-extrabold text-brand uppercase">
+                    <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase">
                       {currentLang.toUpperCase()}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
                     {SUPPORTED_LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
                         type="button"
                         onClick={() => handleLanguageSelect(lang.code)}
-                        className={`min-h-[44px] px-3 py-2 rounded-2xl border text-center font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                        className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-center text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                           currentLang === lang.code
-                            ? 'bg-brand text-white border-brand shadow-sm'
-                            : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
+                            ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white border-orange-500/60 shadow-[0_2px_10px_rgba(234,88,12,0.35)] font-bold'
+                            : 'bg-stone-50 dark:bg-stone-800/70 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-750'
                         }`}
                       >
-                        <span className="font-extrabold text-[11px] px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                        <span className="font-bold text-[10px] px-1 py-0.2 rounded bg-black/10 dark:bg-white/10">
                           {lang.flag}
                         </span>
                         <span>{lang.nativeName}</span>
@@ -1784,95 +1498,87 @@ export default function LeaveTheRoomHomePage() {
                   </div>
                 </section>
 
-                {/* Community Policies & In-Person Safety Section */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3">
-                  <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
                     Community Policies & In-Person Safety
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">Community Guidelines</h3>
-                      <p className="text-slate-600 dark:text-slate-400">Respectful, inclusive in-person interaction. Zero tolerance for harassment or flaking.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800">
+                      <h3 className="font-bold text-stone-950 dark:text-stone-100 mb-0.5">Community Guidelines</h3>
+                      <p className="text-[11px] text-stone-500 dark:text-stone-400">Respectful, inclusive in-person interaction. Zero tolerance for harassment or flaking.</p>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">In-Person Safety</h3>
-                      <p className="text-slate-600 dark:text-slate-400">All meetups occur at verified public parks, cafes, and venues. Check in upon arrival.</p>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">Terms of Service</h3>
-                      <p className="text-slate-600 dark:text-slate-400">Verified identity standards, reliable attendance ratings, and participant accountability.</p>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <h3 className="font-extrabold text-slate-950 dark:text-white mb-1">Privacy Policy</h3>
-                      <p className="text-slate-600 dark:text-slate-400">Precise location is never shared with third parties. No advertising tracking.</p>
+                    <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800">
+                      <h3 className="font-bold text-stone-950 dark:text-stone-100 mb-0.5">In-Person Safety</h3>
+                      <p className="text-[11px] text-stone-500 dark:text-stone-400">All meetups occur at verified public parks, cafes, and venues. Check in upon arrival.</p>
                     </div>
                   </div>
                 </section>
 
-                {/* 5. Demo Perspective Switcher & Sign Out */}
-                <section className="bg-white dark:bg-slate-900 rounded-[26px] p-5 border border-slate-200 dark:border-slate-800 shadow-ambient space-y-3">
+                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                      <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
                         Switch Active Demo Account
                       </h2>
                     </div>
                     <button
                       type="button"
                       onClick={handleResetDemoData}
-                      className="min-h-[36px] px-2.5 inline-flex items-center gap-1 text-xs font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
+                      className="min-h-[32px] px-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
-                      Reset Demo
+                      <span>Reset Demo</span>
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {personas.map((persona) => {
+                    {personas
+                      .filter((p) => !p.name.includes('Adversarial') && !p.name.includes('Auditor'))
+                      .map((persona) => {
                       const isSelected = persona.id === activeUser.id;
                       return (
                         <button
                           key={persona.id}
                           type="button"
                           onClick={() => handleSwitchUser(persona.id)}
-                          className={`min-h-[52px] p-2.5 rounded-2xl border text-left flex items-center justify-between gap-2 transition-all ${
+                          className={`min-h-[48px] p-2 rounded-xl border text-left flex items-center justify-between gap-2 transition-all ${
                             isSelected
-                              ? 'bg-indigo-50 dark:bg-indigo-950/70 border-indigo-600'
-                              : 'bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 border-slate-200 dark:border-slate-700'
+                              ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500'
+                              : 'bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100 border-stone-200 dark:border-stone-700'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
                             <img
                               src={persona.avatar}
                               alt={persona.name}
-                              className="w-9 h-9 rounded-full object-cover shrink-0"
+                              className="w-8 h-8 rounded-full object-cover shrink-0"
                             />
                             <div className="min-w-0">
-                              <div className="text-xs font-extrabold text-slate-950 dark:text-white truncate">
+                              <div className="text-xs font-bold text-stone-950 dark:text-stone-100 truncate">
                                 {persona.name}, {persona.age}
                               </div>
-                              <div className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 truncate">
+                              <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
                                 {persona.skillBadge}
                               </div>
                             </div>
                           </div>
                           {isSelected && (
-                            <UserCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                            <UserCheck className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
                           )}
                         </button>
                       );
                     })}
                   </div>
 
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end">
+                  <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end">
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="min-h-[44px] px-5 py-2 rounded-full text-xs font-extrabold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
-                      Sign Out
+                      <span>Sign Out</span>
                     </button>
                   </div>
                 </section>
@@ -1882,21 +1588,22 @@ export default function LeaveTheRoomHomePage() {
         )}
       </main>
 
-      {/* Ergonomic thumb-friendly Floating Action Button (FAB) for hosting meetups */}
-      <button
-        type="button"
-        onClick={() => openHostModal({ startTime: 'Now' })}
-        aria-label="Host Meetup"
-        className="fixed bottom-20 right-4 z-40 min-h-[52px] px-5 py-3 rounded-full bg-brand hover:bg-brand-hover active:scale-95 text-white text-sm font-extrabold shadow-ambient-lg inline-flex items-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-      >
-        <Plus className="w-5 h-5 stroke-[2.8]" />
-        <span>Host Meetup</span>
-      </button>
+      {activeNav === 'EXPLORE' && (
+        <div className="fixed bottom-20 left-0 right-0 z-40 pointer-events-none">
+          <div className="max-w-xl mx-auto px-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => openHostModal({ startTime: 'Now' })}
+              aria-label="Host Meetup"
+              className="pointer-events-auto min-h-[46px] px-5 py-2.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 active:scale-95 text-white text-xs font-bold shadow-[0_4px_24px_rgba(234,88,12,0.45),0_1px_2px_rgba(0,0,0,0.2)] border border-orange-300/30 inline-flex items-center gap-2 transition-all active:scale-[0.98]"
+            >
+              <Plus className="w-4 h-4 stroke-[2.8]" />
+              <span>Host Meetup</span>
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* =====================================================================
-          PERSISTENT BOTTOM NAVIGATION (Explore, Map, My Meetups, Profile)
-          >= 44x44px Touch Targets, No Cards Tab, No Top Nav Bar
-         ===================================================================== */}
       <BottomNav
         activeTab={activeNav}
         onChangeTab={(tab) => {
@@ -2028,6 +1735,109 @@ export default function LeaveTheRoomHomePage() {
         onMarkAllRead={handleMarkNotificationsRead}
         onSelectLobby={(lobbyId) => setSelectedLobbyId(lobbyId)}
       />
+
+      <AgeSelectorBottomSheet
+        isOpen={isAgeSheetOpen}
+        onClose={() => setIsAgeSheetOpen(false)}
+        selectedAgeRanges={selectedAgeFilters}
+        onApply={(ranges) => {
+          setSelectedAgeFilters(ranges);
+          triggerSensoryFeedback('SUCCESS', activeUser.settings);
+        }}
+        onHaptic={() => triggerSensoryFeedback('TAP', activeUser.settings)}
+      />
+
+      {/* Radius & Distance Filter Bottom Sheet */}
+      {isRadiusSheetOpen && (
+        <div className="fixed inset-0 z-[600] flex flex-col justify-end">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setIsRadiusSheetOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="radius-filter-title"
+            className="relative z-10 w-full max-w-lg mx-auto bg-white dark:bg-[#1C1917] rounded-t-3xl border-t border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col"
+          >
+            <div className="w-12 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700 mx-auto mb-4 shrink-0" />
+
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
+              <div>
+                <h2
+                  id="radius-filter-title"
+                  className="text-base font-bold text-stone-900 dark:text-stone-100"
+                >
+                  Distance Radius
+                </h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                  How far are you willing to travel from {userCoords.label.split(',')[0]}?
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRadiusSheetOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-3 space-y-2 overflow-y-auto">
+              {RADIUS_OPTIONS.map((opt) => {
+                const isSelected = radiusKm === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setRadiusKm(opt.value);
+                      triggerSensoryFeedback('TAP', activeUser.settings);
+                    }}
+                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                      isSelected
+                        ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 shadow-xs ring-1 ring-orange-500/40'
+                        : 'bg-stone-50/80 dark:bg-stone-900/60 border-stone-200/80 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/80'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-sm font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                        <span>{opt.label}</span>
+                      </div>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                        {opt.desc}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? 'border-orange-500 bg-orange-500 text-white'
+                          : 'border-stone-300 dark:border-stone-600'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsRadiusSheetOpen(false)}
+                className="min-h-[44px] flex-1 rounded-xl bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white text-xs font-semibold shadow-xs transition"
+              >
+                Apply Distance
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

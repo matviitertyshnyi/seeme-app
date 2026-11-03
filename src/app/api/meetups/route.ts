@@ -229,6 +229,7 @@ export async function POST(req: NextRequest) {
         skillCompatibility: body.skillCompatibility || 'ALL_LEVELS',
         maxParticipants: clampedMax,
         joinMode: body.joinMode || 'OPEN',
+        preferredAgeRange: body.preferredAgeRange || 'All Ages (18+)',
         hostId: authUser.id,
         bannedUserIds: hostPersona.bannedUserIds ? [...hostPersona.bannedUserIds] : [],
         participants: initialParticipants,
