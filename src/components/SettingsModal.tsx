@@ -93,7 +93,7 @@ export function SettingsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[1000] bg-stone-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
@@ -101,19 +101,19 @@ export function SettingsModal({
         role="dialog"
         aria-modal="true"
         aria-label="App Settings, Notifications and Ban Management"
-        className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[92vh] flex flex-col"
+        className="w-full max-w-2xl bg-white dark:bg-stone-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-stone-200 dark:border-stone-800 overflow-hidden max-h-[92vh] flex flex-col"
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div className="px-6 py-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-slate-900 dark:bg-orange-600 text-white flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-stone-900 dark:bg-orange-600 text-white flex items-center justify-center shadow-sm">
               <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-slate-950 dark:text-white">
+              <h2 className="text-xl font-extrabold text-stone-950 dark:text-white">
                 Settings, Notifications & Safety
               </h2>
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <p className="text-xs font-semibold text-stone-600 dark:text-stone-400">
                 Configure iOS/Android alerts, audio/haptics, privacy, and banned users
               </p>
             </div>
@@ -123,7 +123,7 @@ export function SettingsModal({
             type="button"
             onClick={onClose}
             aria-label="Close settings"
-            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+            className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             <X className="w-5 h-5" />
           </button>
@@ -138,10 +138,10 @@ export function SettingsModal({
                   <Smartphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-950 dark:text-white">
+                  <h3 className="text-sm font-extrabold text-stone-950 dark:text-white">
                     iOS & Android Push Notifications
                   </h3>
-                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <p className="text-xs font-medium text-stone-700 dark:text-stone-300">
                     Receive native lock-screen & top banner alerts for requests and check-ins
                   </p>
                 </div>
@@ -155,7 +155,7 @@ export function SettingsModal({
                 className={`min-h-[44px] px-4 py-2 rounded-full text-xs font-extrabold transition-all ${
                   settings.iosAndroidPush
                     ? 'bg-emerald-700 text-white'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300'
+                    : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-300'
                 }`}
               >
                 {settings.iosAndroidPush ? 'Enabled' : 'Paused'}
@@ -179,19 +179,19 @@ export function SettingsModal({
 
           {/* 2. Sound Effects, Haptics & Units */}
           <div className="space-y-3">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
               Sensory & Regional Preferences
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Volume2 className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                   <div>
-                    <div className="text-xs font-extrabold text-slate-950 dark:text-white">
+                    <div className="text-xs font-extrabold text-stone-950 dark:text-white">
                       Sound Effects
                     </div>
-                    <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                    <div className="text-[11px] font-medium text-stone-600 dark:text-stone-400">
                       Audio chimes on join & check-in
                     </div>
                   </div>
@@ -202,21 +202,21 @@ export function SettingsModal({
                   className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-extrabold ${
                     settings.soundEffects
                       ? 'bg-orange-600 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
                   }`}
                 >
                   {settings.soundEffects ? 'On' : 'Off'}
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Vibrate className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                   <div>
-                    <div className="text-xs font-extrabold text-slate-950 dark:text-white">
+                    <div className="text-xs font-extrabold text-stone-950 dark:text-white">
                       Haptic Vibration
                     </div>
-                    <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                    <div className="text-[11px] font-medium text-stone-600 dark:text-stone-400">
                       Tactile feedback on mobile
                     </div>
                   </div>
@@ -227,21 +227,21 @@ export function SettingsModal({
                   className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-extrabold ${
                     settings.hapticFeedback
                       ? 'bg-orange-600 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
                   }`}
                 >
                   {settings.hapticFeedback ? 'On' : 'Off'}
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Eye className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                   <div>
-                    <div className="text-xs font-extrabold text-slate-950 dark:text-white">
+                    <div className="text-xs font-extrabold text-stone-950 dark:text-white">
                       Open to Co-Host Strip
                     </div>
-                    <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                    <div className="text-[11px] font-medium text-stone-600 dark:text-stone-400">
                       Show profile in nearby strip
                     </div>
                   </div>
@@ -252,23 +252,23 @@ export function SettingsModal({
                   className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-extrabold ${
                     settings.profileVisible
                       ? 'bg-orange-600 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
                   }`}
                 >
                   {settings.profileVisible ? 'Visible' : 'Hidden'}
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-extrabold text-slate-950 dark:text-white">
+                  <div className="text-xs font-extrabold text-stone-950 dark:text-white">
                     Distance Units
                   </div>
-                  <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                  <div className="text-[11px] font-medium text-stone-600 dark:text-stone-400">
                     Radar & card distance display
                   </div>
                 </div>
-                <div className="inline-flex rounded-full bg-slate-200 dark:bg-slate-700 p-1">
+                <div className="inline-flex rounded-full bg-stone-200 dark:bg-stone-700 p-1">
                   {(['km', 'mi'] as const).map((unit) => (
                     <button
                       key={unit}
@@ -276,8 +276,8 @@ export function SettingsModal({
                       onClick={() => onUpdateSettings({ distanceUnit: unit })}
                       className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase ${
                         settings.distanceUnit === unit
-                          ? 'bg-slate-900 dark:bg-orange-600 text-white'
-                          : 'text-slate-700 dark:text-slate-300'
+                          ? 'bg-stone-900 dark:bg-orange-600 text-white'
+                          : 'text-stone-700 dark:text-stone-300'
                       }`}
                     >
                       {unit}
@@ -294,10 +294,10 @@ export function SettingsModal({
               <div className="flex items-center gap-2">
                 <ShieldBan className="w-5 h-5 text-rose-700 dark:text-rose-400" />
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-950 dark:text-white">
+                  <h3 className="text-sm font-extrabold text-stone-950 dark:text-white">
                     Moderation & Banned Players ({bannedUsers.length})
                   </h3>
-                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <p className="text-xs font-medium text-stone-700 dark:text-stone-300">
                     Banned users are immediately removed from your meetups and cannot request or join your rooms.
                   </p>
                 </div>
@@ -311,7 +311,7 @@ export function SettingsModal({
                   value={selectedUserToBan}
                   onChange={(e) => setSelectedUserToBan(e.target.value)}
                   aria-label="Select a player to ban"
-                  className="min-h-[44px] flex-1 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-extrabold text-slate-950 dark:text-white"
+                  className="min-h-[44px] flex-1 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-extrabold text-stone-950 dark:text-white"
                 >
                   <option value="">Select a player to ban/block from your meetups...</option>
                   {unbannedOtherUsers.map((u) => (
@@ -338,7 +338,7 @@ export function SettingsModal({
 
             {/* Banned Users List */}
             {bannedUsers.length === 0 ? (
-              <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-900 rounded-xl p-3 border border-rose-200/70 dark:border-rose-800">
+              <div className="text-xs font-semibold text-stone-700 dark:text-stone-300 bg-white/80 dark:bg-stone-900 rounded-xl p-3 border border-rose-200/70 dark:border-rose-800">
                 You have not banned or blocked any players.
               </div>
             ) : (
@@ -346,7 +346,7 @@ export function SettingsModal({
                 {bannedUsers.map((banned) => (
                   <div
                     key={banned.id}
-                    className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 flex items-center justify-between gap-3"
+                    className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-rose-200 dark:border-rose-800 flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-2.5">
                       <img
@@ -355,7 +355,7 @@ export function SettingsModal({
                         className="w-9 h-9 rounded-full object-cover grayscale"
                       />
                       <div>
-                        <div className="text-xs font-extrabold text-slate-950 dark:text-white">
+                        <div className="text-xs font-extrabold text-stone-950 dark:text-white">
                           {banned.name}, {banned.age}
                         </div>
                         <div className="text-[11px] font-bold text-rose-700 dark:text-rose-400">
@@ -367,7 +367,7 @@ export function SettingsModal({
                     <button
                       type="button"
                       onClick={() => onBanOrUnbanUser(banned.id, 'UNBAN_USER')}
-                      className="min-h-[40px] px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-800 dark:hover:text-emerald-300 text-slate-800 dark:text-slate-200 text-xs font-extrabold inline-flex items-center gap-1 border border-slate-300 dark:border-slate-700"
+                      className="min-h-[40px] px-3.5 py-1.5 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-800 dark:hover:text-emerald-300 text-stone-800 dark:text-stone-200 text-xs font-extrabold inline-flex items-center gap-1 border border-stone-300 dark:border-stone-700"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
                       Unban
@@ -379,14 +379,14 @@ export function SettingsModal({
           </div>
 
           {/* 4. Demo Data Reset */}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between">
+            <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">
               Restore initial demo meetups, ratings, and profiles
             </span>
             <button
               type="button"
               onClick={onResetDemoData}
-              className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-200 text-xs font-extrabold inline-flex items-center gap-1.5"
+              className="min-h-[44px] px-4 py-2 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-200 text-xs font-extrabold inline-flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset All Demo Data

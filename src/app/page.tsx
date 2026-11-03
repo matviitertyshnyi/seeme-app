@@ -137,6 +137,7 @@ export default function LeaveTheRoomHomePage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState<boolean>(false);
   const [isPoliciesModalOpen, setIsPoliciesModalOpen] = useState<boolean>(false);
+  const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState<boolean>(false);
   const [selectedAgeFilters, setSelectedAgeFilters] = useState<string[]>([]);
   const [isAgeSheetOpen, setIsAgeSheetOpen] = useState<boolean>(false);
   const [isRadiusSheetOpen, setIsRadiusSheetOpen] = useState<boolean>(false);
@@ -979,14 +980,14 @@ export default function LeaveTheRoomHomePage() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[900] bg-stone-900 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-2.5 text-xs font-semibold border border-white/10 max-w-[90vw]"
+          className="fixed bottom-24 left-1/2 -transtone-x-1/2 z-[900] bg-stone-900 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-2.5 text-xs font-semibold border border-white/10 max-w-[90vw]"
         >
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className="truncate">{toastMessage}</span>
         </div>
       )}
 
-      <main className="w-full max-w-xl mx-auto flex-1 px-4 pt-3 pb-24">
+      <main className={`w-full max-w-xl mx-auto flex-1 px-4 pt-3 ${activeNav === 'MAP' ? 'pb-20' : 'pb-24'}`}>
         {activeNav === 'EXPLORE' && (
           <div className="space-y-4">
             <section
@@ -1477,49 +1478,7 @@ export default function LeaveTheRoomHomePage() {
                   </div>
                 </section>
 
-                <section className={`bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs transition-all ${activeUser.beacon?.active ? 'dark:border-orange-500/40 dark:shadow-[0_0_20px_rgba(234,88,12,0.15)]' : ''}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                          activeUser.beacon?.active
-                            ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_10px_rgba(234,88,12,0.4)]'
-                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
-                        }`}
-                      >
-                        <Radio className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                            Want-to-Play Beacon
-                          </h2>
-                          {activeUser.beacon?.active && (
-                            <span className="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                              Active
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                          Notify nearby players when you are open for activities
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleToggleBeacon}
-                      className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                        activeUser.beacon?.active
-                          ? 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-[0_2px_10px_rgba(234,88,12,0.35)] border border-orange-400/30'
-                          : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/60'
-                      }`}
-                    >
-                      {activeUser.beacon?.active ? 'Beacon ON' : 'Turn On'}
-                    </button>
-                  </div>
-                </section>
-
+                {/* Language Picker */}
                 <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
@@ -1529,23 +1488,24 @@ export default function LeaveTheRoomHomePage() {
                       {currentLang.toUpperCase()}
                     </span>
                   </div>
-                  <div className="relative">
-                    <select
-                      value={currentLang}
-                      onChange={(e) => handleLanguageSelect(e.target.value as SupportedLanguage)}
-                      aria-label="Select interface language"
-                      className="w-full appearance-none min-h-[44px] px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/50 cursor-pointer pr-10 transition-colors"
-                    >
-                      {SUPPORTED_LANGUAGES.map((lang) => (
-                        <option key={lang.code} value={lang.code} className="bg-stone-900 text-stone-100 py-2">
-                          {lang.flag} — {lang.nativeName} ({lang.name})
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-                      <ChevronDown className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => setIsLanguageSheetOpen(true)}
+                    className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/70 hover:bg-stone-100 dark:hover:bg-stone-750 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs font-semibold flex items-center justify-between transition-all"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-bold text-[10px] px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400">
+                        {currentLang.toUpperCase()}
+                      </span>
+                      <span className="font-bold text-stone-900 dark:text-stone-100">
+                        {SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.nativeName}
+                      </span>
+                      <span className="text-stone-400 font-normal">
+                        ({SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.name})
+                      </span>
                     </div>
-                  </div>
+                    <ChevronDown className="w-4 h-4 text-stone-400" />
+                  </button>
                 </section>
 
                 <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
@@ -2099,6 +2059,96 @@ export default function LeaveTheRoomHomePage() {
               >
                 <span>{t('i_understand') || 'I understand'}</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sleek Custom Language Bottom Sheet (Replaces unstyled OS dropdown) */}
+      {isLanguageSheetOpen && (
+        <div className="fixed inset-0 z-[750] flex flex-col justify-end">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setIsLanguageSheetOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="language-sheet-title"
+            className="relative z-10 w-full max-w-lg mx-auto bg-white dark:bg-[#1C1917] rounded-t-3xl border-t border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col max-h-[80vh]"
+          >
+            <div className="w-12 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700 mx-auto mb-4 shrink-0" />
+
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
+              <div>
+                <h2
+                  id="language-sheet-title"
+                  className="text-base font-bold text-stone-900 dark:text-stone-100"
+                >
+                  Select Language
+                </h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                  Change the interface language across the app
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsLanguageSheetOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-3 space-y-2 overflow-y-auto">
+              {SUPPORTED_LANGUAGES.map((lang) => {
+                const isSelected = currentLang === lang.code;
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => {
+                      handleLanguageSelect(lang.code);
+                      setIsLanguageSheetOpen(false);
+                      triggerSensoryFeedback('TAP', activeUser.settings);
+                    }}
+                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                      isSelected
+                        ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 ring-1 ring-orange-500/40 shadow-xs'
+                        : 'bg-stone-50/80 dark:bg-stone-900/60 border-stone-200/80 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/80'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
+                          isSelected
+                            ? 'bg-orange-600 text-white shadow-sm'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
+                        }`}
+                      >
+                        {lang.flag}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+                          {lang.nativeName}
+                        </div>
+                        <div className="text-xs text-stone-500 dark:text-stone-400">
+                          {lang.name}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isSelected && (
+                        <Check className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[3]" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

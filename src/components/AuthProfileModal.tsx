@@ -232,7 +232,7 @@ export function AuthProfileModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[1000] bg-stone-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
@@ -240,15 +240,15 @@ export function AuthProfileModal({
         role="dialog"
         aria-modal="true"
         aria-label="Profile Setup"
-        className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[92vh] flex flex-col"
+        className="w-full max-w-xl bg-white dark:bg-stone-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-stone-200 dark:border-stone-800 overflow-hidden max-h-[92vh] flex flex-col"
       >
         {/* Top Header */}
-        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div className="px-6 py-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-xl font-extrabold text-slate-950 dark:text-white">
+            <h2 className="text-xl font-extrabold text-stone-950 dark:text-white">
               {initialTab === 'EDIT' ? 'Edit Profile' : 'Sign In & Account'}
             </h2>
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+            <p className="text-xs font-semibold text-stone-600 dark:text-stone-400">
               {initialTab === 'EDIT'
                 ? 'Update your photo, skill level badge, bio, and favorite activities'
                 : 'Switch account or sign in to Leave The Room'}
@@ -258,7 +258,7 @@ export function AuthProfileModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+            className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             <X className="w-5 h-5" />
           </button>
@@ -266,8 +266,8 @@ export function AuthProfileModal({
 
         {/* Authentication header when user is signed out or switching accounts */}
         {initialTab !== 'EDIT' && (
-          <div className="px-6 pt-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 pb-3 shrink-0">
-            <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
+          <div className="px-6 pt-3 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 pb-3 shrink-0">
+            <p className="text-xs font-bold text-stone-600 dark:text-stone-400">
               Sign in with your verified Google or Apple account
             </p>
           </div>
@@ -284,7 +284,7 @@ export function AuthProfileModal({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleGoogleAuth}
-                  className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+                  className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700/80 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
                 >
                   <GoogleIcon className="w-5 h-5 shrink-0" />
                   <span>Continue with Google</span>
@@ -307,13 +307,13 @@ export function AuthProfileModal({
                 </div>
               )}
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-400">
+              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 flex items-center gap-2 text-[11px] font-bold text-stone-600 dark:text-stone-400">
                 <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>Verified 1-tap sign-in with your Google or Apple ID. No separate password needed.</span>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-                <div className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">
+              <div className="pt-4 border-t border-stone-200 dark:border-stone-800">
+                <div className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3">
                   Or 1-Tap Sign In With Existing Demo Account
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -330,7 +330,7 @@ export function AuthProfileModal({
                         className={`min-h-[56px] p-3 rounded-2xl border text-left flex items-center justify-between gap-2 transition-all ${
                           isCurrent
                             ? 'bg-orange-50 dark:bg-orange-950 border-orange-600'
-                            : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700'
+                            : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border-stone-200 dark:border-stone-700'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
@@ -340,7 +340,7 @@ export function AuthProfileModal({
                             className="w-10 h-10 rounded-full object-cover shrink-0"
                           />
                           <div className="min-w-0">
-                            <div className="text-xs font-extrabold text-slate-950 dark:text-white truncate">
+                            <div className="text-xs font-extrabold text-stone-950 dark:text-white truncate">
                               {p.name}, {p.age}
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px] font-bold text-orange-700 dark:text-orange-400">
@@ -385,7 +385,7 @@ export function AuthProfileModal({
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
                   Profile Avatar
                 </label>
                 <div className="grid grid-cols-6 gap-2">
@@ -409,7 +409,7 @@ export function AuthProfileModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
                     Full Name
                   </label>
                   <input
@@ -417,11 +417,11 @@ export function AuthProfileModal({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     aria-label="Full Name"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
                     Age
                   </label>
                   <input
@@ -431,14 +431,14 @@ export function AuthProfileModal({
                     value={age}
                     onChange={(e) => setAge(Number(e.target.value) || 24)}
                     aria-label="Age"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
                     Skill-Level Badge
                   </label>
                   <input
@@ -446,11 +446,11 @@ export function AuthProfileModal({
                     value={skillBadge}
                     onChange={(e) => setSkillBadge(e.target.value)}
                     aria-label="Skill badge"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-orange-700 dark:text-orange-400 focus:outline-none focus:border-orange-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-orange-700 dark:text-orange-400 focus:outline-none focus:border-orange-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
                     Neighborhood
                   </label>
                   <input
@@ -458,13 +458,13 @@ export function AuthProfileModal({
                     value={neighborhood}
                     onChange={(e) => setNeighborhood(e.target.value)}
                     aria-label="Neighborhood"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
                   Bio & Tagline
                 </label>
                 <textarea
@@ -472,18 +472,18 @@ export function AuthProfileModal({
                   value={tagline}
                   onChange={(e) => setTagline(e.target.value)}
                   aria-label="Bio and Tagline"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
                   Favorite Activities (Grouped by Category)
                 </label>
                 <div className="space-y-3">
                   {ACTIVITY_GROUPS.map((grp) => (
                     <div key={grp} className="space-y-1.5">
-                      <div className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="text-[11px] font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                         <CategoryIcon category={grp} className="w-3 h-3 text-orange-600 dark:text-orange-400" />
                         <span>{grp}</span>
                       </div>
@@ -498,7 +498,7 @@ export function AuthProfileModal({
                               className={`min-h-[38px] px-3 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 border transition-all ${
                                 selected
                                   ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
-                                  : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                                  : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
                               }`}
                             >
                               <CategoryIcon category={cat} className="w-3.5 h-3.5" />
@@ -516,7 +516,7 @@ export function AuthProfileModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="min-h-[44px] px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-extrabold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  className="min-h-[44px] px-5 py-2.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-extrabold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
                 >
                   Cancel
                 </button>

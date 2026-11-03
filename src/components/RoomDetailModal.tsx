@@ -365,7 +365,7 @@ export function RoomDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-[1000] bg-stone-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={onClose}
     >
       <div
@@ -373,16 +373,16 @@ export function RoomDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="meetup-detail-title"
-        className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh]"
+        className="w-full max-w-5xl bg-white dark:bg-[#1C1917] rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg overflow-hidden border border-stone-200 dark:border-stone-800 flex flex-col max-h-[92vh]"
       >
         {/* TOP HERO BANNER */}
-        <div className="relative h-40 sm:h-48 w-full shrink-0 bg-slate-900">
+        <div className="relative h-40 sm:h-48 w-full shrink-0 bg-stone-900">
           <img
             src={lobby.coverImage}
             alt={lobby.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/35 to-stone-950/20" />
 
           <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -391,7 +391,7 @@ export function RoomDetailModal({
                 timeLabel={lobby.startTimeBadge}
                 variant="solid"
               />
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-900/85 text-xs font-extrabold text-white backdrop-blur-md">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-stone-900/85 text-xs font-extrabold text-white backdrop-blur-md">
                 <Navigation className="w-3.5 h-3.5 text-orange-300" />
                 {lobby.distanceLabel}
               </span>
@@ -401,7 +401,7 @@ export function RoomDetailModal({
               type="button"
               onClick={onClose}
               aria-label="Close meetup details"
-              className="w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              className="w-11 h-11 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               <X className="w-5 h-5" />
             </button>
@@ -413,7 +413,7 @@ export function RoomDetailModal({
                 <CategoryIcon category={lobby.category} className="w-3.5 h-3.5" />
                 {lobby.category}
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-[11px] font-extrabold uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-900/80 backdrop-blur-md text-[11px] font-extrabold uppercase tracking-wider">
                 {lobby.joinMode === 'OPEN' ? (
                   <>
                     <Zap className="w-3 h-3 text-emerald-300 fill-current" />
@@ -437,14 +437,14 @@ export function RoomDetailModal({
         </div>
 
         {/* MOBILE SEGMENTED SWITCHER (Prevents vertical stacking overlap on phones) */}
-        <div className="lg:hidden px-4 py-2.5 bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-2 shrink-0">
+        <div className="lg:hidden px-4 py-2.5 bg-stone-100 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 grid grid-cols-2 gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setMobileSection('DETAILS')}
             className={`min-h-[44px] rounded-xl text-xs font-extrabold inline-flex items-center justify-center gap-2 transition-all ${
               mobileSection === 'DETAILS'
-                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300'
+                ? 'bg-white dark:bg-stone-800 text-orange-600 dark:text-orange-400 shadow-sm'
+                : 'text-stone-700 dark:text-stone-300'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -459,8 +459,8 @@ export function RoomDetailModal({
             onClick={() => setMobileSection('CHAT')}
             className={`min-h-[44px] rounded-xl text-xs font-extrabold inline-flex items-center justify-center gap-2 transition-all ${
               mobileSection === 'CHAT'
-                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300'
+                ? 'bg-white dark:bg-stone-800 text-orange-600 dark:text-orange-400 shadow-sm'
+                : 'text-stone-700 dark:text-stone-300'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
@@ -478,7 +478,7 @@ export function RoomDetailModal({
           <div
             className={`${
               mobileSection === 'DETAILS' ? 'flex' : 'hidden lg:flex'
-            } lg:w-[55%] flex-col overflow-y-auto p-4 sm:p-6 space-y-5 lg:border-r border-slate-200 dark:border-slate-800`}
+            } lg:w-[55%] flex-col overflow-y-auto p-4 sm:p-6 space-y-5 lg:border-r border-stone-200 dark:border-stone-800`}
           >
             {/* Primary Join CTA Banner on Mobile if user is not yet in the meetup */}
             {!isParticipant && !myPendingRequest && !isFull && (
@@ -547,7 +547,7 @@ export function RoomDetailModal({
                         className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-extrabold border transition-all ${
                           isCurrent
                             ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                            : 'bg-white dark:bg-slate-900 hover:bg-emerald-100/60 text-slate-900 dark:text-slate-100 border-emerald-300 dark:border-emerald-700'
+                            : 'bg-white dark:bg-stone-900 hover:bg-emerald-100/60 text-stone-900 dark:text-stone-100 border-emerald-300 dark:border-emerald-700'
                         }`}
                       >
                         {opt.label}
@@ -563,7 +563,7 @@ export function RoomDetailModal({
                     value={spotClueInput}
                     onChange={(e) => setSpotClueInput(e.target.value)}
                     placeholder='Spot clue (e.g. "Table 3, dark green hoodie")'
-                    className="min-h-[44px] flex-1 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 text-xs font-semibold text-slate-950 dark:text-white placeholder:text-slate-500"
+                    className="min-h-[44px] flex-1 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-emerald-300 dark:border-emerald-700 text-xs font-semibold text-stone-950 dark:text-white placeholder:text-stone-500"
                   />
                   <button
                     type="button"
@@ -574,7 +574,7 @@ export function RoomDetailModal({
                         spotClueInput
                       )
                     }
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-900 dark:bg-orange-600 hover:bg-slate-800 text-white text-xs font-extrabold shrink-0"
+                    className="min-h-[44px] px-4 py-2 rounded-xl bg-stone-900 dark:bg-orange-600 hover:bg-stone-800 text-white text-xs font-extrabold shrink-0"
                   >
                     Save Clue
                   </button>
@@ -583,19 +583,19 @@ export function RoomDetailModal({
             )}
 
             {/* Real-Life Venue + Map Links */}
-            <div className="bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-3">
+            <div className="bg-stone-50 dark:bg-stone-800/70 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 space-y-3">
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  <div className="text-xs font-extrabold uppercase tracking-wider text-stone-600 dark:text-stone-400">
                     Meetup Location
                   </div>
-                  <div className="text-sm font-extrabold text-slate-950 dark:text-white">
+                  <div className="text-sm font-extrabold text-stone-950 dark:text-white">
                     {lobby.venueName}
                   </div>
-                  <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                     {lobby.venueAddress}
                   </div>
                 </div>
@@ -606,7 +606,7 @@ export function RoomDetailModal({
                   href={`https://www.google.com/maps/search/?api=1&query=${lobby.lat},${lobby.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-950 dark:text-white border border-slate-300 dark:border-slate-700 text-xs font-extrabold shadow-sm"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 text-stone-950 dark:text-white border border-stone-300 dark:border-stone-700 text-xs font-extrabold shadow-sm"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                   Google Maps
@@ -618,7 +618,7 @@ export function RoomDetailModal({
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-950 dark:text-white border border-slate-300 dark:border-slate-700 text-xs font-extrabold shadow-sm"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 text-stone-950 dark:text-white border border-stone-300 dark:border-stone-700 text-xs font-extrabold shadow-sm"
                 >
                   <Navigation className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                   Apple Maps
@@ -627,7 +627,7 @@ export function RoomDetailModal({
                 <button
                   type="button"
                   onClick={handleCopyAddress}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 text-xs font-extrabold"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 text-stone-900 dark:text-white border border-stone-300 dark:border-stone-700 text-xs font-extrabold"
                 >
                   {copiedAddress ? (
                     <>
@@ -636,7 +636,7 @@ export function RoomDetailModal({
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                      <Copy className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" />
                       Copy Address
                     </>
                   )}
@@ -646,10 +646,10 @@ export function RoomDetailModal({
 
             {/* Equipment & Activity Note */}
             <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
                 Equipment & Activity Note
               </h4>
-              <p className="text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+              <p className="text-sm text-stone-800 dark:text-stone-200 font-medium leading-relaxed bg-stone-50 dark:bg-stone-800/70 rounded-2xl p-4 border border-stone-200 dark:border-stone-700">
                 {lobby.equipmentNote}
               </p>
             </div>
@@ -657,7 +657,7 @@ export function RoomDetailModal({
             {/* Roster with Arrival Status, Spot Clues, Ratings & Host Ban */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
                   Players ({lobby.participants.length}/{lobby.maxParticipants})
                 </h4>
                 <span className="text-xs font-extrabold text-orange-700 dark:text-orange-400">
@@ -667,7 +667,7 @@ export function RoomDetailModal({
                 </span>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-4">
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 space-y-4">
                 <SeatBubbles
                   participants={lobby.participants}
                   maxParticipants={lobby.maxParticipants}
@@ -676,7 +676,7 @@ export function RoomDetailModal({
                   showSkillBadges
                 />
 
-                <div className="pt-3 border-t border-slate-200 dark:border-slate-700 space-y-2.5">
+                <div className="pt-3 border-t border-stone-200 dark:border-stone-700 space-y-2.5">
                   {lobby.participants.map((person) => {
                     const personIsHost = person.id === lobby.hostId;
                     const isSelf = person.id === activeUser.id;
@@ -687,7 +687,7 @@ export function RoomDetailModal({
                     return (
                       <div
                         key={person.id}
-                        className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-800 space-y-2"
+                        className="bg-white dark:bg-stone-900 rounded-xl p-3 border border-stone-200 dark:border-stone-800 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-3 min-w-0">
@@ -698,14 +698,14 @@ export function RoomDetailModal({
                             />
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-sm font-extrabold text-slate-950 dark:text-white">
+                                <span className="text-sm font-extrabold text-stone-950 dark:text-white">
                                   {person.name}, {person.age}
                                 </span>
                                 <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 text-[10px] font-extrabold border border-orange-200 dark:border-orange-800">
                                   {person.skillBadge || 'Active'}
                                 </span>
                                 {personIsHost && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 dark:bg-orange-600 text-white text-[10px] font-extrabold uppercase">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-900 dark:bg-orange-600 text-white text-[10px] font-extrabold uppercase">
                                     <Crown className="w-2.5 h-2.5 text-amber-300" />
                                     Host
                                   </span>
@@ -727,7 +727,7 @@ export function RoomDetailModal({
                                 )}
                               </div>
 
-                              <div className="flex items-center gap-2 text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-0.5">
+                              <div className="flex items-center gap-2 text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
                                 <span className="text-emerald-700 dark:text-emerald-400">
                                   {person.reliabilityScore ?? 98}% Shows Up
                                 </span>
@@ -777,7 +777,7 @@ export function RoomDetailModal({
                                   className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-colors ${
                                     isRegular
                                       ? 'bg-orange-600 text-white border-orange-600'
-                                      : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                                      : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 text-stone-700 dark:text-stone-200 border-stone-300 dark:border-stone-700'
                                   }`}
                                 >
                                   <Bookmark className="w-4 h-4" />
@@ -824,7 +824,7 @@ export function RoomDetailModal({
                 {lobby.pendingRequests.map((req) => (
                   <div
                     key={req.id}
-                    className="bg-white dark:bg-slate-900 rounded-xl p-3.5 shadow-sm border border-amber-200 dark:border-amber-800 space-y-2.5"
+                    className="bg-white dark:bg-stone-900 rounded-xl p-3.5 shadow-sm border border-amber-200 dark:border-amber-800 space-y-2.5"
                   >
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -835,7 +835,7 @@ export function RoomDetailModal({
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-extrabold text-slate-950 dark:text-white truncate">
+                            <span className="text-sm font-extrabold text-stone-950 dark:text-white truncate">
                               {req.user.name}, {req.user.age}
                             </span>
                             <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 text-[10px] font-extrabold">
@@ -871,7 +871,7 @@ export function RoomDetailModal({
                             onClick={() =>
                               handleHostDecision(req.id, 'DECLINE_REQUEST')
                             }
-                            className="min-h-[44px] inline-flex items-center gap-1 px-3 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 text-xs font-extrabold"
+                            className="min-h-[44px] inline-flex items-center gap-1 px-3 py-2 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-800 dark:text-stone-200 text-xs font-extrabold"
                           >
                             <UserX className="w-4 h-4" />
                             Decline
@@ -890,7 +890,7 @@ export function RoomDetailModal({
                     </div>
 
                     {req.note && (
-                      <p className="text-xs text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 font-medium">
+                      <p className="text-xs text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-800 rounded-lg px-3 py-2 font-medium">
                         &ldquo;{req.note}&rdquo;
                       </p>
                     )}
@@ -915,7 +915,7 @@ export function RoomDetailModal({
                   type="button"
                   onClick={handleLeaveLobby}
                   disabled={isLoadingAction}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-700 dark:text-slate-300 hover:text-rose-700 px-4 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-extrabold text-stone-700 dark:text-stone-300 hover:text-rose-700 px-4 py-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   {isParticipant ? 'Leave Meetup' : 'Cancel Join Request'}
@@ -928,18 +928,18 @@ export function RoomDetailModal({
           <div
             className={`${
               mobileSection === 'CHAT' ? 'flex' : 'hidden lg:flex'
-            } lg:w-[45%] flex-col bg-slate-50 dark:bg-slate-950 flex-1 min-h-[380px]`}
+            } lg:w-[45%] flex-col bg-stone-50 dark:bg-stone-950 flex-1 min-h-[380px]`}
           >
-            <div className="flex px-4 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 items-center justify-between gap-2 shrink-0">
+            <div className="flex px-4 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 items-center justify-between gap-2 shrink-0">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-brand-soft text-brand flex items-center justify-center shrink-0">
                   <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-extrabold text-slate-950 dark:text-white truncate">
+                  <h3 className="text-sm font-extrabold text-stone-950 dark:text-white truncate">
                     Live Meetup Chat
                   </h3>
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
+                  <p className="text-xs font-semibold text-stone-700 dark:text-stone-300 truncate">
                     {isParticipant
                       ? 'Coordinate exact table, court, or arrival'
                       : 'Join this meetup to coordinate'}
@@ -969,10 +969,10 @@ export function RoomDetailModal({
                 <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
                   {messages.length === 0 ? (
                     <div className="text-center py-12 px-4">
-                      <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                      <p className="text-xs font-extrabold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
                         No messages yet
                       </p>
-                      <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">
+                      <p className="text-xs font-medium text-stone-600 dark:text-stone-400 mt-1">
                         Say hello and let the group know what you are wearing or
                         when you will arrive.
                       </p>
@@ -983,7 +983,7 @@ export function RoomDetailModal({
                       if (msg.isSystem) {
                         return (
                           <div key={msg.id} className="flex justify-center">
-                            <span className="px-3.5 py-1 rounded-full bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 shadow-sm text-center">
+                            <span className="px-3.5 py-1 rounded-full bg-white dark:bg-stone-900 text-xs font-bold text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 shadow-sm text-center">
                               {msg.text}
                             </span>
                           </div>
@@ -1000,13 +1000,13 @@ export function RoomDetailModal({
                           <img
                             src={msg.senderAvatar}
                             alt={msg.senderName}
-                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-white dark:border-slate-800 shadow-sm"
+                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-white dark:border-stone-800 shadow-sm"
                           />
                           <div
                             className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                               isMine
                                 ? 'bg-orange-600 text-white rounded-br-sm shadow-sm'
-                                : 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white rounded-bl-sm border border-slate-200 dark:border-slate-800 shadow-sm'
+                                : 'bg-white dark:bg-stone-900 text-stone-950 dark:text-white rounded-bl-sm border border-stone-200 dark:border-stone-800 shadow-sm'
                             }`}
                           >
                             {!isMine && (
@@ -1023,13 +1023,13 @@ export function RoomDetailModal({
                   <div ref={chatEndRef} />
                 </div>
 
-                <div className="px-4 py-2 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
+                <div className="px-4 py-2 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
                   {QUICK_COORDINATION_REPLIES.map((chip) => (
                     <button
                       key={chip}
                       type="button"
                       onClick={() => handleSendMessage(chip)}
-                      className="min-h-[38px] px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-800 dark:hover:text-orange-300 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap transition-colors shrink-0"
+                      className="min-h-[38px] px-3.5 py-1.5 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-800 dark:hover:text-orange-300 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-800 dark:text-stone-200 whitespace-nowrap transition-colors shrink-0"
                     >
                       {chip}
                     </button>
@@ -1041,7 +1041,7 @@ export function RoomDetailModal({
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 shrink-0"
+                  className="p-3.5 sm:p-4 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 shrink-0"
                 >
                   <input
                     type="text"
@@ -1049,7 +1049,7 @@ export function RoomDetailModal({
                     value={newMessageText}
                     onChange={(e) => setNewMessageText(e.target.value)}
                     placeholder={`Message as ${activeUser.name.split(' ')[0]}...`}
-                    className="min-h-[44px] flex-1 px-4 py-2.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
+                    className="min-h-[44px] flex-1 px-4 py-2.5 rounded-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
                   />
                   <button
                     type="submit"
@@ -1077,10 +1077,10 @@ export function RoomDetailModal({
                       <Check className="w-3.5 h-3.5" />
                       Request Sent to Host
                     </span>
-                    <h4 className="text-xl font-extrabold text-slate-950 dark:text-white">
+                    <h4 className="text-xl font-extrabold text-stone-950 dark:text-white">
                       Waiting for host approval
                     </h4>
-                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300 leading-relaxed">
                       Your note: &ldquo;{myPendingRequest.note}&rdquo;.
                     </p>
                   </div>
@@ -1092,12 +1092,12 @@ export function RoomDetailModal({
                         ? 'Meetup Finished'
                         : `${lobby.participants.length}/${lobby.maxParticipants} Full`}
                     </span>
-                    <h4 className="text-xl font-extrabold text-slate-950 dark:text-white">
+                    <h4 className="text-xl font-extrabold text-stone-950 dark:text-white">
                       {isFinished
                         ? 'This meetup has ended'
                         : 'This meetup is full'}
                     </h4>
-                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300">
                       {isFinished
                         ? 'Check out Live or Upcoming meetups in Explore.'
                         : `All ${lobby.maxParticipants} seats have been claimed.`}
@@ -1108,12 +1108,12 @@ export function RoomDetailModal({
                     onSubmit={handleJoinOrRequest}
                     className="w-full max-w-sm space-y-4"
                   >
-                    <h4 className="text-xl font-extrabold text-slate-950 dark:text-white">
+                    <h4 className="text-xl font-extrabold text-stone-950 dark:text-white">
                       {lobby.joinMode === 'OPEN'
                         ? 'Claim an Open Seat Instantly'
                         : 'Request a Seat from the Host'}
                     </h4>
-                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300 leading-relaxed">
                       {lobby.joinMode === 'OPEN'
                         ? `Tap below to claim seat ${
                             lobby.participants.length + 1
@@ -1128,7 +1128,7 @@ export function RoomDetailModal({
                         value={requestNote}
                         onChange={(e) => setRequestNote(e.target.value)}
                         placeholder="Optional note (e.g. 'Hey! I am 5 mins away and have extra balls')"
-                        className="w-full rounded-2xl p-3.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
+                        className="w-full rounded-2xl p-3.5 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
                       />
                     )}
 

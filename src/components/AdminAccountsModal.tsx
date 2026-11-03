@@ -113,24 +113,24 @@ export function AdminAccountsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-5 bg-stone-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-stone-900 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 bg-slate-50 dark:bg-slate-950/50">
+        <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between gap-4 bg-stone-50 dark:bg-stone-950/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center shadow-sm">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
+                <h2 className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-white">
                   Admin Account Manager
                 </h2>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
                   {stats.total} Total
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 Verify identities, moderate profiles, and manage system roles.
               </p>
             </div>
@@ -138,14 +138,14 @@ export function AdminAccountsModal({
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Quick Stats Pill Strip */}
-        <div className="px-5 sm:px-6 py-3 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-5 sm:px-6 py-3 border-b border-stone-100 dark:border-stone-800/80 bg-white dark:bg-stone-900 flex items-center gap-2 overflow-x-auto no-scrollbar">
           {[
             { id: 'ALL', label: 'All Accounts', count: stats.total },
             { id: 'PENDING', label: 'Pending Review', count: stats.pending, highlight: stats.pending > 0 },
@@ -159,10 +159,10 @@ export function AdminAccountsModal({
               onClick={() => setFilterTab(tab.id as any)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
                 filterTab === tab.id
-                  ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-sm'
+                  ? 'bg-stone-900 text-white border-stone-900 dark:bg-white dark:text-stone-900 dark:border-white shadow-sm'
                   : tab.highlight
                   ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-800'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-transparent hover:border-slate-300 dark:hover:border-slate-700'
+                  : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-transparent hover:border-stone-300 dark:hover:border-stone-700'
               }`}
             >
               <span>{tab.label}</span>
@@ -172,15 +172,15 @@ export function AdminAccountsModal({
         </div>
 
         {/* Search Bar */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
+        <div className="p-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/20">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -transtone-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search accounts by name, email, or neighborhood..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs sm:text-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white"
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs sm:text-sm border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-white"
             />
           </div>
         </div>
@@ -188,7 +188,7 @@ export function AdminAccountsModal({
         {/* Account Table / Card List */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
           {filteredPersonas.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-stone-500">
               <User className="w-8 h-8 mx-auto mb-2 opacity-40" />
               <p className="text-xs font-semibold">No accounts found matching your filter</p>
             </div>
@@ -205,7 +205,7 @@ export function AdminAccountsModal({
                       ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40'
                       : p.verificationStatus === 'PENDING'
                       ? 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40'
-                      : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                      : 'bg-white dark:bg-stone-800/60 border-stone-200 dark:border-stone-800 hover:border-stone-300'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -215,12 +215,12 @@ export function AdminAccountsModal({
                         <img
                           src={p.avatar}
                           alt={p.name}
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700"
+                          className="w-12 h-12 rounded-full object-cover ring-2 ring-stone-200 dark:ring-stone-700"
                         />
                         {p.verified && (
                           <span
                             title="Verified Member"
-                            className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white dark:ring-slate-900"
+                            className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900"
                           >
                             <CheckCircle2 className="w-3 h-3" />
                           </span>
@@ -229,7 +229,7 @@ export function AdminAccountsModal({
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+                          <span className="font-extrabold text-sm text-stone-900 dark:text-white truncate">
                             {p.name}
                           </span>
                           {p.role === 'ADMIN' && (
@@ -245,7 +245,7 @@ export function AdminAccountsModal({
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                           <span className="truncate">{p.email}</span>
                           <span>·</span>
                           <span className="truncate">{p.neighborhood}</span>
@@ -254,21 +254,21 @@ export function AdminAccountsModal({
                         {/* Status Badges */}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {p.authProvider === 'google' && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-700 px-2 py-0.5 rounded-md">
                               <GoogleIcon className="w-3 h-3" />
                               Google Auth
                             </span>
                           )}
                           {p.authProvider === 'apple' && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-700 px-2 py-0.5 rounded-md">
                               <AppleIcon className="w-3 h-3" />
                               Apple ID
                             </span>
                           )}
-                          <span className="text-[10px] font-medium text-slate-500">
+                          <span className="text-[10px] font-medium text-stone-500">
                             Score: {p.reliabilityScore}%
                           </span>
-                          <span className="text-[10px] font-medium text-slate-500">
+                          <span className="text-[10px] font-medium text-stone-500">
                             {p.meetupsAttended} meetups
                           </span>
                         </div>
@@ -290,7 +290,7 @@ export function AdminAccountsModal({
                           type="button"
                           disabled={isWorking}
                           onClick={() => handleAdminAction('REVOKE_VERIFICATION', p.id)}
-                          className="px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors"
+                          className="px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 text-xs font-semibold transition-colors"
                         >
                           Revoke Verification
                         </button>
@@ -313,7 +313,7 @@ export function AdminAccountsModal({
                             type="button"
                             disabled={isWorking}
                             onClick={() => handleAdminAction('UNBAN_USER', p.id)}
-                            className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold transition-colors"
+                            className="px-2.5 py-1.5 rounded-xl bg-stone-900 dark:bg-white text-white dark:text-stone-900 text-xs font-bold transition-colors"
                           >
                             Unsuspend
                           </button>
@@ -339,7 +339,7 @@ export function AdminAccountsModal({
                               handleAdminAction('DELETE_USER', p.id);
                             }
                           }}
-                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
+                          className="p-1.5 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
                           title="Delete Account"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -354,11 +354,11 @@ export function AdminAccountsModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between text-xs text-slate-500">
-          <span>Logged in as Admin: <strong className="text-slate-800 dark:text-slate-200">{adminUser.name}</strong></span>
+        <div className="p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 flex items-center justify-between text-xs text-stone-500">
+          <span>Logged in as Admin: <strong className="text-stone-800 dark:text-stone-200">{adminUser.name}</strong></span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold hover:bg-slate-300 transition-colors"
+            className="px-4 py-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold hover:bg-stone-300 transition-colors"
           >
             Close
           </button>

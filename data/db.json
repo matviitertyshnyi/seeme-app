@@ -29,7 +29,7 @@
         "user-elena"
       ],
       "beacon": {
-        "updatedAt": "2026-11-03T02:07:33.949Z"
+        "updatedAt": "2026-11-03T02:57:21.551Z"
       },
       "settings": {
         "iosAndroidPush": true,
@@ -551,7 +551,25 @@
           "ratingAvg": 4.8
         }
       ],
-      "pendingRequests": [],
+      "pendingRequests": [
+        {
+          "id": "req-1793674575779",
+          "user": {
+            "id": "user-maya",
+            "name": "Maya Lin",
+            "age": 24,
+            "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+            "skillBadge": "Adv Pong",
+            "tagline": "Product designer. Always down for 1v1 ping pong or park chess.",
+            "reliabilityScore": 99,
+            "ratingAvg": 4.9,
+            "joinedAt": "2026-11-03T02:56:15.779Z"
+          },
+          "note": "Hey! I am nearby (1.1 km away) and down to join.",
+          "status": "PENDING",
+          "createdAt": "2026-11-03T02:56:15.779Z"
+        }
+      ],
       "createdAt": "2026-11-01T23:15:00.000Z"
     },
     {
@@ -648,6 +666,116 @@
       "senderAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
       "text": "Just checked in at the front counter — mention the SeeMe group for Marcus at table 4.",
       "createdAt": "2026-11-01T23:20:00.000Z"
+    },
+    {
+      "id": "msg-1793674527111",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin claimed a seat in the meetup.",
+      "createdAt": "2026-11-03T02:55:27.111Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674535932",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Arrived at the venue (\"I'm here!\")",
+      "createdAt": "2026-11-03T02:55:35.932Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674536483",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: 5 minutes away",
+      "createdAt": "2026-11-03T02:55:36.483Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674536947",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Running ~10 mins late",
+      "createdAt": "2026-11-03T02:55:36.947Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674537595",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Running ~10 mins late",
+      "createdAt": "2026-11-03T02:55:37.595Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674538288",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Running ~10 mins late",
+      "createdAt": "2026-11-03T02:55:38.288Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674538481",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Running ~10 mins late",
+      "createdAt": "2026-11-03T02:55:38.481Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674538709",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Running ~10 mins late",
+      "createdAt": "2026-11-03T02:55:38.709Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674538901",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Running ~10 mins late",
+      "createdAt": "2026-11-03T02:55:38.901Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674539654",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: 5 minutes away",
+      "createdAt": "2026-11-03T02:55:39.654Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1793674552919",
+      "lobbyId": "lobby-board-1",
+      "senderId": "user-maya",
+      "senderName": "Maya Lin",
+      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "text": "Maya Lin: Arrived at the venue (\"I'm here!\")",
+      "createdAt": "2026-11-03T02:55:52.919Z",
+      "isSystem": true
     }
   ],
   "ratings": [
@@ -679,6 +807,226 @@
     }
   ],
   "notifications": [
+    {
+      "id": "notif-1793674575779-user-liam",
+      "userId": "user-liam",
+      "type": "REQUEST",
+      "title": "New Join Request · Co-work",
+      "body": "Maya Lin (Adv Pong) requested to join \"2-Hour Pomodoro Co-Work & Demo Swap\".",
+      "lobbyId": "lobby-cowork-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:56:15.779Z"
+    },
+    {
+      "id": "notif-1793674552919-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Arrived at the venue (\"I'm here!\") at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:52.919Z"
+    },
+    {
+      "id": "notif-1793674552919-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Arrived at the venue (\"I'm here!\") at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:52.919Z"
+    },
+    {
+      "id": "notif-1793674539654-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "5 minutes away at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:39.654Z"
+    },
+    {
+      "id": "notif-1793674539654-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "5 minutes away at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:39.654Z"
+    },
+    {
+      "id": "notif-1793674538901-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.901Z"
+    },
+    {
+      "id": "notif-1793674538901-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.901Z"
+    },
+    {
+      "id": "notif-1793674538709-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.709Z"
+    },
+    {
+      "id": "notif-1793674538709-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.709Z"
+    },
+    {
+      "id": "notif-1793674538481-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.481Z"
+    },
+    {
+      "id": "notif-1793674538481-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.481Z"
+    },
+    {
+      "id": "notif-1793674538288-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.288Z"
+    },
+    {
+      "id": "notif-1793674538288-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:38.288Z"
+    },
+    {
+      "id": "notif-1793674537595-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:37.595Z"
+    },
+    {
+      "id": "notif-1793674537595-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:37.595Z"
+    },
+    {
+      "id": "notif-1793674536947-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:36.947Z"
+    },
+    {
+      "id": "notif-1793674536947-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Running ~10 mins late at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:36.947Z"
+    },
+    {
+      "id": "notif-1793674536484-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "5 minutes away at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:36.483Z"
+    },
+    {
+      "id": "notif-1793674536484-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "5 minutes away at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:36.483Z"
+    },
+    {
+      "id": "notif-1793674535932-user-zoe",
+      "userId": "user-zoe",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Arrived at the venue (\"I'm here!\") at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:35.932Z"
+    },
+    {
+      "id": "notif-1793674535932-user-marcus",
+      "userId": "user-marcus",
+      "type": "CHECK_IN",
+      "title": "Maya Checked In",
+      "body": "Arrived at the venue (\"I'm here!\") at The Uncommons Board Game Cafe.",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:35.932Z"
+    },
+    {
+      "id": "notif-1793674527111-user-marcus",
+      "userId": "user-marcus",
+      "type": "APPROVED",
+      "title": "New Player Joined · Board Games",
+      "body": "Maya Lin (Adv Pong) claimed a seat in \"Catan & Splendor at The Uncommons\".",
+      "lobbyId": "lobby-board-1",
+      "read": false,
+      "createdAt": "2026-11-03T02:55:27.111Z"
+    },
     {
       "id": "notif-1",
       "userId": "user-maya",

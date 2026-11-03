@@ -63,7 +63,7 @@ export function WelcomeLoginScreen({
               <OpenDoorLogo className="w-16 h-16 drop-shadow-sm" size={64} />
             </div>
             <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-stone-950 dark:text-white">
                 Leave The Room
               </h1>
               <p className="text-xs sm:text-sm font-medium text-ink-muted dark:text-ink-muted-dark max-w-xs mx-auto leading-relaxed">
@@ -79,7 +79,7 @@ export function WelcomeLoginScreen({
               type="button"
               disabled={isSubmitting}
               onClick={handleGoogle}
-              className="w-full min-h-[50px] flex items-center justify-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-stone-800 border-2 border-border dark:border-border-dark hover:border-brand dark:hover:border-brand-accent text-slate-900 dark:text-white font-extrabold text-sm shadow-sm transition-all active:scale-[0.99] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              className="w-full min-h-[50px] flex items-center justify-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-stone-800 border-2 border-border dark:border-border-dark hover:border-brand dark:hover:border-brand-accent text-stone-900 dark:text-white font-extrabold text-sm shadow-sm transition-all active:scale-[0.99] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               <GoogleIcon className="w-5 h-5 flex-shrink-0" />
               <span>

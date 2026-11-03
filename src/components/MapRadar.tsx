@@ -183,7 +183,7 @@ export default function MapRadar({
 
   return (
     /* CRITICAL: isolate + z-0 creates a strict stacking context so Leaflet panes and internal overlays NEVER bleed over modals */
-    <div className="relative isolate z-0 w-full h-[calc(100vh-240px)] min-h-[460px] max-h-[680px] rounded-[26px] overflow-hidden bg-white dark:bg-[#141210] shadow-ambient dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.6)] border border-stone-200 dark:border-stone-800">
+    <div className="relative isolate z-0 w-full h-[calc(100dvh-175px)] min-h-[520px] rounded-[26px] overflow-hidden bg-white dark:bg-[#141210] shadow-ambient dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.6)] border border-stone-200 dark:border-stone-800">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
       <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 pointer-events-auto">

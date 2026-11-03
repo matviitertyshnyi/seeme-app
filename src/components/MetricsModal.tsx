@@ -101,7 +101,7 @@ export function MetricsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[1000] bg-stone-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
@@ -109,19 +109,19 @@ export function MetricsModal({
         role="dialog"
         aria-modal="true"
         aria-label="Player Metrics, Reliability and Ratings"
-        className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[92vh] flex flex-col"
+        className="w-full max-w-3xl bg-white dark:bg-stone-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-stone-200 dark:border-stone-800 overflow-hidden max-h-[92vh] flex flex-col"
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div className="px-6 py-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-sm">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-slate-950 dark:text-white">
+              <h2 className="text-xl font-extrabold text-stone-950 dark:text-white">
                 Metrics, Reputation & Ratings
               </h2>
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <p className="text-xs font-semibold text-stone-600 dark:text-stone-400">
                 Stats and verified player reviews for {activeUser.name}
               </p>
             </div>
@@ -131,7 +131,7 @@ export function MetricsModal({
             type="button"
             onClick={onClose}
             aria-label="Close metrics modal"
-            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+            className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             <X className="w-5 h-5" />
           </button>
@@ -158,8 +158,8 @@ export function MetricsModal({
                 <Star className="w-4 h-4 fill-amber-400 text-amber-600 dark:text-amber-400" />
                 Avg Rating
               </div>
-              <div className="mt-1 text-2xl font-extrabold text-slate-950 dark:text-white">
-                {activeUser.ratingAvg} <span className="text-xs font-bold text-slate-500">/ 5.0</span>
+              <div className="mt-1 text-2xl font-extrabold text-stone-950 dark:text-white">
+                {activeUser.ratingAvg} <span className="text-xs font-bold text-stone-500">/ 5.0</span>
               </div>
               <div className="text-[11px] font-bold text-amber-900 dark:text-amber-400">
                 {activeUser.ratingCount} player reviews
@@ -179,24 +179,24 @@ export function MetricsModal({
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
-              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900 dark:text-slate-200">
+            <div className="p-4 rounded-2xl bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700">
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-stone-900 dark:text-stone-200">
                 <Flame className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                 Weekly Streak
               </div>
-              <div className="mt-1 text-2xl font-extrabold text-slate-950 dark:text-white">
+              <div className="mt-1 text-2xl font-extrabold text-stone-950 dark:text-white">
                 {activeUser.streakWeeks} wks
               </div>
-              <div className="text-[11px] font-bold text-slate-700 dark:text-slate-400">
+              <div className="text-[11px] font-bold text-stone-700 dark:text-stone-400">
                 Consistent player
               </div>
             </div>
           </div>
 
           {/* 2. Live Community Radar Pulse & Activity Breakdown */}
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4">
+          <div className="p-5 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-stone-900 dark:text-white">
                 Live City Activity Pulse
               </h3>
               <div className="flex items-center gap-3 text-xs font-extrabold">
@@ -210,9 +210,9 @@ export function MetricsModal({
               {Object.entries(categoryBreakdown).map(([cat, count]) => (
                 <div
                   key={cat}
-                  className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between"
+                  className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between"
                 >
-                  <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 dark:text-slate-100">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-stone-900 dark:text-stone-100">
                     <CategoryIcon
                       category={cat as never}
                       className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400"
@@ -230,7 +230,7 @@ export function MetricsModal({
           {/* 3. Regular Partners ("Play Again" List) */}
           {regularPartners.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                 <BookmarkCheck className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                 Your Regular Partners ({regularPartners.length})
               </h3>
@@ -238,7 +238,7 @@ export function MetricsModal({
                 {regularPartners.map((partner) => (
                   <div
                     key={partner.id}
-                    className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3"
+                    className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <img
@@ -247,7 +247,7 @@ export function MetricsModal({
                         className="w-11 h-11 rounded-full object-cover shrink-0"
                       />
                       <div className="min-w-0">
-                        <div className="text-xs font-extrabold text-slate-950 dark:text-white truncate">
+                        <div className="text-xs font-extrabold text-stone-950 dark:text-white truncate">
                           {partner.name}, {partner.age}
                         </div>
                         <div className="text-[11px] font-bold text-orange-600 dark:text-orange-400">
@@ -278,7 +278,7 @@ export function MetricsModal({
             className="p-5 rounded-2xl bg-orange-50/60 dark:bg-orange-950/40/40 border border-orange-200 dark:border-orange-900/40 space-y-4"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
+              <h3 className="text-sm font-extrabold text-stone-950 dark:text-white flex items-center gap-2">
                 <ThumbsUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                 Rate a Meetup Partner & Give a Fist Bump
               </h3>
@@ -289,14 +289,14 @@ export function MetricsModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-extrabold text-stone-700 dark:text-stone-300 mb-1">
                   Select Player
                 </label>
                 <select
                   value={selectedPlayerToRate}
                   onChange={(e) => setSelectedPlayerToRate(e.target.value)}
                   aria-label="Select player to rate"
-                  className="min-h-[44px] w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-extrabold text-slate-950 dark:text-white"
+                  className="min-h-[44px] w-full px-3 py-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-extrabold text-stone-950 dark:text-white"
                 >
                   {rateablePlayers.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -307,10 +307,10 @@ export function MetricsModal({
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-extrabold text-stone-700 dark:text-stone-300 mb-1">
                   Star Rating ({stars}/5)
                 </label>
-                <div className="min-h-[44px] flex items-center gap-1 bg-white dark:bg-slate-900 px-3 rounded-xl border border-slate-300 dark:border-slate-700">
+                <div className="min-h-[44px] flex items-center gap-1 bg-white dark:bg-stone-900 px-3 rounded-xl border border-stone-300 dark:border-stone-700">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <button
                       key={num}
@@ -323,7 +323,7 @@ export function MetricsModal({
                         className={`w-5 h-5 ${
                           num <= stars
                             ? 'fill-amber-400 text-amber-500'
-                            : 'text-slate-300 dark:text-slate-600'
+                            : 'text-stone-300 dark:text-stone-600'
                         }`}
                       />
                     </button>
@@ -332,7 +332,7 @@ export function MetricsModal({
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-extrabold text-stone-700 dark:text-stone-300 mb-1">
                   Attendance
                 </label>
                 <button
@@ -357,7 +357,7 @@ export function MetricsModal({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Write a quick review (e.g., Great rally partner, brought extra balls!)"
-                className="min-h-[44px] flex-1 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500"
+                className="min-h-[44px] flex-1 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500"
               />
               <button
                 type="submit"
@@ -371,11 +371,11 @@ export function MetricsModal({
 
           {/* 5. Recent Player Reviews */}
           <div className="space-y-3">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
               Recent Reviews Received ({myReceivedRatings.length})
             </h3>
             {myReceivedRatings.length === 0 ? (
-              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <p className="text-xs font-medium text-stone-600 dark:text-stone-400 bg-stone-50 dark:bg-stone-800/60 p-4 rounded-2xl border border-stone-200 dark:border-stone-700">
                 No reviews recorded for this account yet.
               </p>
             ) : (
@@ -383,7 +383,7 @@ export function MetricsModal({
                 {myReceivedRatings.map((rev) => (
                   <div
                     key={rev.id}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-start justify-between gap-3"
+                    className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex items-start justify-between gap-3"
                   >
                     <div className="flex items-start gap-3">
                       <img
@@ -393,14 +393,14 @@ export function MetricsModal({
                       />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-extrabold text-slate-950 dark:text-white">
+                          <span className="text-xs font-extrabold text-stone-950 dark:text-white">
                             {rev.fromUserName}
                           </span>
                           <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">
                             · {rev.lobbyTitle}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-800 dark:text-slate-200 font-medium mt-1">
+                        <p className="text-xs text-stone-800 dark:text-stone-200 font-medium mt-1">
                           &ldquo;{rev.comment}&rdquo;
                         </p>
                       </div>

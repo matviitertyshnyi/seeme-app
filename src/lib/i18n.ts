@@ -104,7 +104,7 @@ export const DICTIONARY = {
     // Host Creation Wizard (CreateLobbyModal)
     create_modal_title: 'Host a Meetup',
     step_1_category: '1. Category & Activity',
-    step_2_details: '2. Meetup Title, Vibe & Age',
+    step_2_details: '2. Meetup Title, Format & Age',
     step_3_venue: '3. Venue Location',
     step_4_time: '4. Start Time',
     step_5_size: '5. Group Size',

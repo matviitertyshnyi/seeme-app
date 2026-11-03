@@ -40,13 +40,13 @@ export function StatusBadge({
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold tracking-wide ${
           variant === 'solid'
-            ? 'bg-amber-400 text-slate-950 shadow-sm'
+            ? 'bg-amber-400 text-stone-950 shadow-sm'
             : 'bg-amber-50 text-amber-950 border border-amber-300 dark:bg-amber-950/80 dark:text-amber-200 dark:border-amber-700'
         }`}
       >
         <span
           className={`w-2 h-2 rounded-full ${
-            variant === 'solid' ? 'bg-slate-950' : 'bg-amber-500'
+            variant === 'solid' ? 'bg-stone-950' : 'bg-amber-500'
           }`}
         />
         <span>UPCOMING{timeLabel ? ` · ${timeLabel}` : ''}</span>
