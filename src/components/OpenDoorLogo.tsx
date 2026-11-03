@@ -8,19 +8,18 @@ interface OpenDoorLogoProps {
 }
 
 /**
- * Custom "Open Door into the Light" Mark
- * Represents leaving the room and stepping outside into the sun:
- * - 3D Perspective open doorway swinging into the golden outdoors
- * - Radiant sunbeams and warmth streaming across the threshold
- * - High-contrast warm orange and golden amber palette
- * - Absolutely zero badges, pure brand mark
+ * Modern "Leave The Room" Brand Mark & App Icon
+ * - Architectural open doorway stepping out from dark indoors into radiant morning light
+ * - Perspective door swinging open with golden sunlight projection
+ * - High-contrast warm stone, glowing amber, and vibrant orange palette
+ * - Perfectly balanced geometry, zero awkward clip-art sticks or cartoon borders
  */
-export function OpenDoorLogo({ className = 'w-7 h-7', size }: OpenDoorLogoProps) {
+export function OpenDoorLogo({ className = 'w-16 h-16', size }: OpenDoorLogoProps) {
   const dimensionProps = size ? { width: size, height: size } : {};
 
   return (
     <svg
-      viewBox="0 0 48 48"
+      viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -28,52 +27,113 @@ export function OpenDoorLogo({ className = 'w-7 h-7', size }: OpenDoorLogoProps)
       aria-label="Leave The Room Logo"
     >
       <defs>
-        <linearGradient id="doorSunlight" x1="13" y1="9" x2="31" y2="39" gradientUnits="userSpaceOnUse">
+        {/* Ambient Dark Stone Background Gradient */}
+        <linearGradient id="ltrIconBg" x1="12" y1="6" x2="52" y2="58" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#292524" />
+          <stop offset="0.6" stopColor="#1C1917" />
+          <stop offset="1" stopColor="#141210" />
+        </linearGradient>
+
+        {/* Ambient Warm Radial Backlight */}
+        <radialGradient id="ltrBackGlow" cx="30" cy="28" r="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#EA580C" stopOpacity="0.4" />
+          <stop offset="0.65" stopColor="#F59E0B" stopOpacity="0.12" />
+          <stop offset="1" stopColor="#EA580C" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Radiant Sunlight pouring through doorway */}
+        <linearGradient id="ltrSunlight" x1="22" y1="16" x2="36" y2="42" gradientUnits="userSpaceOnUse">
           <stop stopColor="#FEF08A" />
-          <stop offset="0.4" stopColor="#FDE68A" />
-          <stop offset="0.8" stopColor="#F59E0B" />
+          <stop offset="0.35" stopColor="#FDE047" />
+          <stop offset="0.75" stopColor="#F59E0B" />
           <stop offset="1" stopColor="#EA580C" />
+        </linearGradient>
+
+        {/* Door Surface Gradient (Warm Rich Terracotta) */}
+        <linearGradient id="ltrDoorFace" x1="36" y1="16" x2="48" y2="46" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#F97316" />
+          <stop offset="0.7" stopColor="#EA580C" />
+          <stop offset="1" stopColor="#C2410C" />
+        </linearGradient>
+
+        {/* Projected Light Beam on Floor */}
+        <linearGradient id="ltrFloorBeam" x1="28" y1="36" x2="30" y2="54" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FDE047" stopOpacity="0.85" />
+          <stop offset="0.45" stopColor="#F59E0B" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#EA580C" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* Ambient warm glow */}
-      <circle cx="24" cy="24" r="22" className="fill-orange-500/10 dark:fill-orange-400/15" />
+      {/* App Icon Squircle Container */}
+      <rect
+        x="3"
+        y="3"
+        width="58"
+        height="58"
+        rx="16"
+        fill="url(#ltrIconBg)"
+        stroke="#44403C"
+        strokeWidth="1.2"
+      />
 
-      {/* Radiant sunbeams streaming from outdoors */}
-      <path d="M24 14V6" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M33 17L39 11" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M15 17L9 11" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M36 26H44" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+      {/* Ambient Warm Glow behind the doorway */}
+      <circle cx="30" cy="28" r="20" fill="url(#ltrBackGlow)" />
 
-      {/* Door Frame (Warm Stone / Deep Orange) */}
-      <path
-        d="M11 41V11C11 9.89543 11.8954 9 13 9H33C34.1046 9 35 9.89543 35 11V41"
+      {/* Projected Light Beam spilling forward onto threshold */}
+      <polygon
+        points="19,42 41,42 48,53 12,53"
+        fill="url(#ltrFloorBeam)"
+      />
+
+      {/* Door Frame (Warm Stone Architectural Arch) */}
+      <rect
+        x="17"
+        y="13"
+        width="22"
+        height="29"
+        rx="3"
         stroke="#EA580C"
-        strokeWidth="3.2"
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+
+      {/* Radiant Golden Light (The outdoor world opening up) */}
+      <polygon
+        points="19.5,15.5 35,15.5 35,39.5 19.5,39.5"
+        fill="url(#ltrSunlight)"
+      />
+
+      {/* Open Door Swinging Ajar (Precise Perspective Geometry) */}
+      <polygon
+        points="35,15.5 45,12 45,43 35,39.5"
+        fill="url(#ltrDoorFace)"
+        stroke="#EA580C"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+
+      {/* Door Outer Edge Highlight (Catches the sun) */}
+      <line
+        x1="45"
+        y1="12"
+        x2="45"
+        y2="43"
+        stroke="#FED7AA"
+        strokeWidth="1.4"
         strokeLinecap="round"
       />
 
-      {/* Light pouring through the open threshold */}
-      <polygon
-        points="13,9 29,14 29,38 13,41"
-        fill="url(#doorSunlight)"
-        stroke="#EA580C"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
+      {/* Minimal Handle / Touch Affordance */}
+      <circle cx="43" cy="27.5" r="1.2" fill="#FEF08A" />
 
-      {/* Perspective Door Ajar */}
-      <polygon
-        points="29,14 34,10 34,40 29,38"
-        fill="#C2410C"
-        stroke="#EA580C"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
+      {/* Clean Welcome Threshold Line */}
+      <path
+        d="M14 42H44"
+        stroke="#F59E0B"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.9"
       />
-
-      {/* Outdoor Steps / Threshold leading outside */}
-      <path d="M6 41H42" stroke="#D97706" strokeWidth="3.2" strokeLinecap="round" />
-      <path d="M16 45H32" stroke="#EA580C" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
     </svg>
   );
 }
