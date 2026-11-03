@@ -168,6 +168,8 @@ export interface Lobby {
   roomStatus?: RoomStatus;
   skillCompatibility?: SkillCompatibility;
   preferredAgeRange?: string; // e.g., 'All Ages', '18-25', '20s & 30s', '25-35', '30+'
+  isRecurring?: boolean;
+  recurringSchedule?: string; // e.g., 'Every Friday at 20:00'
   maxParticipants: number;
   joinMode: JoinMode;
   hostId: string;

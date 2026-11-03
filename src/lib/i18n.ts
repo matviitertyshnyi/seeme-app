@@ -222,6 +222,14 @@ export const DICTIONARY = {
     rating_comment_placeholder: 'Brief comment on teamwork, energy, or punctuality (optional)...',
     btn_submit_rating: 'Submit Reciprocal Rating',
     rating_submitted: 'Rating Recorded!',
+    instant_join: 'Instant Join',
+    search_placeholder: 'Search meetups, sports, games...',
+    available_meetups: 'Available Meetups',
+    sorted_by_distance: 'Sorted by distance and live status',
+    activity_type: 'Activity Type',
+    i_understand: 'I understand',
+    community_policies: 'Community Policies & Safety Guidelines',
+    recurring_weekly: 'Weekly',
   },
 
   uk: {
@@ -426,6 +434,14 @@ export const DICTIONARY = {
     rating_comment_placeholder: 'Короткий коментар про командну гру чи атмосферу (опція)...',
     btn_submit_rating: 'Надіслати взаємну оцінку',
     rating_submitted: 'Оцінку збережено!',
+    instant_join: 'Швидкий вхід',
+    search_placeholder: 'Пошук зустрічей, спорту, ігор...',
+    available_meetups: 'Доступні зустрічі',
+    sorted_by_distance: 'Сортування за відстанню та статусом',
+    activity_type: 'Тип активності',
+    i_understand: 'Я розумію',
+    community_policies: 'Правила спільноти та безпека зустрічей',
+    recurring_weekly: 'Щотижня',
   },
 
   pl: {
@@ -630,6 +646,14 @@ export const DICTIONARY = {
     rating_comment_placeholder: 'Krótki komentarz o atmosferze lub grze (opcjonalnie)...',
     btn_submit_rating: 'Prześlij wzajemną ocenę',
     rating_submitted: 'Ocena zapisana!',
+    instant_join: 'Szybkie dołączenie',
+    search_placeholder: 'Szukaj spotkań, sportu, gier...',
+    available_meetups: 'Dostępne spotkania',
+    sorted_by_distance: 'Sortowane wg odległości i statusu',
+    activity_type: 'Typ aktywności',
+    i_understand: 'Rozumiem',
+    community_policies: 'Zasady społeczności i bezpieczeństwo spotkań',
+    recurring_weekly: 'Co tydzień',
   },
 
   de: {
@@ -834,6 +858,14 @@ export const DICTIONARY = {
     rating_comment_placeholder: 'Kurzer Kommentar zu Teamgeist oder Stimmung (optional)...',
     btn_submit_rating: 'Gegenseitige Bewertung absenden',
     rating_submitted: 'Bewertung gespeichert!',
+    instant_join: 'Sofort beitreten',
+    search_placeholder: 'Meetups, Sport, Spiele suchen...',
+    available_meetups: 'Verfügbare Treffen',
+    sorted_by_distance: 'Sortiert nach Entfernung und Status',
+    activity_type: 'Aktivitätstyp',
+    i_understand: 'Ich verstehe',
+    community_policies: 'Community-Richtlinien & Sicherheit',
+    recurring_weekly: 'Wöchentlich',
   },
 
   fr: {
@@ -1038,6 +1070,14 @@ export const DICTIONARY = {
     rating_comment_placeholder: 'Court commentaire sur l’esprit d’équipe ou l’ambiance (optionnel)...',
     btn_submit_rating: 'Envoyer l’évaluation réciproque',
     rating_submitted: 'Évaluation enregistrée !',
+    instant_join: 'Rejoindre directement',
+    search_placeholder: 'Rechercher des rencontres, sports, jeux...',
+    available_meetups: 'Rencontres disponibles',
+    sorted_by_distance: 'Trié par distance et statut en direct',
+    activity_type: 'Type d’activité',
+    i_understand: 'J’ai compris',
+    community_policies: 'Règles de la communauté & sécurité',
+    recurring_weekly: 'Chaque semaine',
   },
 } as const;
 

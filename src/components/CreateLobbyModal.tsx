@@ -13,6 +13,7 @@ import {
   UserPlus,
   Award,
   ChevronDown,
+  Calendar,
 } from 'lucide-react';
 import {
   ActivityCategory,
@@ -127,6 +128,9 @@ export function CreateLobbyModal({
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
   const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
   const [preferredAgeRange, setPreferredAgeRange] = useState<string>('All Ages (18+)');
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [recurringDay, setRecurringDay] = useState<string>('Friday');
+  const [recurringTime, setRecurringTime] = useState<string>('20:00');
   const [selectedCoHostId, setSelectedCoHostId] = useState<string | null>(
     initialCoHost?.id || null
   );
@@ -226,7 +230,11 @@ export function CreateLobbyModal({
     try {
       const res = await fetch('/api/lobbies', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           category: activeCategoryName,
           title: finalTitle,
@@ -238,6 +246,10 @@ export function CreateLobbyModal({
           lat: Number(lat),
           lng: Number(lng),
           startTime,
+          isRecurring,
+          recurringSchedule: isRecurring
+            ? `Every ${recurringDay} at ${recurringTime}`
+            : undefined,
           maxParticipants,
           joinMode,
           preferredAgeRange,
@@ -299,7 +311,7 @@ export function CreateLobbyModal({
       >
         <div className="px-5 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-sm">
               <Compass className="w-5 h-5" />
             </div>
             <div>
@@ -315,7 +327,7 @@ export function CreateLobbyModal({
                   {activeUser.name}
                 </strong>{' '}
                 ·{' '}
-                <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">
+                <span className="text-orange-600 dark:text-orange-400 font-extrabold">
                   {activeUser.skillBadge}
                 </span>
               </p>
@@ -326,7 +338,7 @@ export function CreateLobbyModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             <X className="w-5 h-5" />
           </button>
@@ -356,7 +368,7 @@ export function CreateLobbyModal({
                     setCustomActivityInput('');
                   }
                 }}
-                className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="text-xs font-extrabold text-orange-600 dark:text-orange-400 hover:underline"
               >
                 {isCustomActivity ? 'Select Presets' : '+ Custom Activity'}
               </button>
@@ -380,7 +392,7 @@ export function CreateLobbyModal({
                     }}
                     className={`min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold transition-all border ${
                       isCurrent
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                         : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -400,7 +412,7 @@ export function CreateLobbyModal({
                   onChange={(e) => setCustomActivityInput(e.target.value)}
                   placeholder={`e.g. Pickleball, Spikeball, Poker, Coding in ${selectedGroup}`}
                   aria-label="Custom activity name"
-                  className="min-h-[44px] w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-600"
+                  className="min-h-[44px] w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
                 />
               </div>
             ) : (
@@ -412,16 +424,16 @@ export function CreateLobbyModal({
                       key={act}
                       type="button"
                       onClick={() => setCategory(act)}
-                      className={`min-h-[44px] flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
+                      className={`min-h-[44px] flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
                         isSelected
-                          ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm'
-                          : 'bg-white dark:bg-slate-900 hover:bg-indigo-50/60 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                          ? 'bg-slate-900 dark:bg-orange-600 text-white border-slate-900 dark:border-orange-600 shadow-sm'
+                          : 'bg-white dark:bg-slate-900 hover:bg-orange-50/60 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
                       }`}
                     >
                       <CategoryIcon
                         category={act}
                         className={`w-4 h-4 shrink-0 ${
-                          isSelected ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'
+                          isSelected ? 'text-white' : 'text-orange-600 dark:text-orange-400'
                         }`}
                       />
                       <span className="truncate">{act}</span>
@@ -443,7 +455,7 @@ export function CreateLobbyModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={`e.g., 1v1 ${category} Rally or Casual Park Match`}
-                className="min-h-[44px] w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-600"
+                className="min-h-[44px] w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
               />
             </div>
 
@@ -457,7 +469,7 @@ export function CreateLobbyModal({
                   value={equipmentNote}
                   onChange={(e) => setEquipmentNote(e.target.value)}
                   placeholder="e.g., I have 2 extra ping pong paddles and balls."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-600"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
                 />
               </div>
 
@@ -470,14 +482,14 @@ export function CreateLobbyModal({
                   value={spotClue}
                   onChange={(e) => setSpotClue(e.target.value)}
                   placeholder="e.g., Table 3 near fountain, wearing green hoodie"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-600"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
                 />
               </div>
             </div>
 
             <div>
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <Award className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 Skill Level
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -488,7 +500,7 @@ export function CreateLobbyModal({
                     onClick={() => setSkillCompatibility(opt.value)}
                     className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-extrabold border transition-all ${
                       skillCompatibility === opt.value
-                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        ? 'bg-orange-600 text-white border-orange-600'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -503,13 +515,13 @@ export function CreateLobbyModal({
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 3. Venue Location
               </label>
               <button
                 type="button"
                 onClick={handleUseMyLocation}
-                className="min-h-[44px] px-2 inline-flex items-center gap-1 text-xs font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="min-h-[44px] px-2 inline-flex items-center gap-1 text-xs font-extrabold text-orange-600 dark:text-orange-400 hover:underline"
               >
                 <Navigation className="w-3.5 h-3.5" />
                 Use Current GPS
@@ -524,7 +536,7 @@ export function CreateLobbyModal({
                   onClick={() => handleSelectPresetVenue(preset)}
                   className={`min-h-[44px] px-3.5 py-2 rounded-full text-xs font-extrabold whitespace-nowrap border transition-colors ${
                     venueName === preset.name
-                      ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 border-indigo-400 dark:border-indigo-600'
+                      ? 'bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 border-orange-400 dark:border-orange-600'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
                   }`}
                 >
@@ -539,14 +551,14 @@ export function CreateLobbyModal({
                 value={venueName}
                 onChange={(e) => setVenueName(e.target.value)}
                 placeholder="Venue or Park Name"
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-indigo-600"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
               />
               <input
                 type="text"
                 value={venueAddress}
                 onChange={(e) => setVenueAddress(e.target.value)}
                 placeholder="Cross Street / Neighborhood"
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white focus:outline-none focus:border-indigo-600"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
               />
             </div>
           </div>
@@ -555,7 +567,7 @@ export function CreateLobbyModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <Clock className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 4. Start Time
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -566,7 +578,7 @@ export function CreateLobbyModal({
                     onClick={() => setStartTime(opt)}
                     className={`min-h-[44px] py-2.5 px-3 rounded-xl text-xs font-extrabold border transition-all ${
                       startTime === opt
-                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -578,7 +590,7 @@ export function CreateLobbyModal({
 
             <div>
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <Users className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 5. Group Size ({maxParticipants} Players)
               </label>
               <div className="grid grid-cols-6 gap-1.5">
@@ -589,7 +601,7 @@ export function CreateLobbyModal({
                     onClick={() => setMaxParticipants(cap)}
                     className={`min-h-[44px] py-2.5 rounded-xl text-xs font-extrabold border transition-all ${
                       maxParticipants === cap
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -609,6 +621,62 @@ export function CreateLobbyModal({
             </div>
           </div>
 
+          {/* Recurring Event Option */}
+          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                  Recurring Event
+                </label>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                  Repeat this meetup every week at a scheduled time (e.g., Every Friday at 20:00)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRecurring(!isRecurring)}
+                className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  isRecurring
+                    ? 'bg-orange-600 text-white shadow-sm'
+                    : 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300'
+                }`}
+              >
+                {isRecurring ? 'Recurring Weekly' : 'One-Time Only'}
+              </button>
+            </div>
+
+            {isRecurring && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-stone-200 dark:border-stone-800">
+                <div>
+                  <label className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block mb-1">
+                    Day of Week
+                  </label>
+                  <select
+                    value={recurringDay}
+                    onChange={(e) => setRecurringDay(e.target.value)}
+                    className="w-full min-h-[44px] px-3 rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-900 dark:text-stone-100"
+                  >
+                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((d) => (
+                      <option key={d} value={d}>Every {d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={recurringTime}
+                    onChange={(e) => setRecurringTime(e.target.value)}
+                    className="w-full min-h-[44px] px-3 rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-900 dark:text-stone-100"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 6. Join Mode */}
           <div>
             <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
@@ -620,7 +688,7 @@ export function CreateLobbyModal({
                 onClick={() => setJoinMode('OPEN')}
                 className={`text-left p-4 rounded-2xl border-2 transition-all ${
                   joinMode === 'OPEN'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/50'
+                    ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/40'
                     : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'
                 }`}
               >
@@ -638,12 +706,12 @@ export function CreateLobbyModal({
                 onClick={() => setJoinMode('APPROVAL_REQUIRED')}
                 className={`text-left p-4 rounded-2xl border-2 transition-all ${
                   joinMode === 'APPROVAL_REQUIRED'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/50'
+                    ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/40'
                     : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-2 font-extrabold text-sm text-slate-950 dark:text-white">
-                  <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <ShieldCheck className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   Host Approval
                 </div>
                 <p className="mt-1 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -682,10 +750,10 @@ export function CreateLobbyModal({
               <button
                 type="button"
                 onClick={() => setShowOptionalCoHost((prev) => !prev)}
-                className="min-h-[44px] w-full flex items-center justify-between text-xs font-extrabold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                className="min-h-[44px] w-full flex items-center justify-between text-xs font-extrabold text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400"
               >
                 <span className="inline-flex items-center gap-1.5">
-                  <UserPlus className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <UserPlus className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   {selectedCoHost
                     ? `Co-Hosting with ${selectedCoHost.name}`
                     : 'Add an optional Co-Host'}
@@ -710,7 +778,7 @@ export function CreateLobbyModal({
                         }
                         className={`min-h-[48px] p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
                           isCoHost
-                            ? 'bg-indigo-50 dark:bg-indigo-950 border-indigo-600 ring-1 ring-indigo-600'
+                            ? 'bg-orange-50 dark:bg-orange-950 border-orange-600 ring-1 ring-orange-600'
                             : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border-slate-200 dark:border-slate-700'
                         }`}
                       >
@@ -723,7 +791,7 @@ export function CreateLobbyModal({
                           <div className="text-xs font-extrabold text-slate-950 dark:text-white truncate">
                             {person.name.split(' ')[0]}, {person.age}
                           </div>
-                          <div className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 truncate">
+                          <div className="text-[11px] font-bold text-orange-600 dark:text-orange-400 truncate">
                             {person.skillBadge}
                           </div>
                         </div>
@@ -746,7 +814,7 @@ export function CreateLobbyModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="min-h-[44px] px-7 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-extrabold shadow-sm transition-all"
+              className="min-h-[44px] px-7 py-3 rounded-full bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-sm font-extrabold shadow-sm transition-all"
             >
               {isSubmitting ? 'Publishing...' : 'Publish Meetup'}
             </button>

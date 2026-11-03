@@ -258,7 +258,7 @@ export function AuthProfileModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             <X className="w-5 h-5" />
           </button>
@@ -284,7 +284,7 @@ export function AuthProfileModal({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleGoogleAuth}
-                  className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                  className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
                 >
                   <GoogleIcon className="w-5 h-5 shrink-0" />
                   <span>Continue with Google</span>
@@ -294,7 +294,7 @@ export function AuthProfileModal({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleAppleAuth}
-                  className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                  className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
                 >
                   <AppleIcon className="w-5 h-5 shrink-0" />
                   <span>Continue with Apple</span>
@@ -329,7 +329,7 @@ export function AuthProfileModal({
                         }}
                         className={`min-h-[56px] p-3 rounded-2xl border text-left flex items-center justify-between gap-2 transition-all ${
                           isCurrent
-                            ? 'bg-indigo-50 dark:bg-indigo-950 border-indigo-600'
+                            ? 'bg-orange-50 dark:bg-orange-950 border-orange-600'
                             : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700'
                         }`}
                       >
@@ -343,7 +343,7 @@ export function AuthProfileModal({
                             <div className="text-xs font-extrabold text-slate-950 dark:text-white truncate">
                               {p.name}, {p.age}
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-400">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-orange-700 dark:text-orange-400">
                               <span>{p.skillBadge}</span>
                               <span>·</span>
                               <span className="inline-flex items-center gap-0.5 text-amber-700 dark:text-amber-400">
@@ -354,7 +354,7 @@ export function AuthProfileModal({
                           </div>
                         </div>
                         {isCurrent && (
-                          <Check className="w-4 h-4 text-indigo-700 dark:text-indigo-400 shrink-0" />
+                          <Check className="w-4 h-4 text-orange-700 dark:text-orange-400 shrink-0" />
                         )}
                       </button>
                     );
@@ -397,7 +397,7 @@ export function AuthProfileModal({
                       aria-label="Choose profile avatar"
                       className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all ${
                         avatar === url
-                          ? 'border-indigo-600 ring-2 ring-indigo-600'
+                          ? 'border-orange-600 ring-2 ring-orange-600'
                           : 'border-transparent opacity-75 hover:opacity-100'
                       }`}
                     >
@@ -417,7 +417,7 @@ export function AuthProfileModal({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     aria-label="Full Name"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-indigo-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
                 <div>
@@ -431,7 +431,7 @@ export function AuthProfileModal({
                     value={age}
                     onChange={(e) => setAge(Number(e.target.value) || 24)}
                     aria-label="Age"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-indigo-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
               </div>
@@ -446,7 +446,7 @@ export function AuthProfileModal({
                     value={skillBadge}
                     onChange={(e) => setSkillBadge(e.target.value)}
                     aria-label="Skill badge"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-indigo-700 dark:text-indigo-400 focus:outline-none focus:border-indigo-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-orange-700 dark:text-orange-400 focus:outline-none focus:border-orange-600"
                   />
                 </div>
                 <div>
@@ -458,7 +458,7 @@ export function AuthProfileModal({
                     value={neighborhood}
                     onChange={(e) => setNeighborhood(e.target.value)}
                     aria-label="Neighborhood"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-indigo-600"
+                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
               </div>
@@ -472,7 +472,7 @@ export function AuthProfileModal({
                   value={tagline}
                   onChange={(e) => setTagline(e.target.value)}
                   aria-label="Bio and Tagline"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white focus:outline-none focus:border-indigo-600"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white focus:outline-none focus:border-orange-600"
                 />
               </div>
 
@@ -484,7 +484,7 @@ export function AuthProfileModal({
                   {ACTIVITY_GROUPS.map((grp) => (
                     <div key={grp} className="space-y-1.5">
                       <div className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <CategoryIcon category={grp} className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                        <CategoryIcon category={grp} className="w-3 h-3 text-orange-600 dark:text-orange-400" />
                         <span>{grp}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -497,7 +497,7 @@ export function AuthProfileModal({
                               onClick={() => toggleActivity(cat)}
                               className={`min-h-[38px] px-3 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 border transition-all ${
                                 selected
-                                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                                  ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                                   : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                               }`}
                             >
@@ -523,7 +523,7 @@ export function AuthProfileModal({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm transition-all"
+                  className="min-h-[44px] px-6 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm transition-all"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Profile'}
                 </button>

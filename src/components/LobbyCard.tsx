@@ -8,8 +8,10 @@ import {
   Lock,
   Zap,
   Users,
+  Calendar,
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
+import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 
 interface LobbyCardProps {
   lobby: LobbyWithDistance;
@@ -17,6 +19,7 @@ interface LobbyCardProps {
   onSelectLobby: (lobby: LobbyWithDistance) => void;
   onQuickJoin: (lobby: LobbyWithDistance, e: React.MouseEvent) => void;
   isJoining?: boolean;
+  language?: SupportedLanguage;
 }
 
 export function LobbyCard({
@@ -25,7 +28,9 @@ export function LobbyCard({
   onSelectLobby,
   onQuickJoin,
   isJoining = false,
+  language = 'en',
 }: LobbyCardProps) {
+  const t = (key: any, params?: any) => getTranslation(language, key, params);
   const isParticipant = lobby.participants.some((p) => p.id === activeUser.id);
   const isHost = lobby.hostId === activeUser.id;
   const hasPendingRequest = lobby.pendingRequests.some(
@@ -70,17 +75,17 @@ export function LobbyCard({
           {lobby.computedStatus === 'LIVE' ? (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold tracking-wide uppercase">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Live now</span>
+              <span>{t('live_now')}</span>
             </div>
           ) : lobby.computedStatus === 'FINISHED' ? (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-stone-300 text-[10px] font-semibold tracking-wide uppercase">
               <span className="w-2 h-2 rounded-full bg-stone-400" />
-              <span>Ended</span>
+              <span>{t('finished')}</span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-300 text-[10px] font-semibold tracking-wide uppercase">
               <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <span>{lobby.startTimeBadge || 'Upcoming'}</span>
+              <span>{lobby.startTimeBadge || t('status_upcoming')}</span>
             </div>
           )}
         </div>
@@ -89,7 +94,7 @@ export function LobbyCard({
           {lobby.joinMode === 'OPEN' && lobby.computedStatus !== 'FINISHED' && !isFull && (
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-950/70 border border-emerald-500/40 backdrop-blur-md text-emerald-300 text-[10px] font-semibold tracking-wide">
               <Zap className="w-2.5 h-2.5 fill-emerald-400 text-emerald-400" />
-              <span>Instant Join</span>
+              <span>{t('instant_join')}</span>
             </div>
           )}
 
@@ -99,11 +104,26 @@ export function LobbyCard({
             </div>
           )}
 
-          {spotsLeft > 0 && spotsLeft <= 2 && !isFull && (
-            <div className="px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-500/40 backdrop-blur-md text-amber-300 text-[10px] font-semibold">
-              {spotsLeft === 1 ? '1 spot left' : `${spotsLeft} spots left`}
+          {/* Recurring Event Tag */}
+          {lobby.isRecurring && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-950/80 border border-orange-500/40 backdrop-blur-md text-orange-300 text-[10px] font-semibold">
+              <Calendar className="w-2.5 h-2.5" />
+              <span>{lobby.recurringSchedule ? lobby.recurringSchedule.replace('Every ', '') : t('recurring_weekly')}</span>
             </div>
           )}
+
+          {/* Capacity Fraction Tag (e.g. 1/2, 3/4) */}
+          <div
+            className={`px-2 py-0.5 rounded-md border backdrop-blur-md text-[10px] font-semibold tracking-wide ${
+              isFull
+                ? 'bg-stone-900/80 border-stone-700 text-stone-300'
+                : spotsLeft <= 1
+                ? 'bg-amber-950/85 border-amber-500/50 text-amber-300'
+                : 'bg-black/60 border-white/10 text-stone-200'
+            }`}
+          >
+            {lobby.participants.length}/{lobby.maxParticipants}
+          </div>
         </div>
 
         <div className="absolute bottom-3 left-3.5 right-3.5 text-white">
@@ -162,7 +182,7 @@ export function LobbyCard({
               className="min-h-[42px] px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white text-xs font-bold transition active:scale-[0.98] shadow-[0_2px_12px_rgba(16,185,129,0.35)] border border-emerald-400/30 inline-flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>{isHost && lobby.pendingRequests.length > 0 ? `Review (${lobby.pendingRequests.length})` : 'Open Chat'}</span>
+              <span>{isHost && lobby.pendingRequests.length > 0 ? `${t('pending_approval')} (${lobby.pendingRequests.length})` : t('open_chat')}</span>
             </button>
           ) : hasPendingRequest ? (
             <button
@@ -174,7 +194,7 @@ export function LobbyCard({
               className="min-h-[42px] px-3.5 py-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               <Check className="w-3.5 h-3.5 inline mr-1" />
-              Requested
+              {t('pending_approval')}
             </button>
           ) : isFull ? (
             <button
@@ -182,7 +202,7 @@ export function LobbyCard({
               disabled
               className="min-h-[42px] px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800/80 text-stone-400 dark:text-stone-500 text-xs font-semibold cursor-not-allowed border border-stone-200 dark:border-stone-700/50"
             >
-              {isFinished ? 'Ended' : 'Full'}
+              {isFinished ? t('finished') : t('spots_full')}
             </button>
           ) : (
             <button
@@ -191,7 +211,7 @@ export function LobbyCard({
               onClick={(e) => onQuickJoin(lobby, e)}
               className="min-h-[42px] px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-95 text-white text-xs font-bold tracking-tight transition active:scale-[0.98] shadow-[0_2px_14px_rgba(234,88,12,0.38)] border border-orange-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
-              {lobby.joinMode === 'OPEN' ? 'Join Spot' : 'Request Spot'}
+              {lobby.joinMode === 'OPEN' ? t('join_spot') : t('request_spot')}
             </button>
           )}
         </div>

@@ -225,6 +225,8 @@ export const CreateMeetupInputSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
   startTime: StartTimeOptionSchema.default('Now'),
+  isRecurring: z.boolean().optional().default(false),
+  recurringSchedule: z.string().optional(),
   maxParticipants: z.number().int().min(2).max(16).default(4),
   joinMode: JoinModeSchema.default('OPEN'),
   skillCompatibility: SkillCompatibilitySchema.default('ALL_LEVELS'),

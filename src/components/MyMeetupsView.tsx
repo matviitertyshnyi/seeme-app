@@ -263,9 +263,17 @@ export function MyMeetupsView({
                   className="p-4 rounded-2xl bg-white dark:bg-[#1C1917] border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_6px_20px_-4px_rgba(0,0,0,0.5)] hover:border-orange-500/30 transition-all space-y-3"
                 >
                   <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-orange-600 dark:text-orange-400 uppercase tracking-wide text-[10px] font-bold">
-                      {isRoomHost ? 'Your Hosted Meetup' : 'Joined Session'} · {room.category}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-orange-600 dark:text-orange-400 uppercase tracking-wide text-[10px] font-bold">
+                        {isRoomHost ? 'Your Hosted Meetup' : 'Joined Session'} · {room.category}
+                      </span>
+                      {room.isRecurring && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-md bg-orange-950/70 border border-orange-500/30 text-orange-300 text-[10px] font-semibold">
+                          <Calendar className="w-2.5 h-2.5" />
+                          <span>{room.recurringSchedule ? room.recurringSchedule.replace('Every ', '') : 'Weekly'}</span>
+                        </span>
+                      )}
+                    </div>
                     {pendingCount > 0 ? (
                       <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 text-[11px] font-semibold border border-amber-200 dark:border-amber-800">
                         {pendingCount} Join Request{pendingCount > 1 ? 's' : ''}

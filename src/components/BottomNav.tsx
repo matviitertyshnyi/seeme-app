@@ -7,6 +7,7 @@ import {
   MessageCircle,
   User,
 } from 'lucide-react';
+import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 
 export type NavigationTab = 'EXPLORE' | 'MAP' | 'MY_MEETUPS' | 'PROFILE';
 
@@ -20,6 +21,7 @@ export interface BottomNavProps {
   userAvatar?: string;
   userName?: string;
   isSignedOut?: boolean;
+  language?: SupportedLanguage;
   className?: string;
 }
 
@@ -33,6 +35,7 @@ export function BottomNav({
   userAvatar,
   userName = 'User',
   isSignedOut = false,
+  language = 'en',
   className = '',
 }: BottomNavProps) {
   const navItems: Array<{
@@ -44,17 +47,17 @@ export function BottomNav({
   }> = [
     {
       key: 'EXPLORE',
-      label: 'Explore',
+      label: getTranslation(language, 'nav_explore') || 'Explore',
       icon: Compass,
     },
     {
       key: 'MAP',
-      label: 'Map',
+      label: getTranslation(language, 'nav_map') || 'Map',
       icon: MapIcon,
     },
     {
       key: 'MY_MEETUPS',
-      label: 'My Meetups',
+      label: getTranslation(language, 'nav_meetups') || 'My Meetups',
       icon: MessageCircle,
       badge:
         !isSignedOut && meetupsCount > 0 ? (
@@ -68,7 +71,7 @@ export function BottomNav({
     },
     {
       key: 'PROFILE',
-      label: 'Profile',
+      label: getTranslation(language, 'nav_profile') || 'Profile',
       icon: User,
       renderIcon: () => {
         if (!isSignedOut && userAvatar) {

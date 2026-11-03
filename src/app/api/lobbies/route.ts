@@ -150,6 +150,8 @@ export async function POST(req: NextRequest) {
         startTimeBadge: getStartTimeBadge(chosenStart),
         roomStatus: getRoomStatusFromStartTime(chosenStart),
         preferredAgeRange: (body as { preferredAgeRange?: AgeRangeOption | string }).preferredAgeRange || 'All Ages (18+)',
+        isRecurring: (body as { isRecurring?: boolean }).isRecurring ?? false,
+        recurringSchedule: (body as { recurringSchedule?: string }).recurringSchedule || undefined,
         skillCompatibility: skillCompatibility || 'ALL_LEVELS',
         maxParticipants: clampedMax,
         joinMode: joinMode || 'OPEN',

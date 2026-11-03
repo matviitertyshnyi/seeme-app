@@ -230,6 +230,8 @@ export async function POST(req: NextRequest) {
         maxParticipants: clampedMax,
         joinMode: body.joinMode || 'OPEN',
         preferredAgeRange: body.preferredAgeRange || 'All Ages (18+)',
+        isRecurring: body.isRecurring ?? false,
+        recurringSchedule: body.recurringSchedule || undefined,
         hostId: authUser.id,
         bannedUserIds: hostPersona.bannedUserIds ? [...hostPersona.bannedUserIds] : [],
         participants: initialParticipants,

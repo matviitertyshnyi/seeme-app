@@ -35,6 +35,7 @@ import {
   ChevronDown,
   Check,
   X,
+  Search,
 } from 'lucide-react';
 import {
   ActivityCategory,
@@ -67,6 +68,7 @@ import {
   SUPPORTED_LANGUAGES,
   SupportedLanguage,
   useTranslation,
+  getTranslation,
 } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
 import { RoomDetailModal } from '@/components/RoomDetailModal';
@@ -132,6 +134,9 @@ export default function LeaveTheRoomHomePage() {
   const isThemeInitialized = React.useRef(false);
 
   const [selectedBroadCategory, setSelectedBroadCategory] = useState<string>('All Categories');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState<boolean>(false);
+  const [isPoliciesModalOpen, setIsPoliciesModalOpen] = useState<boolean>(false);
   const [selectedAgeFilters, setSelectedAgeFilters] = useState<string[]>([]);
   const [isAgeSheetOpen, setIsAgeSheetOpen] = useState<boolean>(false);
   const [isRadiusSheetOpen, setIsRadiusSheetOpen] = useState<boolean>(false);
@@ -257,6 +262,13 @@ export default function LeaveTheRoomHomePage() {
     }
   };
 
+  const t = useCallback(
+    (key: any, params?: any) => {
+      return getTranslation(currentLang, key, params);
+    },
+    [currentLang]
+  );
+
   const distanceUnit = activeUser.settings?.distanceUnit || 'km';
   const formatRadiusUnit = (km: number) =>
     distanceUnit === 'mi' ? `${(km * 0.621371).toFixed(0)} mi` : `${km} km`;
@@ -347,6 +359,7 @@ export default function LeaveTheRoomHomePage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('leavetheroom_session_user_id', userId);
       localStorage.setItem('seeme_session_user_id', userId);
+      document.cookie = `leavetheroom_session=${userId}; path=/; max-age=31536000; SameSite=Lax`;
     }
     const targetPersona = personas.find((p) => p.id === userId);
     if (targetPersona) {
@@ -360,6 +373,7 @@ export default function LeaveTheRoomHomePage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('leavetheroom_session_user_id', 'signed_out');
       localStorage.setItem('seeme_session_user_id', 'signed_out');
+      document.cookie = 'leavetheroom_session=signed_out; path=/; max-age=0';
     }
     showToast('Signed out of Leave The Room');
   };
@@ -387,6 +401,7 @@ export default function LeaveTheRoomHomePage() {
           if (typeof window !== 'undefined') {
             localStorage.setItem('leavetheroom_session_user_id', data.persona.id);
             localStorage.setItem('seeme_session_user_id', data.persona.id);
+            document.cookie = `leavetheroom_session=${data.persona.id}; path=/; max-age=31536000; SameSite=Lax`;
           }
           triggerSensoryFeedback('SUCCESS', data.persona.settings);
           showToast(`Signed in with Google as ${data.persona.name}!`);
@@ -420,6 +435,7 @@ export default function LeaveTheRoomHomePage() {
           if (typeof window !== 'undefined') {
             localStorage.setItem('leavetheroom_session_user_id', data.persona.id);
             localStorage.setItem('seeme_session_user_id', data.persona.id);
+            document.cookie = `leavetheroom_session=${data.persona.id}; path=/; max-age=31536000; SameSite=Lax`;
           }
           triggerSensoryFeedback('SUCCESS', data.persona.settings);
           showToast(`Signed in with Apple ID as ${data.persona.name}!`);
@@ -485,6 +501,21 @@ export default function LeaveTheRoomHomePage() {
         return false;
       }
 
+      // Search query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchTitle = lobby.title.toLowerCase().includes(q);
+        const matchCat = lobby.category.toLowerCase().includes(q);
+        const matchVenue =
+          lobby.venueName.toLowerCase().includes(q) ||
+          (lobby.venueAddress && lobby.venueAddress.toLowerCase().includes(q));
+        const matchNote = lobby.equipmentNote?.toLowerCase().includes(q);
+        const matchHost = lobby.participants[0]?.name.toLowerCase().includes(q);
+        if (!matchTitle && !matchCat && !matchVenue && !matchNote && !matchHost) {
+          return false;
+        }
+      }
+
       // Haversine distance limit
       if (lobby.distanceKm > radiusKm) return false;
 
@@ -512,6 +543,7 @@ export default function LeaveTheRoomHomePage() {
   }, [
     lobbiesWithDistance,
     selectedBroadCategory,
+    searchQuery,
     selectedAgeFilters,
     radiusKm,
     statusFilter,
@@ -859,7 +891,11 @@ export default function LeaveTheRoomHomePage() {
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: 'JOIN_OR_REQUEST',
           user: {
@@ -888,7 +924,12 @@ export default function LeaveTheRoomHomePage() {
           showToast(`Join request sent to host`);
           setSelectedLobbyId(lobby.id);
         }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Could not join meetup');
       }
+    } catch {
+      showToast('Network error while joining meetup');
     } finally {
       setJoiningLobbyId(null);
     }
@@ -908,7 +949,7 @@ export default function LeaveTheRoomHomePage() {
   if (!hasCheckedSession) {
     return (
       <div className="min-h-screen bg-canvas text-ink flex items-center justify-center">
-        <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center animate-pulse">
+        <div className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center animate-pulse">
           <Compass className="w-5 h-5 stroke-[2.4]" />
         </div>
       </div>
@@ -952,40 +993,49 @@ export default function LeaveTheRoomHomePage() {
               aria-label="Meetup Discovery Filters"
               className="bg-white dark:bg-[#1C1917] rounded-2xl p-3 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
             >
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
-                  (catName) => {
-                    const isSelected = selectedBroadCategory === catName;
-                    const catLabel = catName === 'All Categories' ? 'All Meetups' : catName;
-                    const count = categoryCounts[catName] || 0;
-                    return (
-                      <button
-                        key={catName}
-                        type="button"
-                        onClick={() => setSelectedBroadCategory(catName)}
-                        className={`min-h-[36px] px-3 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 ${
-                          isSelected
-                            ? 'bg-stone-950 dark:bg-stone-800 text-white border border-stone-800 dark:border-orange-500/50 shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_0_14px_rgba(234,88,12,0.22)]'
-                            : 'bg-stone-100/80 dark:bg-stone-800/70 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/70 border border-transparent dark:border-stone-800/50'
-                        }`}
-                      >
-                        <span>{catLabel}</span>
-                        <span
-                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.4)]'
-                              : 'bg-stone-200/90 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
-                          }`}
-                        >
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  }
-                )}
+              {/* Row 1: Search Bar (Left) + Activity Type Filter (Right) */}
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1 min-w-0">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('search_placeholder') || 'Search meetups, sports, games...'}
+                    className="w-full min-h-[40px] pl-9 pr-8 py-2 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Clear search"
+                      className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-stone-400 hover:text-stone-200"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsCategorySheetOpen(true)}
+                  aria-label="Filter by activity type"
+                  className="min-h-[40px] px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+                >
+                  <span className="truncate max-w-[110px] sm:max-w-none">
+                    {selectedBroadCategory === 'All Categories' ? (t('all_activities') || 'All Meetups') : selectedBroadCategory}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-orange-500/20 text-orange-600 dark:text-orange-400">
+                    {categoryCounts[selectedBroadCategory] ?? lobbiesWithDistance.length}
+                  </span>
+                  <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
+                </button>
               </div>
 
-              <div className="flex items-center justify-between gap-2 text-xs text-stone-500 dark:text-stone-400 pt-2 border-t border-stone-100 dark:border-stone-800/80">
+              {/* Subrow: Location & Radius | Age Selector | Live Now */}
+              <div className="flex items-center justify-between gap-2 text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80">
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
@@ -1103,10 +1153,10 @@ export default function LeaveTheRoomHomePage() {
                     <div className="flex items-center justify-between px-0.5">
                       <div>
                         <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100">
-                          Available Meetups ({availableToJoinLobbies.length})
+                          {t('available_meetups') || 'Available Meetups'} ({availableToJoinLobbies.length})
                         </h2>
                         <p className="text-xs text-stone-500 dark:text-stone-400">
-                          Sorted by distance and live status
+                          {t('sorted_by_distance') || 'Sorted by distance and live status'}
                         </p>
                       </div>
                     </div>
@@ -1120,6 +1170,7 @@ export default function LeaveTheRoomHomePage() {
                           onSelectLobby={(item) => setSelectedLobbyId(item.id)}
                           onQuickJoin={handleQuickJoin}
                           isJoining={joiningLobbyId === lobby.id}
+                          language={currentLang}
                         />
                       ))}
                     </div>
@@ -1150,6 +1201,7 @@ export default function LeaveTheRoomHomePage() {
                           onSelectLobby={(item) => setSelectedLobbyId(item.id)}
                           onQuickJoin={handleQuickJoin}
                           isJoining={joiningLobbyId === lobby.id}
+                          language={currentLang}
                         />
                       ))}
                     </div>
@@ -1477,41 +1529,45 @@ export default function LeaveTheRoomHomePage() {
                       {currentLang.toUpperCase()}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        type="button"
-                        onClick={() => handleLanguageSelect(lang.code)}
-                        className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-center text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                          currentLang === lang.code
-                            ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white border-orange-500/60 shadow-[0_2px_10px_rgba(234,88,12,0.35)] font-bold'
-                            : 'bg-stone-50 dark:bg-stone-800/70 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-750'
-                        }`}
-                      >
-                        <span className="font-bold text-[10px] px-1 py-0.2 rounded bg-black/10 dark:bg-white/10">
-                          {lang.flag}
-                        </span>
-                        <span>{lang.nativeName}</span>
-                      </button>
-                    ))}
+                  <div className="relative">
+                    <select
+                      value={currentLang}
+                      onChange={(e) => handleLanguageSelect(e.target.value as SupportedLanguage)}
+                      aria-label="Select interface language"
+                      className="w-full appearance-none min-h-[44px] px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/50 cursor-pointer pr-10 transition-colors"
+                    >
+                      {SUPPORTED_LANGUAGES.map((lang) => (
+                        <option key={lang.code} value={lang.code} className="bg-stone-900 text-stone-100 py-2">
+                          {lang.flag} — {lang.nativeName} ({lang.name})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                   </div>
                 </section>
 
                 <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                    Community Policies & In-Person Safety
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800">
-                      <h3 className="font-bold text-stone-950 dark:text-stone-100 mb-0.5">Community Guidelines</h3>
-                      <p className="text-[11px] text-stone-500 dark:text-stone-400">Respectful, inclusive in-person interaction. Zero tolerance for harassment or flaking.</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800">
-                      <h3 className="font-bold text-stone-950 dark:text-stone-100 mb-0.5">In-Person Safety</h3>
-                      <p className="text-[11px] text-stone-500 dark:text-stone-400">All meetups occur at verified public parks, cafes, and venues. Check in upon arrival.</p>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
+                      {t('community_policies') || 'Community Policies & Safety Guidelines'}
+                    </h2>
                   </div>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                    Review community standards, zero-tolerance flaking rules, and in-person verification standards.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsPoliciesModalOpen(true)}
+                    className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-stone-50 hover:bg-stone-100 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                      <span>{t('community_policies') || 'Community Policies & Safety Guidelines'}</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-200 transition-colors" />
+                  </button>
                 </section>
 
                 <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-3">
@@ -1622,6 +1678,7 @@ export default function LeaveTheRoomHomePage() {
         userAvatar={activeUser.avatar}
         userName={activeUser.name}
         isSignedOut={isSignedOut}
+        language={currentLang}
       />
 
       {/* Meetup Detail, Live Arrival Check-In, Approval Queue, Ratings & Chat Modal */}
@@ -1833,6 +1890,214 @@ export default function LeaveTheRoomHomePage() {
                 className="min-h-[44px] flex-1 rounded-xl bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white text-xs font-semibold shadow-xs transition"
               >
                 Apply Distance
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Activity Type Category Filter Bottom Sheet */}
+      {isCategorySheetOpen && (
+        <div className="fixed inset-0 z-[600] flex flex-col justify-end">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setIsCategorySheetOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="category-filter-title"
+            className="relative z-10 w-full max-w-lg mx-auto bg-white dark:bg-[#1C1917] rounded-t-3xl border-t border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col max-h-[80vh]"
+          >
+            <div className="w-12 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700 mx-auto mb-4 shrink-0" />
+
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
+              <div>
+                <h2
+                  id="category-filter-title"
+                  className="text-base font-bold text-stone-900 dark:text-stone-100"
+                >
+                  {t('activity_type') || 'Activity Type'}
+                </h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                  Filter meetups by category
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCategorySheetOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-3 space-y-2 overflow-y-auto">
+              {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
+                (catName) => {
+                  const isSelected = selectedBroadCategory === catName;
+                  const catLabel = catName === 'All Categories' ? (t('all_activities') || 'All Meetups') : catName;
+                  const count = categoryCounts[catName] || 0;
+                  return (
+                    <button
+                      key={catName}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBroadCategory(catName);
+                        setIsCategorySheetOpen(false);
+                        triggerSensoryFeedback('TAP', activeUser.settings);
+                      }}
+                      className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                        isSelected
+                          ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 ring-1 ring-orange-500/40'
+                          : 'bg-stone-50/80 dark:bg-stone-900/60 border-stone-200/80 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                            isSelected
+                              ? 'bg-orange-600 text-white'
+                              : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                          }`}
+                        >
+                          <CategoryIcon category={catName === 'All Categories' ? 'All Rooms' : catName} className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+                            {catLabel}
+                          </div>
+                          <div className="text-xs text-stone-500 dark:text-stone-400">
+                            {count} {count === 1 ? 'meetup available' : 'meetups available'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                            isSelected
+                              ? 'bg-orange-600 text-white'
+                              : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                          }`}
+                        >
+                          {count}
+                        </span>
+                        {isSelected && <Check className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[3]" />}
+                      </div>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Community Policies & Safety Guidelines Modal (Closed by "I understand") */}
+      {isPoliciesModalOpen && (
+        <div className="fixed inset-0 z-[700] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsPoliciesModalOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="policies-modal-title"
+            className="relative z-10 w-full max-w-lg bg-white dark:bg-[#1C1917] rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl p-6 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2
+                    id="policies-modal-title"
+                    className="text-base font-bold text-stone-950 dark:text-stone-100"
+                  >
+                    {t('community_policies') || 'Community Policies & Safety Guidelines'}
+                  </h2>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                    Standards ensuring safe, respectful in-person meetups
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPoliciesModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4 overflow-y-auto text-xs text-stone-600 dark:text-stone-300 leading-relaxed pr-1">
+              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  1. Respectful & Inclusive Culture
+                </h3>
+                <p className="text-stone-500 dark:text-stone-400 text-xs">
+                  Zero tolerance for harassment, discrimination, intimidatory behavior, or hostility. Treat all participants with mutual dignity, regardless of skill level or experience.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  2. Public & Verified Venues Only
+                </h3>
+                <p className="text-stone-500 dark:text-stone-400 text-xs">
+                  All meetups occur exclusively in public, well-lit spaces: parks, public recreation facilities, verified cafes, libraries, and open courts. Private residences and secluded unverified locations are strictly prohibited.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  3. Punctuality & Anti-Flaking Policy
+                </h3>
+                <p className="text-stone-500 dark:text-stone-400 text-xs">
+                  Confirm attendance only when you genuinely intend to show up. If running late, message your group chat promptly. Repeated unexcused no-shows lower your Show-Up Reliability Score and trigger matchmaking timeouts.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  4. Real-Time Arrival Check-In
+                </h3>
+                <p className="text-stone-500 dark:text-stone-400 text-xs">
+                  Tap &quot;I&apos;m Here&quot; in the room details when you reach the meetup spot. This reassures hosts and peers, confirms your in-person presence, and activates reciprocal player rating at the end of the meetup.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  5. Reporting & Host Discretion
+                </h3>
+                <p className="text-stone-500 dark:text-stone-400 text-xs">
+                  Hosts have discretion over their participant roster. Any player can block or report bad actors immediately via the player card. Reported violations are promptly investigated by moderation.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-stone-100 dark:border-stone-800 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsPoliciesModalOpen(false)}
+                className="w-full min-h-[48px] rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-xs font-bold shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>{t('i_understand') || 'I understand'}</span>
               </button>
             </div>
           </div>

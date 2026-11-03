@@ -160,7 +160,11 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: 'CHECK_IN',
           targetUserId: activeUser.id,
@@ -185,7 +189,11 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: 'BAN_FROM_LOBBY',
           targetUserId,
@@ -219,7 +227,11 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: 'JOIN_OR_REQUEST',
           user: {
@@ -255,7 +267,11 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: decision,
           requestId,
@@ -275,7 +291,11 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: 'LEAVE',
           targetUserId: activeUser.id,
@@ -295,6 +315,10 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}`, {
         method: 'DELETE',
+        headers: {
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
       });
       if (res.ok) {
         onLobbyDeleted(lobby.id);
@@ -313,7 +337,11 @@ export function RoomDetailModal({
     try {
       const res = await fetch(`/api/lobbies/${lobby.id}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           senderId: activeUser.id,
           senderName: activeUser.name,
@@ -364,7 +392,7 @@ export function RoomDetailModal({
                 variant="solid"
               />
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-900/85 text-xs font-extrabold text-white backdrop-blur-md">
-                <Navigation className="w-3.5 h-3.5 text-indigo-300" />
+                <Navigation className="w-3.5 h-3.5 text-orange-300" />
                 {lobby.distanceLabel}
               </span>
             </div>
@@ -373,7 +401,7 @@ export function RoomDetailModal({
               type="button"
               onClick={onClose}
               aria-label="Close meetup details"
-              className="w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               <X className="w-5 h-5" />
             </button>
@@ -381,7 +409,7 @@ export function RoomDetailModal({
 
           <div className="absolute bottom-3.5 left-4 right-4 text-white">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-600 text-white text-xs font-extrabold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-extrabold">
                 <CategoryIcon category={lobby.category} className="w-3.5 h-3.5" />
                 {lobby.category}
               </span>
@@ -415,7 +443,7 @@ export function RoomDetailModal({
             onClick={() => setMobileSection('DETAILS')}
             className={`min-h-[44px] rounded-xl text-xs font-extrabold inline-flex items-center justify-center gap-2 transition-all ${
               mobileSection === 'DETAILS'
-                ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm'
                 : 'text-slate-700 dark:text-slate-300'
             }`}
           >
@@ -431,7 +459,7 @@ export function RoomDetailModal({
             onClick={() => setMobileSection('CHAT')}
             className={`min-h-[44px] rounded-xl text-xs font-extrabold inline-flex items-center justify-center gap-2 transition-all ${
               mobileSection === 'CHAT'
-                ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm'
                 : 'text-slate-700 dark:text-slate-300'
             }`}
           >
@@ -454,16 +482,16 @@ export function RoomDetailModal({
           >
             {/* Primary Join CTA Banner on Mobile if user is not yet in the meetup */}
             {!isParticipant && !myPendingRequest && !isFull && (
-              <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
+              <div className="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-xs font-extrabold text-indigo-950 dark:text-indigo-200">
+                  <div className="text-xs font-extrabold text-orange-950 dark:text-orange-200">
                     {lobby.maxParticipants - lobby.participants.length} open{' '}
                     {lobby.maxParticipants - lobby.participants.length === 1
                       ? 'seat'
                       : 'seats'}{' '}
                     available
                   </div>
-                  <p className="text-[11px] font-semibold text-indigo-800 dark:text-indigo-300">
+                  <p className="text-[11px] font-semibold text-orange-800 dark:text-orange-300">
                     {lobby.joinMode === 'OPEN'
                       ? 'Instant join: claim your spot in 1 tap'
                       : 'Host approval required'}
@@ -475,7 +503,7 @@ export function RoomDetailModal({
                     type="button"
                     disabled={isLoadingAction}
                     onClick={handleJoinOrRequest}
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm shrink-0 inline-flex items-center gap-1.5"
+                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shrink-0 inline-flex items-center gap-1.5"
                   >
                     <UserPlus className="w-4 h-4" />
                     Join Now
@@ -484,7 +512,7 @@ export function RoomDetailModal({
                   <button
                     type="button"
                     onClick={() => setMobileSection('CHAT')}
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm shrink-0"
+                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shrink-0"
                   >
                     Request Spot
                   </button>
@@ -546,7 +574,7 @@ export function RoomDetailModal({
                         spotClueInput
                       )
                     }
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 text-white text-xs font-extrabold shrink-0"
+                    className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-900 dark:bg-orange-600 hover:bg-slate-800 text-white text-xs font-extrabold shrink-0"
                   >
                     Save Clue
                   </button>
@@ -557,7 +585,7 @@ export function RoomDetailModal({
             {/* Real-Life Venue + Map Links */}
             <div className="bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -580,7 +608,7 @@ export function RoomDetailModal({
                   rel="noopener noreferrer"
                   className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-950 dark:text-white border border-slate-300 dark:border-slate-700 text-xs font-extrabold shadow-sm"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <ExternalLink className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                   Google Maps
                 </a>
 
@@ -592,7 +620,7 @@ export function RoomDetailModal({
                   rel="noopener noreferrer"
                   className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-950 dark:text-white border border-slate-300 dark:border-slate-700 text-xs font-extrabold shadow-sm"
                 >
-                  <Navigation className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <Navigation className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                   Apple Maps
                 </a>
 
@@ -632,7 +660,7 @@ export function RoomDetailModal({
                 <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   Players ({lobby.participants.length}/{lobby.maxParticipants})
                 </h4>
-                <span className="text-xs font-extrabold text-indigo-700 dark:text-indigo-400">
+                <span className="text-xs font-extrabold text-orange-700 dark:text-orange-400">
                   {lobby.maxParticipants - lobby.participants.length === 0
                     ? 'All Seats Filled'
                     : `${lobby.maxParticipants - lobby.participants.length} Open`}
@@ -673,11 +701,11 @@ export function RoomDetailModal({
                                 <span className="text-sm font-extrabold text-slate-950 dark:text-white">
                                   {person.name}, {person.age}
                                 </span>
-                                <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 text-[10px] font-extrabold border border-indigo-200 dark:border-indigo-800">
+                                <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 text-[10px] font-extrabold border border-orange-200 dark:border-orange-800">
                                   {person.skillBadge || 'Active'}
                                 </span>
                                 {personIsHost && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 dark:bg-indigo-600 text-white text-[10px] font-extrabold uppercase">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 dark:bg-orange-600 text-white text-[10px] font-extrabold uppercase">
                                     <Crown className="w-2.5 h-2.5 text-amber-300" />
                                     Host
                                   </span>
@@ -748,7 +776,7 @@ export function RoomDetailModal({
                                   }
                                   className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-colors ${
                                     isRegular
-                                      ? 'bg-indigo-600 text-white border-indigo-600'
+                                      ? 'bg-orange-600 text-white border-orange-600'
                                       : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'
                                   }`}
                                 >
@@ -773,7 +801,7 @@ export function RoomDetailModal({
                         </div>
 
                         {person.spotClue && (
-                          <div className="text-xs font-bold text-indigo-950 dark:text-indigo-200 bg-indigo-50/80 dark:bg-indigo-950/60 rounded-lg px-3 py-1.5 border border-indigo-200 dark:border-indigo-800">
+                          <div className="text-xs font-bold text-orange-950 dark:text-orange-200 bg-orange-50/80 dark:bg-orange-950/60 rounded-lg px-3 py-1.5 border border-orange-200 dark:border-orange-800">
                             Spot clue: &ldquo;{person.spotClue}&rdquo;
                           </div>
                         )}
@@ -810,7 +838,7 @@ export function RoomDetailModal({
                             <span className="text-sm font-extrabold text-slate-950 dark:text-white truncate">
                               {req.user.name}, {req.user.age}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 text-[10px] font-extrabold">
+                            <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 text-[10px] font-extrabold">
                               {req.user.skillBadge || 'Active'}
                             </span>
                           </div>
@@ -977,12 +1005,12 @@ export function RoomDetailModal({
                           <div
                             className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                               isMine
-                                ? 'bg-indigo-600 text-white rounded-br-sm shadow-sm'
+                                ? 'bg-orange-600 text-white rounded-br-sm shadow-sm'
                                 : 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white rounded-bl-sm border border-slate-200 dark:border-slate-800 shadow-sm'
                             }`}
                           >
                             {!isMine && (
-                              <div className="text-[11px] font-extrabold text-indigo-700 dark:text-indigo-400 mb-0.5">
+                              <div className="text-[11px] font-extrabold text-orange-700 dark:text-orange-400 mb-0.5">
                                 {msg.senderName}
                               </div>
                             )}
@@ -1001,7 +1029,7 @@ export function RoomDetailModal({
                       key={chip}
                       type="button"
                       onClick={() => handleSendMessage(chip)}
-                      className="min-h-[38px] px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 hover:text-indigo-800 dark:hover:text-indigo-300 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap transition-colors shrink-0"
+                      className="min-h-[38px] px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-800 dark:hover:text-orange-300 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap transition-colors shrink-0"
                     >
                       {chip}
                     </button>
@@ -1021,13 +1049,13 @@ export function RoomDetailModal({
                     value={newMessageText}
                     onChange={(e) => setNewMessageText(e.target.value)}
                     placeholder={`Message as ${activeUser.name.split(' ')[0]}...`}
-                    className="min-h-[44px] flex-1 px-4 py-2.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-600"
+                    className="min-h-[44px] flex-1 px-4 py-2.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
                   />
                   <button
                     type="submit"
                     aria-label="Send message"
                     disabled={!newMessageText.trim() || isSendingMsg}
-                    className="w-11 h-11 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition-all shrink-0"
+                    className="w-11 h-11 rounded-full bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition-all shrink-0"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -1035,7 +1063,7 @@ export function RoomDetailModal({
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center">
-                <div className="w-14 h-14 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 flex items-center justify-center mb-4">
+                <div className="w-14 h-14 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-400 flex items-center justify-center mb-4">
                   {lobby.joinMode === 'OPEN' ? (
                     <Zap className="w-7 h-7" />
                   ) : (
@@ -1100,14 +1128,14 @@ export function RoomDetailModal({
                         value={requestNote}
                         onChange={(e) => setRequestNote(e.target.value)}
                         placeholder="Optional note (e.g. 'Hey! I am 5 mins away and have extra balls')"
-                        className="w-full rounded-2xl p-3.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-600"
+                        className="w-full rounded-2xl p-3.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-950 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-600"
                       />
                     )}
 
                     <button
                       type="submit"
                       disabled={isLoadingAction}
-                      className="min-h-[48px] w-full py-3.5 px-6 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-extrabold shadow-sm inline-flex items-center justify-center gap-2 transition-all"
+                      className="min-h-[48px] w-full py-3.5 px-6 rounded-full bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-sm font-extrabold shadow-sm inline-flex items-center justify-center gap-2 transition-all"
                     >
                       <UserPlus className="w-4 h-4" />
                       {lobby.joinMode === 'OPEN'
