@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb, writeDb, withDbMutation } from '@/lib/db';
-import { requireAuth, errorResponse, AuthError } from '@/lib/auth-guard';
+import { readDb, withDbMutation } from '@/lib/db';
+import {
+  requireAuth,
+  errorResponse,
+  AuthError,
+  sanitizePersona,
+  sanitizePersonas,
+} from '@/lib/auth-guard';
 import {
   ActivityCategory,
   PlayerRating,
@@ -14,7 +20,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const db = await readDb();
   return NextResponse.json({
-    personas: db.personas,
+    personas: sanitizePersonas(db.personas),
     ratings: db.ratings || [],
     notifications: db.notifications || [],
   });
@@ -25,6 +31,25 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action } = body as { action: string };
     const nowIso = new Date().toISOString();
+
+    const AUTH_REQUIRED_ACTIONS = new Set([
+      'REQUEST_VERIFICATION',
+      'ADMIN_ACTION',
+      'UPDATE_PROFILE',
+      'UPDATE_SETTINGS',
+      'TOGGLE_BEACON',
+      'RATE_PLAYER',
+      'BAN_USER',
+      'UNBAN_USER',
+      'TOGGLE_REGULAR_PARTNER',
+      'MARK_NOTIFICATIONS_READ',
+    ]);
+
+    let authUser: UserPersona | undefined;
+    if (AUTH_REQUIRED_ACTIONS.has(action)) {
+      const auth = await requireAuth(req);
+      authUser = auth.user;
+    }
 
     return await withDbMutation(async (db) => {
 
@@ -68,7 +93,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const newUserId = `user-${Date.now()}`;
+      const newUserId = `user-${crypto.randomUUID()}`;
       const newPersona: UserPersona = {
         id: newUserId,
         email: cleanEmail,
@@ -123,7 +148,7 @@ export async function POST(req: NextRequest) {
       db.personas.unshift(newPersona);
       db.notifications = db.notifications || [];
       db.notifications.unshift({
-        id: `notif-${Date.now()}`,
+        id: `notif-${crypto.randomUUID()}`,
         userId: newUserId,
         type: 'SYSTEM',
         title: 'Welcome to Leave The Room!',
@@ -133,8 +158,8 @@ export async function POST(req: NextRequest) {
       });
 
       return NextResponse.json({
-        persona: newPersona,
-        personas: db.personas,
+        persona: sanitizePersona(newPersona),
+        personas: sanitizePersonas(db.personas),
         notifications: db.notifications,
       });
     }
@@ -168,17 +193,19 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // If user has a password and password was provided, verify it (or allow demo accounts without password)
-      if (found.password && password && found.password !== password.trim()) {
-        return NextResponse.json(
-          { error: 'Incorrect password. Please try again.' },
-          { status: 401 }
-        );
+      // If user has a password set, strictly require it and verify
+      if (found.password) {
+        if (!password || found.password !== password.trim()) {
+          return NextResponse.json(
+            { error: 'Incorrect password. Please try again.' },
+            { status: 401 }
+          );
+        }
       }
 
       return NextResponse.json({
-        persona: found,
-        personas: db.personas,
+        persona: sanitizePersona(found),
+        personas: sanitizePersonas(db.personas),
       });
     }
 
@@ -213,7 +240,7 @@ export async function POST(req: NextRequest) {
           found.avatar = avatar;
         }
       } else {
-        const newUserId = `user-g-${Date.now()}`;
+        const newUserId = `user-g-${crypto.randomUUID()}`;
         found = {
           id: newUserId,
           email: userEmail,
@@ -257,7 +284,7 @@ export async function POST(req: NextRequest) {
 
         db.notifications = db.notifications || [];
         db.notifications.unshift({
-          id: `notif-${Date.now()}`,
+          id: `notif-${crypto.randomUUID()}`,
           userId: newUserId,
           type: 'SYSTEM',
           title: 'Google Sign-In Verified',
@@ -267,10 +294,9 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      await writeDb(db);
       return NextResponse.json({
-        persona: found,
-        personas: db.personas,
+        persona: sanitizePersona(found),
+        personas: sanitizePersonas(db.personas),
         notifications: db.notifications,
       });
     }
@@ -303,7 +329,7 @@ export async function POST(req: NextRequest) {
         found.verificationStatus = 'VERIFIED';
         found.authProvider = 'apple';
       } else {
-        const newUserId = `user-a-${Date.now()}`;
+        const newUserId = `user-a-${crypto.randomUUID()}`;
         found = {
           id: newUserId,
           email: userEmail,
@@ -347,7 +373,7 @@ export async function POST(req: NextRequest) {
 
         db.notifications = db.notifications || [];
         db.notifications.unshift({
-          id: `notif-${Date.now()}`,
+          id: `notif-${crypto.randomUUID()}`,
           userId: newUserId,
           type: 'SYSTEM',
           title: 'Apple Sign-In Verified',
@@ -357,20 +383,23 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      await writeDb(db);
       return NextResponse.json({
-        persona: found,
-        personas: db.personas,
+        persona: sanitizePersona(found),
+        personas: sanitizePersonas(db.personas),
         notifications: db.notifications,
       });
     }
 
     if (action === 'REQUEST_VERIFICATION') {
-      const { userId, note } = body as {
-        userId: string;
+      const { note } = body as {
+        userId?: string;
         note?: string;
       };
-      const persona = db.personas.find((p) => p.id === userId);
+      // Authorize against authenticated session identity:
+      const targetUserId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
+      const persona = db.personas.find((p) => p.id === targetUserId);
       if (!persona) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
@@ -381,8 +410,8 @@ export async function POST(req: NextRequest) {
 
       db.notifications = db.notifications || [];
       db.notifications.unshift({
-        id: `notif-${Date.now()}`,
-        userId,
+        id: `notif-${crypto.randomUUID()}`,
+        userId: targetUserId,
         type: 'SYSTEM',
         title: 'Verification Request Received',
         body: 'Your profile verification is under review by the Leave The Room Admin team.',
@@ -390,27 +419,15 @@ export async function POST(req: NextRequest) {
         createdAt: nowIso,
       });
 
-      await writeDb(db);
       return NextResponse.json({
-        persona,
-        personas: db.personas,
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
         notifications: db.notifications,
       });
     }
 
     if (action === 'ADMIN_ACTION') {
-      let authUser: UserPersona;
-      try {
-        const auth = await requireAuth(req);
-        authUser = auth.user;
-      } catch (err) {
-        if (err instanceof AuthError) {
-          return errorResponse(err.message, err.status, err.code);
-        }
-        return errorResponse('Authentication required', 401, 'UNAUTHORIZED');
-      }
-
-      const effectiveRole = authUser.role || (authUser.id === 'user-maya' ? 'ADMIN' : 'USER');
+      const effectiveRole = authUser!.role || (authUser!.id === 'user-maya' ? 'ADMIN' : 'USER');
       if (effectiveRole !== 'ADMIN') {
         return errorResponse('Admin privileges required', 403, 'FORBIDDEN');
       }
@@ -440,7 +457,7 @@ export async function POST(req: NextRequest) {
 
         db.notifications = db.notifications || [];
         db.notifications.unshift({
-          id: `notif-${Date.now()}`,
+          id: `notif-${crypto.randomUUID()}`,
           userId: target.id,
           type: 'SYSTEM',
           title: 'Account Verified!',
@@ -465,15 +482,14 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        target,
-        personas: db.personas,
+        target: target ? sanitizePersona(target) : undefined,
+        personas: sanitizePersonas(db.personas),
         notifications: db.notifications,
       });
     }
 
     if (action === 'UPDATE_PROFILE') {
       const {
-        userId,
         name,
         age,
         avatar,
@@ -482,7 +498,7 @@ export async function POST(req: NextRequest) {
         neighborhood,
         favoriteActivities,
       } = body as {
-        userId: string;
+        userId?: string;
         name?: string;
         age?: number;
         avatar?: string;
@@ -492,7 +508,11 @@ export async function POST(req: NextRequest) {
         favoriteActivities?: ActivityCategory[];
       };
 
-      const persona = db.personas.find((p) => p.id === userId);
+      // Authorize against authenticated session identity:
+      const targetUserId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
+      const persona = db.personas.find((p) => p.id === targetUserId);
       if (!persona) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
@@ -510,7 +530,7 @@ export async function POST(req: NextRequest) {
       // Sync participant snapshots across active lobbies
       db.lobbies.forEach((lobby) => {
         lobby.participants.forEach((part) => {
-          if (part.id === userId) {
+          if (part.id === targetUserId) {
             part.name = persona.name;
             part.age = persona.age;
             part.avatar = persona.avatar;
@@ -520,55 +540,78 @@ export async function POST(req: NextRequest) {
         });
       });
 
-      await writeDb(db);
       return NextResponse.json({
-        persona,
-        personas: db.personas,
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
         lobbies: db.lobbies,
       });
     }
 
     if (action === 'UPDATE_SETTINGS') {
-      const { userId, settings } = body as {
-        userId: string;
+      const { settings } = body as {
+        userId?: string;
         settings: Partial<UserSettings>;
       };
-      const persona = db.personas.find((p) => p.id === userId);
+      // Authorize against authenticated session identity:
+      const targetUserId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
+      const persona = db.personas.find((p) => p.id === targetUserId);
       if (!persona) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
       persona.settings = { ...persona.settings, ...settings };
-      await writeDb(db);
-      return NextResponse.json({ persona, personas: db.personas });
+      return NextResponse.json({
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
+      });
     }
 
     if (action === 'TOGGLE_BEACON') {
-      const { userId, beacon } = body as {
-        userId: string;
-        beacon: RadarBeacon;
-      };
-      const persona = db.personas.find((p) => p.id === userId);
+      // Authorize against authenticated session identity:
+      const targetUserId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
+      const persona = db.personas.find((p) => p.id === targetUserId);
       if (!persona) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
+
+      // Support both nested beacon object and flat fields
+      const incomingBeacon = (body.beacon as RadarBeacon) || {
+        active: Boolean(body.active),
+        categories:
+          Array.isArray(body.categories) && body.categories.length > 0
+            ? body.categories
+            : persona.favoriteActivities,
+        radiusKm: Number(body.radiusKm) || persona.beacon?.radiusKm || 5,
+        note:
+          body.note !== undefined
+            ? String(body.note)
+            : persona.beacon?.note || 'Ready to play',
+      };
+
       persona.beacon = {
-        ...beacon,
+        ...persona.beacon,
+        ...incomingBeacon,
         updatedAt: nowIso,
       };
-      await writeDb(db);
-      return NextResponse.json({ persona, personas: db.personas });
+
+      return NextResponse.json({
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
+      });
     }
 
     if (action === 'RATE_PLAYER') {
       const {
-        fromUserId,
         toUserId,
         lobbyId,
         stars,
         showedUp = true,
         comment = '',
       } = body as {
-        fromUserId: string;
+        fromUserId?: string;
         toUserId: string;
         lobbyId: string;
         stars: number;
@@ -576,25 +619,34 @@ export async function POST(req: NextRequest) {
         comment?: string;
       };
 
-      const fromUser = db.personas.find((p) => p.id === fromUserId);
+      // Authorize against authenticated session: caller is strictly fromUserId
+      const effectiveFromUserId = authUser!.id;
+      if (toUserId === effectiveFromUserId) {
+        return errorResponse('You cannot rate yourself', 400);
+      }
+
+      const fromUser =
+        db.personas.find((p) => p.id === effectiveFromUserId) || authUser!;
       const toUser = db.personas.find((p) => p.id === toUserId);
       const lobby = db.lobbies.find((l) => l.id === lobbyId);
 
       const clampedStars = Math.max(1, Math.min(5, Number(stars) || 5));
 
       const newRating: PlayerRating = {
-        id: `rate-${Date.now()}`,
-        fromUserId,
-        fromUserName: fromUser?.name || 'Player',
+        id: `rate-${crypto.randomUUID()}`,
+        fromUserId: effectiveFromUserId,
+        fromUserName: fromUser.name || 'Player',
         fromUserAvatar:
-          fromUser?.avatar ||
+          fromUser.avatar ||
           'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
         toUserId,
         lobbyId,
         lobbyTitle: lobby?.title || 'Recent Meetup',
         stars: clampedStars,
         showedUp,
-        comment: comment.trim() || (showedUp ? 'Showed up on time, great session!' : 'Missed session'),
+        comment:
+          comment.trim() ||
+          (showedUp ? 'Showed up on time, great session!' : 'Missed session'),
         createdAt: nowIso,
       };
 
@@ -631,10 +683,10 @@ export async function POST(req: NextRequest) {
 
         db.notifications = db.notifications || [];
         db.notifications.unshift({
-          id: `notif-${Date.now()}`,
+          id: `notif-${crypto.randomUUID()}`,
           userId: toUserId,
           type: 'RATING',
-          title: `New ${clampedStars}-Star Review from ${fromUser?.name || 'Player'}`,
+          title: `New ${clampedStars}-Star Review from ${fromUser.name || 'Player'}`,
           body: newRating.comment,
           lobbyId,
           read: false,
@@ -642,10 +694,9 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      await writeDb(db);
       return NextResponse.json({
         rating: newRating,
-        personas: db.personas,
+        personas: sanitizePersonas(db.personas),
         ratings: db.ratings,
         notifications: db.notifications,
         lobbies: db.lobbies,
@@ -653,15 +704,34 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'BAN_USER' || action === 'UNBAN_USER') {
-      const { userId, targetUserId, lobbyId } = body as {
-        userId: string;
+      const { targetUserId, lobbyId } = body as {
+        userId?: string;
         targetUserId: string;
         lobbyId?: string;
       };
 
-      const persona = db.personas.find((p) => p.id === userId);
+      // Authorize against authenticated session identity:
+      const actorId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
+      const persona = db.personas.find((p) => p.id === actorId);
       if (!persona) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      }
+
+      if (action === 'BAN_USER' && lobbyId) {
+        const targetLobby = db.lobbies.find((l) => l.id === lobbyId);
+        if (
+          targetLobby &&
+          targetLobby.hostId !== authUser!.id &&
+          authUser!.role !== 'ADMIN'
+        ) {
+          return errorResponse(
+            'Only the host or an administrator can ban users from this meetup',
+            403,
+            'FORBIDDEN'
+          );
+        }
       }
 
       persona.bannedUserIds = persona.bannedUserIds || [];
@@ -670,9 +740,9 @@ export async function POST(req: NextRequest) {
         if (!persona.bannedUserIds.includes(targetUserId)) {
           persona.bannedUserIds.push(targetUserId);
         }
-        // Also remove targetUserId from any lobbies hosted by userId or the specified lobbyId
+        // Also remove targetUserId from any lobbies hosted by actor or the specified lobbyId
         db.lobbies.forEach((l) => {
-          if (l.hostId === userId || l.id === lobbyId) {
+          if (l.hostId === actorId || l.id === lobbyId) {
             l.bannedUserIds = l.bannedUserIds || [];
             if (!l.bannedUserIds.includes(targetUserId)) {
               l.bannedUserIds.push(targetUserId);
@@ -688,26 +758,29 @@ export async function POST(req: NextRequest) {
           (id) => id !== targetUserId
         );
         db.lobbies.forEach((l) => {
-          if (l.hostId === userId && Array.isArray(l.bannedUserIds)) {
+          if (l.hostId === actorId && Array.isArray(l.bannedUserIds)) {
             l.bannedUserIds = l.bannedUserIds.filter((id) => id !== targetUserId);
           }
         });
       }
 
-      await writeDb(db);
       return NextResponse.json({
-        persona,
-        personas: db.personas,
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
         lobbies: db.lobbies,
       });
     }
 
     if (action === 'TOGGLE_REGULAR_PARTNER') {
-      const { userId, partnerId } = body as {
-        userId: string;
+      const { partnerId } = body as {
+        userId?: string;
         partnerId: string;
       };
-      const persona = db.personas.find((p) => p.id === userId);
+      // Authorize against authenticated session identity:
+      const targetUserId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
+      const persona = db.personas.find((p) => p.id === targetUserId);
       if (!persona) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
@@ -719,16 +792,20 @@ export async function POST(req: NextRequest) {
       } else {
         persona.regularPartnerIds.push(partnerId);
       }
-      await writeDb(db);
-      return NextResponse.json({ persona, personas: db.personas });
+      return NextResponse.json({
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
+      });
     }
 
     if (action === 'MARK_NOTIFICATIONS_READ') {
-      const { userId } = body as { userId: string };
+      // Authorize against authenticated session identity:
+      const targetUserId =
+        authUser!.role === 'ADMIN' && body.userId ? body.userId : authUser!.id;
+
       db.notifications = (db.notifications || []).map((n) =>
-        n.userId === userId ? { ...n, read: true } : n
+        n.userId === targetUserId ? { ...n, read: true } : n
       );
-      await writeDb(db);
       return NextResponse.json({ notifications: db.notifications });
     }
 

@@ -148,7 +148,7 @@ export async function DELETE(
       meetup.participants.forEach((part) => {
         if (part.id !== authUser.id) {
           db.notifications!.unshift({
-            id: `notif-${Date.now()}-${part.id}`,
+            id: `notif-${crypto.randomUUID()}-${part.id}`,
             userId: part.id,
             type: 'SYSTEM',
             title: `Meetup Cancelled · ${meetup.category}`,

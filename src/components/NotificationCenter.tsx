@@ -37,7 +37,7 @@ export function MobilePushBanner({
         }
         onDismiss();
       }}
-      className="fixed top-3 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-transtone-x-1/2 sm:w-[430px] z-[1100] bg-stone-950/95 backdrop-blur-xl text-white rounded-[24px] p-4 shadow-ambient-lg border border-white/15 cursor-pointer transition-all"
+      className="fixed top-3 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-[430px] z-[1100] bg-stone-950/95 backdrop-blur-xl text-white rounded-[24px] p-4 shadow-ambient-lg border border-white/15 cursor-pointer transition-all"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">

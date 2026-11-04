@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isCloudDatabaseConnected, readDb, withDbMutation } from '@/lib/db';
-import { requireAuth, errorResponse, successResponse, AuthError } from '@/lib/auth-guard';
+import { requireAuth, errorResponse, successResponse, AuthError, sanitizePersonas } from '@/lib/auth-guard';
 import { CreateMeetupInputSchema, validatePayload } from '@/lib/types';
 import {
   attachAndSortByDistance,
@@ -122,7 +122,7 @@ export async function GET(req: NextRequest) {
     // Legacy response envelope support
     if (legacy) {
       return NextResponse.json({
-        personas: db.personas,
+        personas: sanitizePersonas(db.personas),
         lobbies: sortedMeetups,
         ratings: db.ratings || [],
         notifications: db.notifications || [],
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
 
     return await withDbMutation(async (db) => {
       const nowIso = new Date().toISOString();
-      const meetupId = `lobby-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const meetupId = `lobby-${crypto.randomUUID()}`;
       const clampedMax = Math.max(2, Math.min(16, Number(body.maxParticipants) || 4));
       const chosenStart = body.startTime || 'Now';
 
@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
 
       db.lobbies.unshift(newMeetup);
       db.messages.push({
-        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        id: `msg-${crypto.randomUUID()}`,
         lobbyId: meetupId,
         senderId: authUser.id,
         senderName: authUser.name,
@@ -262,7 +262,7 @@ export async function POST(req: NextRequest) {
           persona.beacon.categories.some((cat) => cat.toLowerCase() === body.category.toLowerCase())
         ) {
           db.notifications!.unshift({
-            id: `notif-${Date.now()}-${persona.id}`,
+            id: `notif-${crypto.randomUUID()}-${persona.id}`,
             userId: persona.id,
             type: 'BEACON_MATCH',
             title: `Radar Beacon Match · ${body.category}`,

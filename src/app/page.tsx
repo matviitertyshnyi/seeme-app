@@ -5,37 +5,7 @@ import dynamic from 'next/dynamic';
 import {
   Compass,
   Plus,
-  LayoutGrid,
   Map as MapIcon,
-  LocateFixed,
-  MessageCircle,
-  Crown,
-  Bell,
-  RotateCcw,
-  ChevronRight,
-  CheckCircle2,
-  Clock,
-  Navigation,
-  UserCheck,
-  UserPlus,
-  CalendarClock,
-  Sparkles,
-  SearchX,
-  BarChart3,
-  Settings,
-  Star,
-  Radio,
-  User,
-  Moon,
-  Sun,
-  ShieldCheck,
-  Edit3,
-  LogOut,
-  Users,
-  ChevronDown,
-  Check,
-  X,
-  Search,
 } from 'lucide-react';
 import {
   ActivityCategory,
@@ -56,31 +26,30 @@ import {
   fireNativeNotificationIfPermitted,
 } from '@/lib/sound';
 import {
-  ACTIVITY_GROUPS,
   GROUPED_ACTIVITIES,
-  getActivityGroup,
-  ALL_CATEGORIES,
-  CategoryIcon,
   getBroadCategory,
-  BROAD_CATEGORIES,
 } from '@/components/CategoryIcon';
 import {
-  SUPPORTED_LANGUAGES,
   SupportedLanguage,
-  useTranslation,
   getTranslation,
 } from '@/lib/i18n';
-import { LobbyCard } from '@/components/LobbyCard';
+import { ToastNotification } from '@/components/ToastNotification';
+import { ExploreView } from '@/components/ExploreView';
+import { ProfileView } from '@/components/ProfileView';
+import { RadiusSelectorBottomSheet } from '@/components/RadiusSelectorBottomSheet';
+import { CategoryFilterBottomSheet } from '@/components/CategoryFilterBottomSheet';
+import { CommunityPoliciesModal } from '@/components/CommunityPoliciesModal';
+import { LanguageSelectorBottomSheet } from '@/components/LanguageSelectorBottomSheet';
 import { RoomDetailModal } from '@/components/RoomDetailModal';
 import { CreateLobbyModal } from '@/components/CreateLobbyModal';
-import { AuthProfileModal, GoogleIcon, AppleIcon } from '@/components/AuthProfileModal';
+import { AuthProfileModal } from '@/components/AuthProfileModal';
 import { MetricsModal } from '@/components/MetricsModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { WelcomeLoginScreen } from '@/components/WelcomeLoginScreen';
 import { AdminAccountsModal } from '@/components/AdminAccountsModal';
 import { BottomNav } from '@/components/BottomNav';
 import { MyMeetupsView } from '@/components/MyMeetupsView';
-import { AgeSelectorBottomSheet, AGE_PRESETS } from '@/components/AgeSelectorBottomSheet';
+import { AgeSelectorBottomSheet } from '@/components/AgeSelectorBottomSheet';
 import {
   MobilePushBanner,
   NotificationDrawer,
@@ -634,14 +603,20 @@ export default function LeaveTheRoomHomePage() {
 
     const res = await fetch('/api/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': activeUser.id,
+        Authorization: `Bearer ${activeUser.id}`,
+      },
       body: JSON.stringify({
         action: 'TOGGLE_BEACON',
         userId: activeUser.id,
-        active: nextActive,
-        categories: beaconCats,
-        radiusKm,
-        note: `Open to play ${beaconCats.join(', ')} nearby`,
+        beacon: {
+          active: nextActive,
+          categories: beaconCats,
+          radiusKm,
+          note: `Open to play ${beaconCats.join(', ')} nearby`,
+        },
       }),
     });
 
@@ -976,241 +951,56 @@ export default function LeaveTheRoomHomePage() {
       />
 
       {/* Toast Notification (Positioned safely above the bottom nav) */}
-      {toastMessage && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-24 left-1/2 -transtone-x-1/2 z-[900] bg-stone-900 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-2.5 text-xs font-semibold border border-white/10 max-w-[90vw]"
-        >
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="truncate">{toastMessage}</span>
-        </div>
-      )}
+      <ToastNotification message={toastMessage} />
 
       <main className={`w-full max-w-xl mx-auto flex-1 px-4 pt-3 ${activeNav === 'MAP' ? 'pb-20' : 'pb-24'}`}>
         {activeNav === 'EXPLORE' && (
-          <div className="space-y-4">
-            <section
-              aria-label="Meetup Discovery Filters"
-              className="bg-white dark:bg-[#1C1917] rounded-2xl p-3 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
-            >
-              {/* Row 1: Search Bar (Left) + Activity Type Filter (Right) */}
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1 min-w-0">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('search_placeholder') || 'Search meetups, sports, games...'}
-                    className="w-full min-h-[40px] pl-9 pr-8 py-2 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      aria-label="Clear search"
-                      className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-stone-400 hover:text-stone-200"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsCategorySheetOpen(true)}
-                  aria-label="Filter by activity type"
-                  className="min-h-[40px] px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
-                >
-                  <span className="truncate max-w-[110px] sm:max-w-none">
-                    {selectedBroadCategory === 'All Categories' ? (t('all_activities') || 'All Meetups') : selectedBroadCategory}
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-orange-500/20 text-orange-600 dark:text-orange-400">
-                    {categoryCounts[selectedBroadCategory] ?? lobbiesWithDistance.length}
-                  </span>
-                  <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
-                </button>
-              </div>
-
-              {/* Subrow: Location & Radius | Age Selector | Live Now */}
-              <div className="flex items-center justify-between gap-2 text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80">
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleNearMeGps}
-                    className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1.5 text-xs"
-                    title="Tap to update current location"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                    <span className="truncate max-w-[110px] sm:max-w-none">{userCoords.label.split(',')[0]}</span>
-                  </button>
-                  <span className="text-stone-300 dark:text-stone-700">·</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsRadiusSheetOpen(true)}
-                    className="min-h-[30px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
-                  >
-                    <span>{formatRadiusUnit(radiusKm)}</span>
-                    <ChevronDown className="w-3 h-3 text-stone-400" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setIsAgeSheetOpen(true)}
-                    className={`min-h-[30px] inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all ${
-                      selectedAgeFilters.length > 0
-                        ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
-                        : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
-                    }`}
-                  >
-                    <span className="text-stone-400 text-[11px] font-normal">Age:</span>
-                    <span>
-                      {selectedAgeFilters.length === 0
-                        ? 'All ages'
-                        : selectedAgeFilters.length === 1
-                        ? AGE_PRESETS.find((p) => p.id === selectedAgeFilters[0])?.label || selectedAgeFilters[0]
-                        : `${selectedAgeFilters.length} selected`}
-                    </span>
-                    <ChevronDown className="w-3 h-3 text-stone-400" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setStatusFilter(statusFilter === 'LIVE' ? 'ALL' : 'LIVE')}
-                    className={`min-h-[30px] px-2.5 py-0.5 rounded-lg text-[11px] font-semibold transition-colors inline-flex items-center gap-1 ${
-                      statusFilter === 'LIVE'
-                        ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                    }`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${statusFilter === 'LIVE' ? 'bg-white' : 'bg-emerald-500'}`} />
-                    <span>Live now</span>
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {filteredLobbies.length === 0 ? (
-              <div className="bg-white dark:bg-[#1C1917] rounded-3xl p-8 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.5)] max-w-lg mx-auto space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/15 to-amber-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto shadow-[0_0_16px_rgba(234,88,12,0.2)]">
-                  <SearchX className="w-6 h-6" />
-                </div>
-
-                <div>
-                  <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
-                    No Meetups Found Nearby
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
-                    No active meetups matched your current filters. Expand your radius, switch categories, or start a meetup.
-                  </p>
-                </div>
-
-                <div className="pt-1 flex flex-wrap items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openHostModal({
-                        category:
-                          selectedCategory !== 'All'
-                            ? selectedCategory
-                            : selectedGroup !== 'All Activities'
-                            ? GROUPED_ACTIVITIES[selectedGroup][0]
-                            : 'Ping Pong',
-                        startTime:
-                          statusFilter === 'UPCOMING' ? 'In 30 mins' : 'Now',
-                      })
-                    }
-                    className="min-h-[42px] px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-[0_4px_16px_rgba(234,88,12,0.4)] border border-orange-400/30 inline-flex items-center gap-1.5 transition active:scale-[0.98]"
-                  >
-                    <Plus className="w-4 h-4 stroke-[2.5]" />
-                    <span>Host a Meetup</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedBroadCategory('All Categories');
-                      setSelectedCategory('All');
-                      setStatusFilter('ALL');
-                      setRadiusKm(50);
-                      setSelectedAgeFilters([]);
-                    }}
-                    className="min-h-[42px] px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700 transition active:scale-[0.98]"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-5">
-                {/* SECTION A: AVAILABLE MEETUPS TO JOIN */}
-                {availableToJoinLobbies.length > 0 && (
-                  <section className="space-y-3">
-                    <div className="flex items-center justify-between px-0.5">
-                      <div>
-                        <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100">
-                          {t('available_meetups') || 'Available Meetups'} ({availableToJoinLobbies.length})
-                        </h2>
-                        <p className="text-xs text-stone-500 dark:text-stone-400">
-                          {t('sorted_by_distance') || 'Sorted by distance and live status'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3.5">
-                      {availableToJoinLobbies.map((lobby) => (
-                        <LobbyCard
-                          key={lobby.id}
-                          lobby={lobby}
-                          activeUser={activeUser}
-                          onSelectLobby={(item) => setSelectedLobbyId(item.id)}
-                          onQuickJoin={handleQuickJoin}
-                          isJoining={joiningLobbyId === lobby.id}
-                          language={currentLang}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* SECTION B: MEETUPS YOU ARE IN */}
-                {joinedFilteredLobbies.length > 0 && (
-                  <section className="space-y-3 pt-3 border-t border-stone-200/80 dark:border-stone-800/80">
-                    <div className="flex items-center justify-between px-0.5">
-                      <div>
-                        <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          <span>Meetups You Are In ({joinedFilteredLobbies.length})</span>
-                        </h2>
-                        <p className="text-xs text-stone-500 dark:text-stone-400">
-                          Tap to check in or open chat
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3.5">
-                      {joinedFilteredLobbies.map((lobby) => (
-                        <LobbyCard
-                          key={lobby.id}
-                          lobby={lobby}
-                          activeUser={activeUser}
-                          onSelectLobby={(item) => setSelectedLobbyId(item.id)}
-                          onQuickJoin={handleQuickJoin}
-                          isJoining={joiningLobbyId === lobby.id}
-                          language={currentLang}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            )}
-          </div>
+          <ExploreView
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClearSearch={() => setSearchQuery('')}
+            selectedBroadCategory={selectedBroadCategory}
+            categoryCounts={categoryCounts}
+            totalLobbiesCount={lobbiesWithDistance.length}
+            onOpenCategorySheet={() => setIsCategorySheetOpen(true)}
+            userLocationLabel={userCoords.label}
+            onNearMeGps={handleNearMeGps}
+            radiusKm={radiusKm}
+            formatRadiusUnit={formatRadiusUnit}
+            onOpenRadiusSheet={() => setIsRadiusSheetOpen(true)}
+            selectedAgeFilters={selectedAgeFilters}
+            onOpenAgeSheet={() => setIsAgeSheetOpen(true)}
+            statusFilter={statusFilter}
+            onToggleStatusFilter={() =>
+              setStatusFilter(statusFilter === 'LIVE' ? 'ALL' : 'LIVE')
+            }
+            filteredLobbiesCount={filteredLobbies.length}
+            availableToJoinLobbies={availableToJoinLobbies}
+            joinedFilteredLobbies={joinedFilteredLobbies}
+            activeUser={activeUser}
+            onSelectLobby={(lobbyId) => setSelectedLobbyId(lobbyId)}
+            onQuickJoin={handleQuickJoin}
+            joiningLobbyId={joiningLobbyId}
+            currentLang={currentLang}
+            onOpenHostModal={() =>
+              openHostModal({
+                category:
+                  selectedCategory !== 'All'
+                    ? selectedCategory
+                    : selectedGroup !== 'All Activities'
+                    ? GROUPED_ACTIVITIES[selectedGroup][0]
+                    : 'Ping Pong',
+                startTime: statusFilter === 'UPCOMING' ? 'In 30 mins' : 'Now',
+              })
+            }
+            onResetFilters={() => {
+              setSelectedBroadCategory('All Categories');
+              setSelectedCategory('All');
+              setStatusFilter('ALL');
+              setRadiusKm(50);
+              setSelectedAgeFilters([]);
+            }}
+          />
         )}
 
         {activeNav === 'MAP' && (
@@ -1279,328 +1069,30 @@ export default function LeaveTheRoomHomePage() {
         )}
 
         {activeNav === 'PROFILE' && (
-          <div className="space-y-5">
-            {isSignedOut ? (
-              <div className="bg-white dark:bg-[#1C1917] rounded-[26px] p-8 text-center border border-stone-200 dark:border-stone-800 shadow-ambient space-y-4 max-w-md mx-auto mt-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center mx-auto shadow-md">
-                  <Compass className="w-7 h-7" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-extrabold text-stone-950 dark:text-white">
-                    Sign In to Leave The Room
-                  </h1>
-                  <p className="text-xs font-medium text-stone-600 dark:text-stone-300 mt-1">
-                    Sign in to your account to join meetups, check in, and chat
-                    with players nearby.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700/80 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
-                  >
-                    <GoogleIcon className="w-5 h-5 shrink-0" />
-                    <span>Continue with Google</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleAppleSignIn}
-                    className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
-                  >
-                    <AppleIcon className="w-5 h-5 shrink-0" />
-                    <span>Continue with Apple</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleSwitchUser(activeUser.id);
-                    }}
-                    className="min-h-[44px] w-full py-3 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-sm transition-all"
-                  >
-                    Continue as {activeUser.name}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthModalTab('LOGIN');
-                      setIsAuthModalOpen(true);
-                    }}
-                    className="min-h-[44px] w-full py-3 rounded-full bg-stone-900 hover:bg-black dark:bg-white text-white dark:text-stone-900 text-xs font-extrabold shadow-sm transition-all"
-                  >
-                    More Sign In Options
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Logged-In Profile Screen (No Register or Sign-Up Prompts!) */
-              <>
-                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_20px_-4px_rgba(0,0,0,0.5)] space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="relative shrink-0">
-                        <img
-                          src={activeUser.avatar}
-                          alt={activeUser.name}
-                          className="w-16 h-16 rounded-full object-cover ring-2 ring-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.3)]"
-                        />
-                        {activeUser.verified && (
-                          <span
-                            title="Verified Member"
-                            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900"
-                          >
-                            <ShieldCheck className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100">
-                            {activeUser.name}, {activeUser.age}
-                          </h1>
-                          <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold text-[11px]">
-                            {activeUser.skillBadge}
-                          </span>
-                        </div>
-
-                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                          {activeUser.neighborhood}
-                        </p>
-
-                        <p className="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
-                          {activeUser.tagline}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthModalTab('EDIT');
-                          setIsAuthModalOpen(true);
-                        }}
-                        className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors border border-stone-200 dark:border-stone-700/60"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-stone-600 dark:text-stone-400" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
-                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                      <div className="text-base font-bold text-emerald-700 dark:text-emerald-400">
-                        {activeUser.reliabilityScore}%
-                      </div>
-                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-                        Show-Up Rate
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                      <div className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                        {activeUser.ratingAvg}
-                      </div>
-                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-                        Rating ({activeUser.ratingCount})
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                      <div className="text-base font-bold text-orange-600 dark:text-orange-400 drop-shadow-[0_0_8px_rgba(234,88,12,0.25)]">
-                        {activeUser.meetupsAttended}
-                      </div>
-                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-                        Meetups Joined
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                      <div className="text-base font-bold text-stone-900 dark:text-stone-100">
-                        {activeUser.hoursPlayed}h
-                      </div>
-                      <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-                        Hours Played
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* 2. Dark Mode & Appearance Toggle Card */}
-                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200/90 dark:border-stone-800/90 shadow-2xs">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
-                        {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                      </div>
-                      <div>
-                        <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                          Appearance & Theme
-                        </h2>
-                        <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                          {isDarkMode ? 'Dark warm stone palette' : 'Warm cream light mode'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setIsDarkMode(false)}
-                        className={`min-h-[32px] px-3 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
-                          !isDarkMode
-                            ? 'bg-white text-stone-950 shadow-2xs'
-                            : 'text-stone-400 hover:text-stone-200'
-                        }`}
-                      >
-                        <Sun className="w-3 h-3" />
-                        <span>Light</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsDarkMode(true)}
-                        className={`min-h-[32px] px-3 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
-                          isDarkMode
-                            ? 'bg-orange-600 text-white shadow-2xs'
-                            : 'text-stone-600 dark:text-stone-400'
-                        }`}
-                      >
-                        <Moon className="w-3 h-3" />
-                        <span>Dark</span>
-                      </button>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Language Picker */}
-                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                      Language / Мова / Język / Sprache / Langue
-                    </h2>
-                    <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase">
-                      {currentLang.toUpperCase()}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsLanguageSheetOpen(true)}
-                    className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/70 hover:bg-stone-100 dark:hover:bg-stone-750 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs font-semibold flex items-center justify-between transition-all"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="font-bold text-[10px] px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400">
-                        {currentLang.toUpperCase()}
-                      </span>
-                      <span className="font-bold text-stone-900 dark:text-stone-100">
-                        {SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.nativeName}
-                      </span>
-                      <span className="text-stone-400 font-normal">
-                        ({SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.name})
-                      </span>
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-stone-400" />
-                  </button>
-                </section>
-
-                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                      {t('community_policies') || 'Community Policies & Safety Guidelines'}
-                    </h2>
-                  </div>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Review community standards, zero-tolerance flaking rules, and in-person verification standards.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setIsPoliciesModalOpen(true)}
-                    className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-stone-50 hover:bg-stone-100 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                      <span>{t('community_policies') || 'Community Policies & Safety Guidelines'}</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-200 transition-colors" />
-                  </button>
-                </section>
-
-                <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                        Switch Active Demo Account
-                      </h2>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleResetDemoData}
-                      className="min-h-[32px] px-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Reset Demo</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {personas
-                      .filter((p) => !p.name.includes('Adversarial') && !p.name.includes('Auditor'))
-                      .map((persona) => {
-                      const isSelected = persona.id === activeUser.id;
-                      return (
-                        <button
-                          key={persona.id}
-                          type="button"
-                          onClick={() => handleSwitchUser(persona.id)}
-                          className={`min-h-[48px] p-2 rounded-xl border text-left flex items-center justify-between gap-2 transition-all ${
-                            isSelected
-                              ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500'
-                              : 'bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100 border-stone-200 dark:border-stone-700'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <img
-                              src={persona.avatar}
-                              alt={persona.name}
-                              className="w-8 h-8 rounded-full object-cover shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <div className="text-xs font-bold text-stone-950 dark:text-stone-100 truncate">
-                                {persona.name}, {persona.age}
-                              </div>
-                              <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
-                                {persona.skillBadge}
-                              </div>
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <UserCheck className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end">
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                </section>
-              </>
-            )}
-          </div>
+          <ProfileView
+            isSignedOut={isSignedOut}
+            activeUser={activeUser}
+            personas={personas}
+            isDarkMode={isDarkMode}
+            currentLang={currentLang}
+            onGoogleSignIn={handleGoogleSignIn}
+            onAppleSignIn={handleAppleSignIn}
+            onSwitchUser={handleSwitchUser}
+            onOpenAuthModal={() => {
+              setAuthModalTab('LOGIN');
+              setIsAuthModalOpen(true);
+            }}
+            onOpenEditProfile={() => {
+              setAuthModalTab('EDIT');
+              setIsAuthModalOpen(true);
+            }}
+            onToggleDarkMode={(isDark) => setIsDarkMode(isDark)}
+            onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
+            onOpenPoliciesModal={() => setIsPoliciesModalOpen(true)}
+            onResetDemoData={handleResetDemoData}
+            onSignOut={handleSignOut}
+            onToggleBeacon={handleToggleBeacon}
+          />
         )}
       </main>
 
@@ -1765,394 +1257,47 @@ export default function LeaveTheRoomHomePage() {
       />
 
       {/* Radius & Distance Filter Bottom Sheet */}
-      {isRadiusSheetOpen && (
-        <div className="fixed inset-0 z-[600] flex flex-col justify-end">
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setIsRadiusSheetOpen(false)}
-            aria-hidden="true"
-          />
-
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="radius-filter-title"
-            className="relative z-10 w-full max-w-lg mx-auto bg-white dark:bg-[#1C1917] rounded-t-3xl border-t border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col"
-          >
-            <div className="w-12 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700 mx-auto mb-4 shrink-0" />
-
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
-              <div>
-                <h2
-                  id="radius-filter-title"
-                  className="text-base font-bold text-stone-900 dark:text-stone-100"
-                >
-                  Distance Radius
-                </h2>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  How far are you willing to travel from {userCoords.label.split(',')[0]}?
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsRadiusSheetOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="py-3 space-y-2 overflow-y-auto">
-              {RADIUS_OPTIONS.map((opt) => {
-                const isSelected = radiusKm === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => {
-                      setRadiusKm(opt.value);
-                      triggerSensoryFeedback('TAP', activeUser.settings);
-                    }}
-                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                      isSelected
-                        ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 shadow-xs ring-1 ring-orange-500/40'
-                        : 'bg-stone-50/80 dark:bg-stone-900/60 border-stone-200/80 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-sm font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                        <span>{opt.label}</span>
-                      </div>
-                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                        {opt.desc}
-                      </p>
-                    </div>
-
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                        isSelected
-                          ? 'border-orange-500 bg-orange-500 text-white'
-                          : 'border-stone-300 dark:border-stone-600'
-                      }`}
-                    >
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsRadiusSheetOpen(false)}
-                className="min-h-[44px] flex-1 rounded-xl bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white text-xs font-semibold shadow-xs transition"
-              >
-                Apply Distance
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RadiusSelectorBottomSheet
+        isOpen={isRadiusSheetOpen}
+        onClose={() => setIsRadiusSheetOpen(false)}
+        radiusKm={radiusKm}
+        onSelectRadius={(val) => {
+          setRadiusKm(val);
+          triggerSensoryFeedback('TAP', activeUser.settings);
+        }}
+        userLocationLabel={userCoords.label}
+      />
 
       {/* Activity Type Category Filter Bottom Sheet */}
-      {isCategorySheetOpen && (
-        <div className="fixed inset-0 z-[600] flex flex-col justify-end">
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setIsCategorySheetOpen(false)}
-            aria-hidden="true"
-          />
+      <CategoryFilterBottomSheet
+        isOpen={isCategorySheetOpen}
+        onClose={() => setIsCategorySheetOpen(false)}
+        selectedBroadCategory={selectedBroadCategory}
+        onSelectCategory={(catName) => {
+          setSelectedBroadCategory(catName);
+          triggerSensoryFeedback('TAP', activeUser.settings);
+        }}
+        categoryCounts={categoryCounts}
+        currentLang={currentLang}
+      />
 
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="category-filter-title"
-            className="relative z-10 w-full max-w-lg mx-auto bg-white dark:bg-[#1C1917] rounded-t-3xl border-t border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col max-h-[80vh]"
-          >
-            <div className="w-12 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700 mx-auto mb-4 shrink-0" />
+      {/* Community Policies & Safety Guidelines Modal */}
+      <CommunityPoliciesModal
+        isOpen={isPoliciesModalOpen}
+        onClose={() => setIsPoliciesModalOpen(false)}
+        currentLang={currentLang}
+      />
 
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
-              <div>
-                <h2
-                  id="category-filter-title"
-                  className="text-base font-bold text-stone-900 dark:text-stone-100"
-                >
-                  {t('activity_type') || 'Activity Type'}
-                </h2>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Filter meetups by category
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCategorySheetOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="py-3 space-y-2 overflow-y-auto">
-              {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
-                (catName) => {
-                  const isSelected = selectedBroadCategory === catName;
-                  const catLabel = catName === 'All Categories' ? (t('all_activities') || 'All Meetups') : catName;
-                  const count = categoryCounts[catName] || 0;
-                  return (
-                    <button
-                      key={catName}
-                      type="button"
-                      onClick={() => {
-                        setSelectedBroadCategory(catName);
-                        setIsCategorySheetOpen(false);
-                        triggerSensoryFeedback('TAP', activeUser.settings);
-                      }}
-                      className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                        isSelected
-                          ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 ring-1 ring-orange-500/40'
-                          : 'bg-stone-50/80 dark:bg-stone-900/60 border-stone-200/80 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                            isSelected
-                              ? 'bg-orange-600 text-white'
-                              : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
-                          }`}
-                        >
-                          <CategoryIcon category={catName === 'All Categories' ? 'All Rooms' : catName} className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-stone-900 dark:text-stone-100">
-                            {catLabel}
-                          </div>
-                          <div className="text-xs text-stone-500 dark:text-stone-400">
-                            {count} {count === 1 ? 'meetup available' : 'meetups available'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                            isSelected
-                              ? 'bg-orange-600 text-white'
-                              : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
-                          }`}
-                        >
-                          {count}
-                        </span>
-                        {isSelected && <Check className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[3]" />}
-                      </div>
-                    </button>
-                  );
-                }
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Community Policies & Safety Guidelines Modal (Closed by "I understand") */}
-      {isPoliciesModalOpen && (
-        <div className="fixed inset-0 z-[700] flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsPoliciesModalOpen(false)}
-            aria-hidden="true"
-          />
-
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="policies-modal-title"
-            className="relative z-10 w-full max-w-lg bg-white dark:bg-[#1C1917] rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl p-6 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200"
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2
-                    id="policies-modal-title"
-                    className="text-base font-bold text-stone-950 dark:text-stone-100"
-                  >
-                    {t('community_policies') || 'Community Policies & Safety Guidelines'}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                    Standards ensuring safe, respectful in-person meetups
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsPoliciesModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-4 overflow-y-auto text-xs text-stone-600 dark:text-stone-300 leading-relaxed pr-1">
-              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  1. Respectful & Inclusive Culture
-                </h3>
-                <p className="text-stone-500 dark:text-stone-400 text-xs">
-                  Zero tolerance for harassment, discrimination, intimidatory behavior, or hostility. Treat all participants with mutual dignity, regardless of skill level or experience.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  2. Public & Verified Venues Only
-                </h3>
-                <p className="text-stone-500 dark:text-stone-400 text-xs">
-                  All meetups occur exclusively in public, well-lit spaces: parks, public recreation facilities, verified cafes, libraries, and open courts. Private residences and secluded unverified locations are strictly prohibited.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  3. Punctuality & Anti-Flaking Policy
-                </h3>
-                <p className="text-stone-500 dark:text-stone-400 text-xs">
-                  Confirm attendance only when you genuinely intend to show up. If running late, message your group chat promptly. Repeated unexcused no-shows lower your Show-Up Reliability Score and trigger matchmaking timeouts.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  4. Real-Time Arrival Check-In
-                </h3>
-                <p className="text-stone-500 dark:text-stone-400 text-xs">
-                  Tap &quot;I&apos;m Here&quot; in the room details when you reach the meetup spot. This reassures hosts and peers, confirms your in-person presence, and activates reciprocal player rating at the end of the meetup.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  5. Reporting & Host Discretion
-                </h3>
-                <p className="text-stone-500 dark:text-stone-400 text-xs">
-                  Hosts have discretion over their participant roster. Any player can block or report bad actors immediately via the player card. Reported violations are promptly investigated by moderation.
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-stone-100 dark:border-stone-800 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsPoliciesModalOpen(false)}
-                className="w-full min-h-[48px] rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-xs font-bold shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <span>{t('i_understand') || 'I understand'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Sleek Custom Language Bottom Sheet (Replaces unstyled OS dropdown) */}
-      {isLanguageSheetOpen && (
-        <div className="fixed inset-0 z-[750] flex flex-col justify-end">
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setIsLanguageSheetOpen(false)}
-            aria-hidden="true"
-          />
-
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="language-sheet-title"
-            className="relative z-10 w-full max-w-lg mx-auto bg-white dark:bg-[#1C1917] rounded-t-3xl border-t border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col max-h-[80vh]"
-          >
-            <div className="w-12 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700 mx-auto mb-4 shrink-0" />
-
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
-              <div>
-                <h2
-                  id="language-sheet-title"
-                  className="text-base font-bold text-stone-900 dark:text-stone-100"
-                >
-                  Select Language
-                </h2>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Change the interface language across the app
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsLanguageSheetOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 flex items-center justify-center transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="py-3 space-y-2 overflow-y-auto">
-              {SUPPORTED_LANGUAGES.map((lang) => {
-                const isSelected = currentLang === lang.code;
-                return (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => {
-                      handleLanguageSelect(lang.code);
-                      setIsLanguageSheetOpen(false);
-                      triggerSensoryFeedback('TAP', activeUser.settings);
-                    }}
-                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                      isSelected
-                        ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 ring-1 ring-orange-500/40 shadow-xs'
-                        : 'bg-stone-50/80 dark:bg-stone-900/60 border-stone-200/80 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
-                          isSelected
-                            ? 'bg-orange-600 text-white shadow-sm'
-                            : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
-                        }`}
-                      >
-                        {lang.flag}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-stone-900 dark:text-stone-100">
-                          {lang.nativeName}
-                        </div>
-                        <div className="text-xs text-stone-500 dark:text-stone-400">
-                          {lang.name}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {isSelected && (
-                        <Check className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[3]" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Sleek Custom Language Bottom Sheet */}
+      <LanguageSelectorBottomSheet
+        isOpen={isLanguageSheetOpen}
+        onClose={() => setIsLanguageSheetOpen(false)}
+        currentLang={currentLang}
+        onSelectLanguage={(langCode) => {
+          handleLanguageSelect(langCode);
+          triggerSensoryFeedback('TAP', activeUser.settings);
+        }}
+      />
     </div>
   );
 }

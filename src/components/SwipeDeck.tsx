@@ -142,17 +142,17 @@ export function SwipeDeck({
         {nextLobby && (
           <div
             aria-hidden="true"
-            className="absolute inset-x-4 top-4 bottom-0 bg-white rounded-[32px] shadow-ambient border border-stone-200 scale-[0.96] opacity-60 transtone-y-3 pointer-events-none"
+            className="absolute inset-x-4 top-4 bottom-0 bg-white rounded-[32px] shadow-ambient border border-stone-200 scale-[0.96] opacity-60 translate-y-3 pointer-events-none"
           />
         )}
 
         <div
           className={`relative bg-white rounded-[32px] overflow-hidden shadow-ambient-lg border border-stone-200 transition-all duration-200 ${
             exitDirection === 'left'
-              ? '-transtone-x-24 -rotate-6 opacity-0'
+              ? '-translate-x-24 -rotate-6 opacity-0'
               : exitDirection === 'right'
-              ? 'transtone-x-24 rotate-6 opacity-0'
-              : 'transtone-x-0 rotate-0 opacity-100'
+              ? 'translate-x-24 rotate-6 opacity-0'
+              : 'translate-x-0 rotate-0 opacity-100'
           }`}
         >
           {/* Cover Photo */}

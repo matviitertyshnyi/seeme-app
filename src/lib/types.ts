@@ -1,14 +1,7 @@
 import { z, type ZodType, type ZodSchema } from 'zod';
-import type {
-  ActivityCategory as LegacyActivityCategory,
-  ArrivalStatus as LegacyArrivalStatus,
-  JoinMode as LegacyJoinMode,
-  RoomStatus as LegacyRoomStatus,
-  SkillCompatibility as LegacySkillCompatibility,
-  StartTimeOption as LegacyStartTimeOption,
-  UserRole as LegacyUserRole,
-  VerificationStatus as LegacyVerificationStatus,
-} from '@/types/lobby';
+import type { AgeRangeOption } from '@/types/lobby';
+
+export * from '@/types/lobby';
 
 // Validation helper
 export type ValidationResult<T> =
@@ -39,7 +32,6 @@ export function validatePayload<T>(
 
 // Activity and status schemas
 export const ActivityCategorySchema = z.string().min(1, 'Category is required');
-export type ActivityCategory = z.infer<typeof ActivityCategorySchema>;
 
 export const StartTimeOptionSchema = z.enum([
   'Now',
@@ -47,10 +39,8 @@ export const StartTimeOptionSchema = z.enum([
   'In 1 hour',
   'Later today',
 ]);
-export type StartTimeOption = z.infer<typeof StartTimeOptionSchema>;
 
 export const RoomStatusSchema = z.enum(['LIVE', 'UPCOMING', 'FINISHED']);
-export type RoomStatus = z.infer<typeof RoomStatusSchema>;
 
 export const ArrivalStatusSchema = z.enum([
   'ON_MY_WAY',
@@ -58,27 +48,22 @@ export const ArrivalStatusSchema = z.enum([
   'ARRIVED',
   'LATE',
 ]);
-export type ArrivalStatus = z.infer<typeof ArrivalStatusSchema>;
 
 export const SkillCompatibilitySchema = z.enum([
   'ALL_LEVELS',
   'CASUAL',
   'COMPETITIVE',
 ]);
-export type SkillCompatibility = z.infer<typeof SkillCompatibilitySchema>;
 
 export const JoinModeSchema = z.enum(['OPEN', 'APPROVAL_REQUIRED']);
-export type JoinMode = z.infer<typeof JoinModeSchema>;
 
 export const UserRoleSchema = z.enum(['ADMIN', 'USER']);
-export type UserRole = z.infer<typeof UserRoleSchema>;
 
 export const VerificationStatusSchema = z.enum([
   'UNVERIFIED',
   'PENDING',
   'VERIFIED',
 ]);
-export type VerificationStatus = z.infer<typeof VerificationStatusSchema>;
 
 // User settings and beacon schemas
 export const UserSettingsSchema = z.object({
@@ -90,7 +75,6 @@ export const UserSettingsSchema = z.object({
   showReliabilityScore: z.boolean().default(true),
   darkMode: z.boolean().optional(),
 });
-export type UserSettings = z.infer<typeof UserSettingsSchema>;
 
 export const RadarBeaconSchema = z.object({
   active: z.boolean().default(false),
@@ -99,7 +83,6 @@ export const RadarBeaconSchema = z.object({
   note: z.string().max(200).optional(),
   updatedAt: z.string().default(() => new Date().toISOString()),
 });
-export type RadarBeacon = z.infer<typeof RadarBeaconSchema>;
 
 // Participant and join request schemas
 export const ParticipantSchema = z.object({
@@ -117,7 +100,6 @@ export const ParticipantSchema = z.object({
   reliabilityScore: z.number().min(0).max(100).optional().default(98),
   ratingAvg: z.number().min(0).max(5).optional().default(4.9),
 });
-export type Participant = z.infer<typeof ParticipantSchema>;
 
 export const JoinRequestSchema = z.object({
   id: z.string().min(1),
@@ -126,7 +108,6 @@ export const JoinRequestSchema = z.object({
   status: z.enum(['PENDING', 'ACCEPTED', 'DECLINED']).default('PENDING'),
   createdAt: z.string().default(() => new Date().toISOString()),
 });
-export type JoinRequest = z.infer<typeof JoinRequestSchema>;
 
 // User and persona schemas
 export const UserSchema = z.object({
@@ -168,8 +149,6 @@ export const UserSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
-export type User = z.infer<typeof UserSchema>;
-export type UserPersona = User; // Backward-compatible alias
 
 export const UpdateProfileInputSchema = z.object({
   userId: z.string().optional(),
@@ -194,7 +173,6 @@ export const AgeRangeOptionSchema = z.enum([
   '30+',
   '40+',
 ]);
-export type AgeRangeOption = z.infer<typeof AgeRangeOptionSchema>;
 
 export const AGE_RANGE_OPTIONS: AgeRangeOption[] = [
   'All Ages (18+)',
@@ -289,8 +267,6 @@ export const MeetupSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string().optional(),
 });
-export type Meetup = z.infer<typeof MeetupSchema>;
-export type Lobby = Meetup; // Backward-compatible alias
 
 // Join action schema
 export const JoinActionTypeSchema = z.enum([
@@ -345,5 +321,3 @@ export const MessageSchema = z.object({
   isSystem: z.boolean().optional(),
   createdAt: z.string().default(() => new Date().toISOString()),
 });
-export type Message = z.infer<typeof MessageSchema>;
-export type ChatMessage = Message; // Backward-compatible alias

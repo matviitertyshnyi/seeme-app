@@ -14,6 +14,15 @@ import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SeatBubbles } from '@/components/SeatBubbles';
 import { StatusBadge } from '@/components/StatusBadge';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 interface MapRadarProps {
   lobbies: LobbyWithDistance[];
   userLat: number;
@@ -141,7 +150,7 @@ export default function MapRadar({
           <div style="display:inline-flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;">
             <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:9999px;font-size:11px;font-weight:800;letter-spacing:0.04em;white-space:nowrap;transition:all 0.18s ease;${bgStyle}">
               <span style="width:7px;height:7px;border-radius:9999px;background:${statusDotHex};display:inline-block;flex-shrink:0;"></span>
-              <span>${lobby.mapPinLabel}</span>
+              <span>${escapeHtml(lobby.mapPinLabel || '')}</span>
               <span style="opacity:0.85;font-weight:600;font-size:10px;padding-left:2px;border-left:1px solid currentColor;">${lobby.participants.length}/${lobby.maxParticipants}</span>
             </div>
             <div style="width:7px;height:7px;background:${isSelected ? '#EA580C' : '#FFFFFF'};transform:rotate(45deg);margin-top:-4px;border-right:2px solid ${borderHex};border-bottom:2px solid ${borderHex};"></div>

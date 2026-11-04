@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -443,7 +444,7 @@ export const meetupRepository: IMeetupRepository = {
     data: Omit<Meetup, 'id' | 'createdAt'> & { id?: string; createdAt?: string }
   ): Promise<Meetup> {
     const db = await readDb();
-    const id = data.id || `lobby-${Date.now()}`;
+    const id = data.id || `lobby-${crypto.randomUUID()}`;
     const createdAt = data.createdAt || new Date().toISOString();
 
     const newMeetup: Meetup = {
@@ -538,7 +539,7 @@ export const meetupRepository: IMeetupRepository = {
   ): Promise<ChatMessage> {
     const db = await readDb();
     const newMessage: ChatMessage = {
-      id: message.id || `msg-${Date.now()}`,
+      id: message.id || `msg-${crypto.randomUUID()}`,
       lobbyId: meetupId,
       senderId: message.senderId,
       senderName: message.senderName,

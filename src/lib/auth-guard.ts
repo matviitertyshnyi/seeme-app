@@ -25,44 +25,77 @@ export class AuthError extends Error {
 }
 
 /**
+ * Strips sensitive fields (such as plaintext password) from a UserPersona before returning it in API responses.
+ */
+export function sanitizePersona<T extends UserPersona>(persona: T): Omit<T, 'password'> {
+  if (!persona || typeof persona !== 'object') {
+    return persona as Omit<T, 'password'>;
+  }
+  const { password: _password, ...safePersona } = persona;
+  return safePersona;
+}
+
+/**
+ * Strips sensitive fields from an array of UserPersonas.
+ */
+export function sanitizePersonas<T extends UserPersona>(personas: T[]): Omit<T, 'password'>[] {
+  if (!Array.isArray(personas)) {
+    return [];
+  }
+  return personas.map(sanitizePersona);
+}
+
+function parseSessionCookieValue(rawValue?: string): string | null {
+  if (!rawValue) return null;
+  const trimmed = rawValue.trim();
+  if (!trimmed || trimmed === 'signed_out' || trimmed === 'null' || trimmed === 'undefined') {
+    return null;
+  }
+  if (trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed.userId && typeof parsed.userId === 'string') {
+        const parsedId = parsed.userId.trim();
+        return parsedId && parsedId !== 'signed_out' ? parsedId : null;
+      }
+    } catch {
+      // Not valid JSON, continue to raw string check
+    }
+  }
+  return trimmed;
+}
+
+/**
  * Extract authenticated user ID from request headers or cookies.
  * Priority:
- * 1. Cookie: `seeme_session` (string ID or JSON `{ userId: string }`)
+ * 1. Cookie: `leavetheroom_session` or `seeme_session` (string ID or JSON `{ userId: string }`)
  * 2. Header: `Authorization: Bearer <userId_or_token>`
  * 3. Header: `x-user-id: <userId>` (for development simulation, Postman, and automated tests)
  */
 export function extractSessionUserId(req: NextRequest): string | null {
-  // 1. Check HTTP cookie (supports both new brand and legacy test suite)
-  const sessionCookie =
-    req.cookies.get('leavetheroom_session')?.value ||
-    req.cookies.get('seeme_session')?.value;
-  if (sessionCookie && sessionCookie !== 'signed_out' && sessionCookie.trim()) {
-    try {
-      if (sessionCookie.startsWith('{')) {
-        const parsed = JSON.parse(sessionCookie);
-        if (parsed.userId && typeof parsed.userId === 'string') {
-          return parsed.userId.trim();
-        }
-      }
-    } catch {
-      // Not JSON, treat as raw userId string
-    }
-    return sessionCookie.trim();
-  }
+  // 1. Check HTTP cookies (new brand prioritized, falling back to legacy brand)
+  const ltrCookieId = parseSessionCookieValue(req.cookies.get('leavetheroom_session')?.value);
+  if (ltrCookieId) return ltrCookieId;
+
+  const seemeCookieId = parseSessionCookieValue(req.cookies.get('seeme_session')?.value);
+  if (seemeCookieId) return seemeCookieId;
 
   // 2. Check Authorization header
   const authHeader = req.headers.get('authorization');
   if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.slice(7).trim();
-    if (token && token !== 'null' && token !== 'undefined') {
+    if (token && token !== 'null' && token !== 'undefined' && token !== 'signed_out') {
       return token;
     }
   }
 
   // 3. Check x-user-id header (simulation / dev / test)
   const xUserId = req.headers.get('x-user-id');
-  if (xUserId && xUserId.trim() && xUserId !== 'signed_out') {
-    return xUserId.trim();
+  if (xUserId && xUserId.trim()) {
+    const trimmed = xUserId.trim();
+    if (trimmed !== 'signed_out' && trimmed !== 'null' && trimmed !== 'undefined') {
+      return trimmed;
+    }
   }
 
   return null;

@@ -63,7 +63,7 @@ export async function POST(
       }
 
       const newMessage: ChatMessage = {
-        id: `msg-${Date.now()}`,
+        id: `msg-${crypto.randomUUID()}`,
         lobbyId: params.id,
         senderId: authUser.id,
         senderName: authUser.name,

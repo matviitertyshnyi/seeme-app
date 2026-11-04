@@ -83,7 +83,7 @@ export async function POST(
       const cluePhrase = participant.spotClue ? ` · Spot: "${participant.spotClue}"` : '';
 
       db.messages.push({
-        id: `msg-${Date.now()}`,
+        id: `msg-${crypto.randomUUID()}`,
         lobbyId: meetup.id,
         senderId: participant.id,
         senderName: participant.name,
@@ -97,7 +97,7 @@ export async function POST(
       meetup.participants.forEach((other) => {
         if (other.id !== participant.id) {
           db.notifications!.unshift({
-            id: `notif-${Date.now()}-${other.id}`,
+            id: `notif-${crypto.randomUUID()}-${other.id}`,
             userId: other.id,
             type: 'CHECK_IN',
             title: `${participant.name.split(' ')[0]} Checked In`,
@@ -155,7 +155,7 @@ export async function POST(
 
       if (kickedPerson) {
         db.messages.push({
-          id: `msg-${Date.now()}`,
+          id: `msg-${crypto.randomUUID()}`,
           lobbyId: meetup.id,
           senderId: meetup.hostId,
           senderName: 'System',
@@ -240,7 +240,7 @@ export async function POST(
         });
 
         db.messages.push({
-          id: `msg-${Date.now()}`,
+          id: `msg-${crypto.randomUUID()}`,
           lobbyId: meetup.id,
           senderId: acceptedReq.user.id,
           senderName: acceptedReq.user.name,
@@ -253,7 +253,7 @@ export async function POST(
         });
 
         db.notifications.unshift({
-          id: `notif-${Date.now()}-${acceptedReq.user.id}`,
+          id: `notif-${crypto.randomUUID()}-${acceptedReq.user.id}`,
           userId: acceptedReq.user.id,
           type: 'APPROVED',
           title: `Spot Approved · ${meetup.category}`,
@@ -356,7 +356,7 @@ export async function POST(
       });
 
       db.messages.push({
-        id: `msg-${Date.now()}`,
+        id: `msg-${crypto.randomUUID()}`,
         lobbyId: meetup.id,
         senderId: joiningUser.id,
         senderName: joiningUser.name,
@@ -367,7 +367,7 @@ export async function POST(
       });
 
       db.notifications.unshift({
-        id: `notif-${Date.now()}-${meetup.hostId}`,
+        id: `notif-${crypto.randomUUID()}-${meetup.hostId}`,
         userId: meetup.hostId,
         type: 'APPROVED',
         title: `New Player Joined · ${meetup.category}`,
@@ -406,7 +406,7 @@ export async function POST(
       }
 
       meetup.pendingRequests.push({
-        id: `req-${Date.now()}`,
+        id: `req-${crypto.randomUUID()}`,
         user: {
           id: joiningUser.id,
           name: joiningUser.name,
@@ -424,7 +424,7 @@ export async function POST(
       });
 
       db.notifications.unshift({
-        id: `notif-${Date.now()}-${meetup.hostId}`,
+        id: `notif-${crypto.randomUUID()}-${meetup.hostId}`,
         userId: meetup.hostId,
         type: 'REQUEST',
         title: `New Join Request · ${meetup.category}`,

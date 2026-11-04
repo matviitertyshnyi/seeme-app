@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:e2e": "tsx tests/e2e_suite.ts"
+    "test:e2e": "npx tsx tests/e2e_suite.ts"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

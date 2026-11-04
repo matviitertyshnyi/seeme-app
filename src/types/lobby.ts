@@ -117,6 +117,8 @@ export interface UserPersona {
   beacon?: RadarBeacon;
   settings: UserSettings;
   authProvider?: 'google' | 'apple' | 'email' | 'demo';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Participant {
@@ -144,6 +146,7 @@ export interface JoinRequest {
 export interface ChatMessage {
   id: string;
   lobbyId: string;
+  meetupId?: string;
   senderId: string;
   senderName: string;
   senderAvatar: string;
@@ -176,8 +179,14 @@ export interface Lobby {
   participants: Participant[];
   pendingRequests: JoinRequest[];
   bannedUserIds?: string[];
+  coHostIds?: string[];
   createdAt: string;
+  updatedAt?: string;
 }
+
+export type Meetup = Lobby;
+export type User = UserPersona;
+export type Message = ChatMessage;
 
 export interface LobbyWithDistance extends Lobby {
   distanceKm: number;

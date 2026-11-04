@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb, writeDb } from '@/lib/db';
-import { optionalAuth, errorResponse } from '@/lib/auth-guard';
+import { readDb, withDbMutation } from '@/lib/db';
+import { optionalAuth, errorResponse, sanitizePersona } from '@/lib/auth-guard';
 import { UserPersona } from '@/types/lobby';
 
 export const dynamic = 'force-dynamic';
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       authenticated: true,
-      user,
+      user: sanitizePersona(user),
     });
   } catch (err) {
     return errorResponse(
@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action = 'LOGIN' } = body as { action?: string };
     const db = await readDb();
-    const nowIso = new Date().toISOString();
 
     // 1. LOGOUT
     if (action === 'LOGOUT') {
@@ -89,10 +88,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const safeTarget = sanitizePersona(target);
       const res = NextResponse.json({
         authenticated: true,
-        user: target,
-        persona: target,
+        user: safeTarget,
+        persona: safeTarget,
         success: true,
       });
       setSessionCookie(res, target.id);
@@ -109,17 +109,22 @@ export async function POST(req: NextRequest) {
 
       const provider = action === 'GOOGLE_AUTH' ? 'google' : 'apple';
       const cleanEmail = (email || `${provider}.user@leavetheroom.app`).trim().toLowerCase();
-      let persona = db.personas.find((p) => p.email?.toLowerCase() === cleanEmail);
 
-      if (persona) {
-        if (persona.isBanned) {
-          return errorResponse(
-            persona.banReason || 'This account has been suspended by an administrator',
-            403,
-            'FORBIDDEN'
-          );
+      // Wrap auto-provisioning inside withDbMutation for concurrency safety
+      const mutationResult = await withDbMutation(async (txDb) => {
+        const persona = txDb.personas.find((p) => p.email?.toLowerCase() === cleanEmail);
+
+        if (persona) {
+          if (persona.isBanned) {
+            return {
+              error: persona.banReason || 'This account has been suspended by an administrator',
+              status: 403,
+              code: 'FORBIDDEN',
+            };
+          }
+          return { persona };
         }
-      } else {
+
         // Auto-provision verified persona for OAuth per requirements
         const displayName = name?.trim() || (provider === 'google' ? 'Google Explorer' : 'Apple Explorer');
         const defaultAvatar =
@@ -128,8 +133,8 @@ export async function POST(req: NextRequest) {
             ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80'
             : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80');
 
-        persona = {
-          id: `user-${provider}-${Date.now()}`,
+        const newPersona: UserPersona = {
+          id: `user-${provider}-${crypto.randomUUID()}`,
           email: cleanEmail,
           name: displayName,
           age: 26,
@@ -160,17 +165,22 @@ export async function POST(req: NextRequest) {
           authProvider: provider,
         };
 
-        db.personas.unshift(persona);
-        await writeDb(db);
+        txDb.personas.unshift(newPersona);
+        return { persona: newPersona };
+      });
+
+      if ('error' in mutationResult && mutationResult.error) {
+        return errorResponse(mutationResult.error, mutationResult.status, mutationResult.code);
       }
 
+      const safePersona = sanitizePersona(mutationResult.persona!);
       const res = NextResponse.json({
         authenticated: true,
-        user: persona,
-        persona,
+        user: safePersona,
+        persona: safePersona,
         success: true,
       });
-      setSessionCookie(res, persona.id);
+      setSessionCookie(res, safePersona.id);
       return res;
     }
 
@@ -207,18 +217,21 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // If user had a password set, verify it
-      if (persona.password && password && persona.password !== password) {
-        return errorResponse('Incorrect password', 401);
+      // If user had a password set, strictly require it and verify
+      if (persona.password) {
+        if (!password || persona.password !== password.trim()) {
+          return errorResponse('Incorrect password', 401);
+        }
       }
 
+      const safePersona = sanitizePersona(persona);
       const res = NextResponse.json({
         authenticated: true,
-        user: persona,
-        persona,
+        user: safePersona,
+        persona: safePersona,
         success: true,
       });
-      setSessionCookie(res, persona.id);
+      setSessionCookie(res, safePersona.id);
       return res;
     }
 

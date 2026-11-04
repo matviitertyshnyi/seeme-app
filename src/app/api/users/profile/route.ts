@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb, writeDb } from '@/lib/db';
-import { requireAuth, optionalAuth, errorResponse, AuthError } from '@/lib/auth-guard';
+import { readDb, withDbMutation } from '@/lib/db';
+import { requireAuth, optionalAuth, errorResponse, AuthError, sanitizePersona } from '@/lib/auth-guard';
 import { UpdateProfileInputSchema, validatePayload } from '@/lib/types';
 import { UserPersona } from '@/types/lobby';
 
@@ -34,12 +34,13 @@ export async function GET(req: NextRequest) {
       // If no userId query param, return active session user's full profile
       const { user } = await requireAuth(req);
       const freshUser = db.personas.find((p) => p.id === user.id) || user;
+      const safeFreshUser = sanitizePersona(freshUser);
       return NextResponse.json({
         success: true,
         data: {
-          user: freshUser,
+          user: safeFreshUser,
         },
-        user: freshUser,
+        user: safeFreshUser,
       });
     }
 
@@ -54,12 +55,13 @@ export async function GET(req: NextRequest) {
     const isAdmin = sessionUser?.role === 'ADMIN';
 
     if (isSelf || isAdmin) {
+      const safeTargetUser = sanitizePersona(targetUser);
       return NextResponse.json({
         success: true,
         data: {
-          user: targetUser,
+          user: safeTargetUser,
         },
-        user: targetUser,
+        user: safeTargetUser,
       });
     }
 
@@ -101,50 +103,50 @@ export async function PUT(req: NextRequest) {
       return errorResponse('You do not have permission to edit this profile', 403, 'FORBIDDEN');
     }
 
-    const db = await readDb();
-    const index = db.personas.findIndex((p) => p.id === targetId);
-    if (index === -1) {
-      return errorResponse('User not found', 404);
-    }
+    return await withDbMutation(async (db) => {
+      const index = db.personas.findIndex((p) => p.id === targetId);
+      if (index === -1) {
+        return errorResponse('User not found', 404);
+      }
 
-    const current = db.personas[index];
-    if (updates.name) current.name = updates.name;
-    if (updates.age) current.age = updates.age;
-    if (updates.avatar) current.avatar = updates.avatar;
-    if (updates.skillBadge) current.skillBadge = updates.skillBadge;
-    if (updates.tagline !== undefined) current.tagline = updates.tagline;
-    if (updates.neighborhood) current.neighborhood = updates.neighborhood;
-    if (updates.favoriteActivities) current.favoriteActivities = updates.favoriteActivities;
-    if (updates.beacon) current.beacon = updates.beacon;
-    if (updates.settings) {
-      current.settings = {
-        ...current.settings,
-        ...updates.settings,
-      };
-    }
-    (current as any).updatedAt = new Date().toISOString();
+      const current = db.personas[index];
+      if (updates.name) current.name = updates.name;
+      if (updates.age) current.age = updates.age;
+      if (updates.avatar) current.avatar = updates.avatar;
+      if (updates.skillBadge) current.skillBadge = updates.skillBadge;
+      if (updates.tagline !== undefined) current.tagline = updates.tagline;
+      if (updates.neighborhood) current.neighborhood = updates.neighborhood;
+      if (updates.favoriteActivities) current.favoriteActivities = updates.favoriteActivities;
+      if (updates.beacon) current.beacon = updates.beacon;
+      if (updates.settings) {
+        current.settings = {
+          ...current.settings,
+          ...updates.settings,
+        };
+      }
+      (current as any).updatedAt = new Date().toISOString();
 
-    // Synchronize participant snapshots across active meetups
-    db.lobbies.forEach((lobby) => {
-      lobby.participants.forEach((part) => {
-        if (part.id === targetId) {
-          if (updates.name) part.name = updates.name;
-          if (updates.avatar) part.avatar = updates.avatar;
-          if (updates.age) part.age = updates.age;
-          if (updates.skillBadge) part.skillBadge = updates.skillBadge;
-          if (updates.tagline !== undefined) part.tagline = updates.tagline;
-        }
+      // Synchronize participant snapshots across active meetups
+      db.lobbies.forEach((lobby) => {
+        lobby.participants.forEach((part) => {
+          if (part.id === targetId) {
+            if (updates.name) part.name = updates.name;
+            if (updates.avatar) part.avatar = updates.avatar;
+            if (updates.age) part.age = updates.age;
+            if (updates.skillBadge) part.skillBadge = updates.skillBadge;
+            if (updates.tagline !== undefined) part.tagline = updates.tagline;
+          }
+        });
       });
-    });
 
-    await writeDb(db);
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        user: current,
-      },
-      user: current,
+      const safeUser = sanitizePersona(current);
+      return NextResponse.json({
+        success: true,
+        data: {
+          user: safeUser,
+        },
+        user: safeUser,
+      });
     });
   } catch (err) {
     if (err instanceof AuthError) {

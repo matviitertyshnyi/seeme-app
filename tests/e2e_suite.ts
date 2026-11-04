@@ -2,6 +2,7 @@ import { runTier1FeatureCoverage } from './e2e/tier1_features';
 import { runTier2BoundaryCases } from './e2e/tier2_boundaries';
 import { runTier3CrossFeatureCombinations } from './e2e/tier3_combinations';
 import { runTier4RealWorldScenarios } from './e2e/tier4_realworld';
+import { runRegressionR1R4 } from './regression_r1_r4';
 
 interface TierSummary {
   name: string;
@@ -77,7 +78,19 @@ export async function runFullE2ESuite(): Promise<{
     durationMs: t4Stats.durationMs,
   });
 
-  // 5. Automated Language Verification Audit (scripts/verify-languages.js)
+  // 5. Automated Regression Test Suite (13 Acceptance Criteria R1 - R4)
+  const regressionCollector = await runRegressionR1R4();
+  const regressionStats = regressionCollector.getStats();
+  tierSummaries.push({
+    name: 'Regression Suite (R1 - R4 Criteria)',
+    total: regressionStats.total,
+    passed: regressionStats.passed,
+    failed: regressionStats.failed,
+    passRate: regressionStats.passRate,
+    durationMs: regressionStats.durationMs,
+  });
+
+  // 6. Automated Language Verification Audit (scripts/verify-languages.js)
   console.log('\n================================================================================');
   console.log('RUNNING MANDATORY AUTOMATED VERIFICATION FOR 5 LANGUAGES (scripts/verify-languages.js)');
   console.log('================================================================================');
@@ -149,7 +162,7 @@ export async function runFullE2ESuite(): Promise<{
   console.log('================================================================================');
 
   if (allPassed) {
-    console.log('VERDICT: ALL 4 TIERS EMPIRICALLY PASSED WITH 100% SUCCESS RATE! [APPROVE]\n');
+    console.log('VERDICT: ALL 4 TIERS & REGRESSION SUITE EMPIRICALLY PASSED WITH 100% SUCCESS RATE! [APPROVE]\n');
   } else {
     console.error(`VERDICT: FAILED WITH ${failedChecks} UNRESOLVED DEFECTS. [REJECT]\n`);
   }
