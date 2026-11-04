@@ -71,10 +71,10 @@ export function ExploreView({
     <div className="space-y-4">
       <section
         aria-label="Meetup Discovery Filters"
-        className="bg-white dark:bg-[#1C1917] rounded-2xl p-3 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
+        className="bg-white dark:bg-[#1C1917] rounded-2xl p-2.5 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
       >
         {/* Row 1: Search Bar (Left) + Activity Type Filter (Right) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="relative flex-1 min-w-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
               <Search className="w-4 h-4" />
@@ -83,7 +83,7 @@ export function ExploreView({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={t('search_placeholder') || 'Search meetups, sports, games...'}
+              placeholder={t('search_placeholder') || 'Search meetups...'}
               className="w-full min-h-[40px] pl-9 pr-8 py-2 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
             />
             {searchQuery && (
@@ -102,9 +102,9 @@ export function ExploreView({
             type="button"
             onClick={onOpenCategorySheet}
             aria-label="Filter by activity type"
-            className="min-h-[40px] px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+            className="min-h-[40px] px-2.5 sm:px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
           >
-            <span className="truncate max-w-[110px] sm:max-w-none">
+            <span className="truncate max-w-[105px] sm:max-w-none">
               {selectedBroadCategory === 'All Categories'
                 ? t('all_activities') || 'All Meetups'
                 : selectedBroadCategory}
@@ -117,56 +117,56 @@ export function ExploreView({
         </div>
 
         {/* Subrow: Location & Radius | Age Selector | Live Now */}
-        <div className="flex items-center justify-between gap-1.5 sm:gap-2 text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             <button
               type="button"
               onClick={onNearMeGps}
-              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1.5 text-xs shrink-0"
+              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs shrink-0"
               title="Tap to update current location"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="truncate max-w-[125px] sm:max-w-none">{locationName}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="truncate max-w-[115px] sm:max-w-none">{locationName}</span>
             </button>
             <span className="text-stone-300 dark:text-stone-700 shrink-0">·</span>
             <button
               type="button"
               onClick={onOpenRadiusSheet}
-              className="min-h-[28px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-xs shrink-0 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+              className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
             >
               <span>{formatRadiusUnit(radiusKm)}</span>
-              <ChevronDown className="w-3 h-3 text-stone-400" />
+              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-stone-400" />
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             <button
               type="button"
               onClick={onOpenAgeSheet}
-              className={`min-h-[28px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+              className={`min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all shrink-0 ${
                 selectedAgeFilters.length > 0
                   ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
               }`}
             >
-              <span className="text-stone-400 text-[11px] font-normal">
+              <span className="text-stone-400 text-[10px] sm:text-[11px] font-normal">
                 {currentLang === 'uk' ? 'Вік:' : 'Age:'}
               </span>
               <span>
                 {selectedAgeFilters.length === 0
-                  ? (currentLang === 'uk' ? 'Всі' : 'All ages')
+                  ? (currentLang === 'uk' ? 'Всі' : 'All')
                   : selectedAgeFilters.length === 1
                   ? AGE_PRESETS.find((p) => p.id === selectedAgeFilters[0])?.label ||
                     selectedAgeFilters[0]
                   : `${selectedAgeFilters.length} selected`}
               </span>
-              <ChevronDown className="w-3 h-3 text-stone-400" />
+              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-stone-400" />
             </button>
 
             <button
               type="button"
               onClick={onToggleStatusFilter}
-              className={`min-h-[28px] px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 ${
+              className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 ${
                 statusFilter === 'LIVE'
                   ? 'bg-emerald-600 text-white shadow-2xs'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -177,7 +177,7 @@ export function ExploreView({
                   statusFilter === 'LIVE' ? 'bg-white' : 'bg-emerald-500'
                 }`}
               />
-              <span>{currentLang === 'uk' ? 'Наживо' : 'Live now'}</span>
+              <span>{currentLang === 'uk' ? 'Наживо' : 'Live'}</span>
             </button>
           </div>
         </div>
