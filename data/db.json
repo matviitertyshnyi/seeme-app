@@ -1,6 +1,53 @@
 {
   "personas": [
     {
+      "id": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
+      "email": "alex.chen.meetups@gmail.com",
+      "name": "Alex Chen",
+      "age": 26,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "skillBadge": "Verified Member",
+      "tagline": "Signed in with Google! Down for sports, chess, and hanging out.",
+      "neighborhood": "Greenwich Village",
+      "verified": true,
+      "verificationStatus": "VERIFIED",
+      "role": "USER",
+      "isBanned": false,
+      "authProvider": "google",
+      "favoriteActivities": [
+        "Ping Pong",
+        "Chess",
+        "Run Club",
+        "Coffee"
+      ],
+      "reliabilityScore": 100,
+      "meetupsAttended": 1,
+      "hoursPlayed": 2,
+      "ratingAvg": 5,
+      "ratingCount": 1,
+      "streakWeeks": 1,
+      "bannedUserIds": [],
+      "regularPartnerIds": [],
+      "beacon": {
+        "active": true,
+        "categories": [
+          "Ping Pong",
+          "Chess"
+        ],
+        "radiusKm": 15,
+        "note": "Open to play nearby",
+        "updatedAt": "2026-11-04T20:36:59.898Z"
+      },
+      "settings": {
+        "iosAndroidPush": true,
+        "soundEffects": true,
+        "hapticFeedback": true,
+        "distanceUnit": "km",
+        "profileVisible": true,
+        "showReliabilityScore": true
+      }
+    },
+    {
       "id": "user-maya",
       "email": "maya@seeme.app",
       "name": "Maya Lin",
@@ -29,13 +76,13 @@
         "user-elena"
       ],
       "beacon": {
-        "active": false,
+        "active": true,
         "categories": [
           "Ping Pong"
         ],
-        "radiusKm": 5,
-        "note": "Turned off",
-        "updatedAt": "2026-11-04T18:55:20.746Z"
+        "radiusKm": 15,
+        "note": "Open to play Ping Pong nearby",
+        "updatedAt": "2026-11-04T20:36:56.615Z"
       },
       "settings": {
         "iosAndroidPush": true,
@@ -685,6 +732,15 @@
     }
   ],
   "notifications": [
+    {
+      "id": "notif-92c885b4-a6be-4c94-b478-14c1c036b13b",
+      "userId": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
+      "type": "SYSTEM",
+      "title": "Google Sign-In Verified",
+      "body": "Welcome, Alex Chen! Your account is verified with a 100% Reliability Score.",
+      "read": false,
+      "createdAt": "2026-11-04T20:36:59.898Z"
+    },
     {
       "id": "notif-1",
       "userId": "user-maya",

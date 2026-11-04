@@ -765,65 +765,8 @@ async function runM3VerificationSuite() {
       'ProfileView renders active user name in profile header'
     );
     assert(
-      profileActiveHtml.includes('Want-to-Play Radar Beacon'),
-      'ProfileView renders Want-to-Play Radar Beacon section'
-    );
-    assert(
-      profileActiveHtml.includes('Active'),
-      'ProfileView renders "Active" badge when beacon.active=true'
-    );
-    assert(
-      profileActiveHtml.includes('role="switch"') &&
-        profileActiveHtml.includes('aria-checked="true"'),
-      'ProfileView beacon toggle switch includes role="switch" and aria-checked="true"'
-    );
-    assert(
-      profileActiveHtml.includes('translate-x-5'),
-      'ProfileView beacon toggle button uses Tailwind "translate-x-5" (no transtone typo)'
-    );
-
-    // ProfileView with inactive beacon
-    const userWithInactiveBeacon: UserPersona = {
-      ...DEMO_PERSONAS[0],
-      beacon: {
-        active: false,
-        categories: ['Coffee'],
-        radiusKm: 5,
-        updatedAt: '2026-11-04T12:00:00Z',
-      },
-    };
-
-    const profileInactiveHtml = renderToStaticMarkup(
-      React.createElement(ProfileView, {
-        isSignedOut: false,
-        activeUser: userWithInactiveBeacon,
-        personas: DEMO_PERSONAS,
-        isDarkMode: false,
-        currentLang: 'en',
-        onGoogleSignIn: () => {},
-        onAppleSignIn: () => {},
-        onSwitchUser: () => {},
-        onOpenAuthModal: () => {},
-        onOpenEditProfile: () => {},
-        onToggleDarkMode: () => {},
-        onOpenLanguageSheet: () => {},
-        onOpenPoliciesModal: () => {},
-        onResetDemoData: () => {},
-        onSignOut: () => {},
-        onToggleBeacon: () => {},
-      })
-    );
-    assert(
-      profileInactiveHtml.includes('Off'),
-      'ProfileView renders "Off" badge when beacon.active=false'
-    );
-    assert(
-      profileInactiveHtml.includes('aria-checked="false"'),
-      'ProfileView beacon toggle switch includes aria-checked="false"'
-    );
-    assert(
-      profileInactiveHtml.includes('translate-x-0'),
-      'ProfileView inactive toggle uses "translate-x-0"'
+      !profileActiveHtml.includes('Want-to-Play Radar Beacon'),
+      'ProfileView does not render removed Want-to-Play Radar Beacon section'
     );
 
     // ProfileView signed out state

@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import {
-  Compass,
   Plus,
   Map as MapIcon,
 } from 'lucide-react';
+import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import {
   ActivityCategory,
   ActivityGroup,
@@ -925,8 +925,8 @@ export default function LeaveTheRoomHomePage() {
   if (!hasCheckedSession) {
     return (
       <div className="min-h-screen bg-canvas text-ink flex items-center justify-center">
-        <div className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center animate-pulse">
-          <Compass className="w-5 h-5 stroke-[2.4]" />
+        <div className="animate-pulse">
+          <OpenDoorLogo className="w-16 h-16 drop-shadow-sm" size={64} />
         </div>
       </div>
     );

@@ -117,22 +117,22 @@ export function ExploreView({
         </div>
 
         {/* Subrow: Location & Radius | Age Selector | Live Now */}
-        <div className="flex items-center justify-between gap-2 text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80">
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80">
+          <div className="flex items-center gap-1.5 min-w-0">
             <button
               type="button"
               onClick={onNearMeGps}
-              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1.5 text-xs"
+              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1.5 text-xs min-w-0"
               title="Tap to update current location"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="truncate max-w-[110px] sm:max-w-none">{locationName}</span>
+              <span className="truncate max-w-[100px] sm:max-w-none">{locationName}</span>
             </button>
-            <span className="text-stone-300 dark:text-stone-700">·</span>
+            <span className="text-stone-300 dark:text-stone-700 shrink-0">·</span>
             <button
               type="button"
               onClick={onOpenRadiusSheet}
-              className="min-h-[30px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+              className="min-h-[30px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-xs shrink-0 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
             >
               <span>{formatRadiusUnit(radiusKm)}</span>
               <ChevronDown className="w-3 h-3 text-stone-400" />
@@ -143,16 +143,16 @@ export function ExploreView({
             <button
               type="button"
               onClick={onOpenAgeSheet}
-              className={`min-h-[30px] inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`min-h-[30px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold transition-all ${
                 selectedAgeFilters.length > 0
                   ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
               }`}
             >
-              <span className="text-stone-400 text-[11px] font-normal">Age:</span>
+              <span className="hidden sm:inline text-stone-400 text-[11px] font-normal">Age:</span>
               <span>
                 {selectedAgeFilters.length === 0
-                  ? 'All ages'
+                  ? t('age_filter_all') || 'All ages'
                   : selectedAgeFilters.length === 1
                   ? AGE_PRESETS.find((p) => p.id === selectedAgeFilters[0])?.label ||
                     selectedAgeFilters[0]
@@ -164,18 +164,18 @@ export function ExploreView({
             <button
               type="button"
               onClick={onToggleStatusFilter}
-              className={`min-h-[30px] px-2.5 py-0.5 rounded-lg text-[11px] font-semibold transition-colors inline-flex items-center gap-1 ${
+              className={`min-h-[30px] px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 ${
                 statusFilter === 'LIVE'
                   ? 'bg-emerald-600 text-white shadow-2xs'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                   statusFilter === 'LIVE' ? 'bg-white' : 'bg-emerald-500'
                 }`}
               />
-              <span>Live now</span>
+              <span>{t('status_live') || 'Live now'}</span>
             </button>
           </div>
         </div>

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {
-  Compass,
   ShieldCheck,
   Edit3,
   Star,
@@ -14,8 +13,8 @@ import {
   RotateCcw,
   UserCheck,
   LogOut,
-  Radio,
 } from 'lucide-react';
+import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import { UserPersona } from '@/types/lobby';
 import {
   SUPPORTED_LANGUAGES,
@@ -62,18 +61,13 @@ export function ProfileView({
   onToggleBeacon,
 }: ProfileViewProps) {
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
-  const isBeaconActive = Boolean(activeUser.beacon?.active);
-  const beaconCategories =
-    activeUser.beacon?.categories?.length
-      ? activeUser.beacon.categories
-      : activeUser.favoriteActivities || [];
 
   return (
     <div className="space-y-5">
       {isSignedOut ? (
         <div className="bg-white dark:bg-[#1C1917] rounded-[26px] p-8 text-center border border-stone-200 dark:border-stone-800 shadow-ambient space-y-4 max-w-md mx-auto mt-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center mx-auto shadow-md">
-            <Compass className="w-7 h-7" />
+          <div className="flex justify-center">
+            <OpenDoorLogo className="w-14 h-14 drop-shadow-sm" size={56} />
           </div>
           <div>
             <h1 className="text-xl font-extrabold text-stone-950 dark:text-white">
@@ -211,68 +205,6 @@ export function ProfileView({
                   Hours Played
                 </div>
               </div>
-            </div>
-          </section>
-
-          {/* Want-to-Play Radar Beacon Availability Card */}
-          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200/90 dark:border-stone-800/90 shadow-2xs space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                    isBeaconActive
-                      ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400'
-                      : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
-                  }`}
-                >
-                  <Radio
-                    className={`w-4 h-4 ${isBeaconActive ? 'animate-pulse text-orange-600 dark:text-orange-400' : ''}`}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                      Want-to-Play Radar Beacon
-                    </h2>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isBeaconActive
-                          ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
-                      }`}
-                    >
-                      {isBeaconActive ? 'Active' : 'Off'}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
-                    {isBeaconActive
-                      ? `Broadcasting availability for ${beaconCategories.slice(0, 2).join(', ') || 'activities'}`
-                      : 'Broadcast your availability to players nearby on Map Radar'}
-                  </p>
-                </div>
-              </div>
-
-              {onToggleBeacon && (
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={isBeaconActive}
-                  aria-label="Toggle Want-to-Play Radar Beacon"
-                  onClick={onToggleBeacon}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-600 ${
-                    isBeaconActive
-                      ? 'bg-orange-600'
-                      : 'bg-stone-300 dark:bg-stone-700'
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                      isBeaconActive ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              )}
             </div>
           </section>
 
