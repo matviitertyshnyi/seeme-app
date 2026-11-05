@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
   MapPin,
@@ -126,7 +127,7 @@ export function WelcomeLoginScreen({
         </div>
 
         {/* Verification Footnote */}
-        <footer className="text-center pt-5">
+        <footer className="text-center pt-5 space-y-3">
           <div className="flex items-center justify-center gap-4 text-xs font-bold text-ink-muted dark:text-ink-muted-dark">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -137,6 +138,23 @@ export function WelcomeLoginScreen({
               <MapPin className="w-4 h-4 text-brand dark:text-brand-accent" />
               Real-World Venues
             </span>
+          </div>
+
+          {/* Legal Links for OAuth Compliance & Reviewers */}
+          <div className="flex items-center justify-center gap-3 text-[11px] font-medium text-ink-muted dark:text-ink-muted-dark">
+            <Link
+              href="/privacy"
+              className="hover:underline hover:text-ink dark:hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link
+              href="/terms"
+              className="hover:underline hover:text-ink dark:hover:text-white transition-colors"
+            >
+              Terms of Service
+            </Link>
           </div>
         </footer>
       </main>

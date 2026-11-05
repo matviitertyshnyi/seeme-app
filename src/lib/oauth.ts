@@ -10,19 +10,61 @@ export interface OAuthUserDetails {
 }
 
 export function getAppBaseUrl(req?: NextRequest | Request): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '');
-  }
   if (req) {
     const url = new URL(req.url);
     const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || url.host;
     const proto = req.headers.get('x-forwarded-proto') || url.protocol.replace(':', '') || 'http';
-    return `${proto}://${host}`;
+    if (host) {
+      return `${proto}://${host}`.replace(/\/+$/, '');
+    }
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '');
   }
   return 'http://localhost:3000';
 }
 
-export function setSessionCookies(response: NextResponse, userId: string) {
+const SESSION_SECRET =
+  process.env.SESSION_SECRET ||
+  process.env.GOOGLE_CLIENT_SECRET ||
+  'ltr-signed-session-fallback-secret';
+
+export function signUserSessionToken(persona: UserPersona): string {
+  const payload = {
+    id: persona.id,
+    email: persona.email,
+    name: persona.name,
+    age: persona.age,
+    avatar: persona.avatar,
+    neighborhood: persona.neighborhood,
+    onboarded: persona.onboarded,
+    authProvider: persona.authProvider,
+  };
+  const b64 = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+  const crypto = require('crypto') as typeof import('crypto');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(b64).digest('base64url');
+  return `${b64}.${sig}`;
+}
+
+export function verifyUserSessionToken(token?: string): Partial<UserPersona> | null {
+  if (!token || !token.includes('.')) return null;
+  try {
+    const [b64, sig] = token.split('.');
+    if (!b64 || !sig) return null;
+    const crypto = require('crypto') as typeof import('crypto');
+    const expected = crypto.createHmac('sha256', SESSION_SECRET).update(b64).digest('base64url');
+    if (sig !== expected) return null;
+    return JSON.parse(Buffer.from(b64, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
+export function setSessionCookies(
+  response: NextResponse,
+  userId: string,
+  persona?: UserPersona
+) {
   const cookieOptions = {
     httpOnly: true,
     sameSite: 'lax' as const,
@@ -30,8 +72,12 @@ export function setSessionCookies(response: NextResponse, userId: string) {
     path: '/',
     maxAge: 60 * 60 * 24 * 30, // 30 days
   };
+  response.cookies.set('ltr_session', userId, cookieOptions);
   response.cookies.set('leavetheroom_session', userId, cookieOptions);
   response.cookies.set('seeme_session', userId, cookieOptions);
+  if (persona) {
+    response.cookies.set('ltr_user_token', signUserSessionToken(persona), cookieOptions);
+  }
 }
 
 export function buildGoogleAuthUrl(baseUrl: string, state: string): string {
@@ -182,12 +228,13 @@ export async function provisionOrFindOAuthUser(
       avatar: defaultAvatar,
       skillBadge: 'Verified Member',
       tagline: `Joined via ${provider === 'google' ? 'Google' : 'Apple ID'}. Ready to meet up!`,
-      neighborhood: '',
+      neighborhood: 'Select your city',
+      onboarded: false,
       verified: true,
       verificationStatus: 'VERIFIED',
       role: 'USER',
       isBanned: false,
-      favoriteActivities: ['Ping Pong', 'Coffee', 'Chess'],
+      favoriteActivities: ['Coffee', 'Tennis'],
       reliabilityScore: 100,
       meetupsAttended: 0,
       hoursPlayed: 0,

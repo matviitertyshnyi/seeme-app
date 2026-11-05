@@ -150,12 +150,10 @@ export function ProfileView({
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100">
-                      {activeUser.name}, {activeUser.age}
+                    <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100 flex items-center gap-1.5">
+                      <span>{activeUser.name}, {activeUser.age}</span>
+                      <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" aria-label="Verified" />
                     </h1>
-                    <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold text-[11px]">
-                      {activeUser.skillBadge}
-                    </span>
                   </div>
 
                   <div className="mt-0.5">
@@ -328,6 +326,22 @@ export function ProfileView({
               </div>
               <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-200 transition-colors" />
             </button>
+            <div className="flex items-center gap-4 pt-1 text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+              <a href="/privacy" className="hover:text-orange-500 transition-colors">
+                Privacy Policy
+              </a>
+              <span>·</span>
+              <a href="/terms" className="hover:text-orange-500 transition-colors">
+                Terms of Service
+              </a>
+              <span>·</span>
+              <a
+                href="mailto:contact@leavetheroom.tech"
+                className="hover:text-orange-500 transition-colors"
+              >
+                contact@leavetheroom.tech
+              </a>
+            </div>
           </section>
 
           {/* Switch Active Demo Account (Only shown in demo mode, hidden for real logged-in users) */}

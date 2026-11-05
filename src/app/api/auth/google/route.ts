@@ -8,6 +8,10 @@ export async function GET(req: NextRequest) {
   const state = crypto.randomUUID();
 
   if (!process.env.GOOGLE_CLIENT_ID) {
+    if (process.env.NODE_ENV !== 'production') {
+      const mockRedirect = new URL('/api/auth/callback/google?mock=true', baseUrl);
+      return NextResponse.redirect(mockRedirect);
+    }
     return NextResponse.redirect(
       new URL('/?auth_error=Google+Sign-In+is+not+configured.+Missing+GOOGLE_CLIENT_ID.', baseUrl)
     );

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, Crown, Check } from 'lucide-react';
+import { Plus, Crown, Check, ShieldCheck } from 'lucide-react';
 import { Participant } from '@/types/lobby';
 
 interface SeatBubblesProps {
@@ -80,7 +80,7 @@ export function SeatBubbles({
 
             {showSkillBadges && (
               <span
-                className={`mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-tight whitespace-nowrap border ${
+                className={`mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-tight whitespace-nowrap border inline-flex items-center ${
                   isArrived
                     ? 'bg-emerald-50 text-emerald-950 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-200 dark:border-emerald-700'
                     : isHost
@@ -90,7 +90,8 @@ export function SeatBubbles({
                     : 'bg-stone-100 text-stone-800 border-stone-300 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-700'
                 }`}
               >
-                {skillLabel}
+                <span>{person.name.split(' ')[0]}</span>
+                <ShieldCheck className="w-2.5 h-2.5 text-emerald-500 shrink-0 inline ml-0.5" />
               </span>
             )}
           </div>

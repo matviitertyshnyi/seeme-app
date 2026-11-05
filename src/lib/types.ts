@@ -1,5 +1,5 @@
 import { z, type ZodType, type ZodSchema } from 'zod';
-import type { AgeRangeOption } from '@/types/lobby';
+import type { AgeRangeOption, UserPersona } from '@/types/lobby';
 
 export * from '@/types/lobby';
 
@@ -118,6 +118,7 @@ export const UserSchema = z.object({
   skillBadge: z.string().default('New Member'),
   tagline: z.string().default(''),
   neighborhood: z.string().default('Greenwich Village'),
+  onboarded: z.boolean().optional(),
   verified: z.boolean().default(false),
   verificationStatus: VerificationStatusSchema.default('UNVERIFIED'),
   verificationRequestedAt: z.string().optional(),
@@ -156,11 +157,16 @@ export const UpdateProfileInputSchema = z.object({
   skillBadge: z.string().trim().max(50).optional(),
   tagline: z.string().trim().max(200).optional(),
   neighborhood: z.string().trim().max(80).optional(),
+  onboarded: z.boolean().optional(),
   favoriteActivities: z.array(z.string()).max(20).optional(),
   settings: UserSettingsSchema.partial().optional(),
   beacon: RadarBeaconSchema.optional(),
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileInputSchema>;
+
+export interface UserAccount extends UserPersona {
+  onboarded?: boolean;
+}
 
 // Age preference schema
 export const AgeRangeOptionSchema = z.enum([

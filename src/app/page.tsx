@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Plus,
@@ -172,6 +172,20 @@ export default function LeaveTheRoomHomePage() {
     [personas, activePersonaId]
   );
 
+  const hasPromptedOnboarding = useRef(false);
+  useEffect(() => {
+    if (
+      !hasPromptedOnboarding.current &&
+      activeUser &&
+      activeUser.onboarded === false &&
+      !isSignedOut
+    ) {
+      hasPromptedOnboarding.current = true;
+      setAuthModalTab('EDIT');
+      setIsAuthModalOpen(true);
+    }
+  }, [activeUser, isSignedOut]);
+
   // Initialize theme from localStorage or default to dark
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -313,7 +327,11 @@ export default function LeaveTheRoomHomePage() {
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         const authStatus = url.searchParams.get('auth');
-        const authError = url.searchParams.get('auth_error');
+        const authError = url.searchParams.get('auth_error') || url.searchParams.get('oauth_error');
+        const sharedMeetupId = url.searchParams.get('meetup') || url.searchParams.get('room');
+        if (sharedMeetupId) {
+          setSelectedLobbyId(sharedMeetupId);
+        }
         if (authStatus === 'success') {
           showToast('Signed in successfully!');
           url.searchParams.delete('auth');
@@ -335,6 +353,10 @@ export default function LeaveTheRoomHomePage() {
               setIsSignedOut(false);
               localStorage.setItem('leavetheroom_session_user_id', data.user.id);
               localStorage.setItem('seeme_session_user_id', data.user.id);
+              if (data.user.onboarded === false || data.user.neighborhood === 'Select your city') {
+                setAuthModalTab('EDIT');
+                setIsAuthModalOpen(true);
+              }
             }
           }
         } catch {
@@ -1234,6 +1256,7 @@ export default function LeaveTheRoomHomePage() {
           triggerSensoryFeedback('SUCCESS', persona.settings);
           showToast(msg);
         }}
+        onSelectCity={handleSelectCity}
       />
 
       {/* Metrics, Reliability, Regular Partners & Player Ratings Modal */}

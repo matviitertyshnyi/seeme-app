@@ -9,6 +9,7 @@ import {
   Zap,
   Users,
   Calendar,
+  ShieldCheck,
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
@@ -159,14 +160,15 @@ export function LobbyCard({
             )}
           </div>
           <div className="text-left min-w-0">
-            <span className="block text-xs font-semibold text-stone-900 dark:text-stone-100 leading-tight truncate">
-              {hostPerson?.name?.split(' ')[0] || 'Member'}{' '}
+            <span className="block text-xs font-semibold text-stone-900 dark:text-stone-100 leading-tight truncate flex items-center gap-1">
+              <span>{hostPerson?.name?.split(' ')[0] || 'Member'}</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <span className="text-[10px] font-normal text-stone-400">
                 {isHost ? '(You)' : '(Host)'}
               </span>
             </span>
             <span className="text-[10px] text-stone-500 dark:text-stone-400 font-medium block truncate">
-              {hostPerson?.skillBadge || 'Verified'} · {hostPerson?.reliabilityScore || 98}% Reliability
+              {hostPerson?.reliabilityScore || 98}% Reliability
             </span>
           </div>
         </div>

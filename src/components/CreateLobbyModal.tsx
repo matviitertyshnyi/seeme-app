@@ -112,7 +112,7 @@ export function CreateLobbyModal({
   userLng,
   onCreated,
 }: CreateLobbyModalProps) {
-  const initialCat = initialCategory || 'Ping Pong';
+  const initialCat = initialCategory || 'Coffee';
   const [category, setCategory] = useState<ActivityCategory>(initialCat);
   const [selectedGroup, setSelectedGroup] = useState<ActivityGroup>(
     getActivityGroup(initialCat)
@@ -206,7 +206,7 @@ export function CreateLobbyModal({
   useEffect(() => {
     if (isOpen) {
       const activeCat =
-        initialCategory || initialCoHost?.favoriteActivities?.[0] || 'Ping Pong';
+        initialCategory || initialCoHost?.favoriteActivities?.[0] || 'Coffee';
       setCategory(activeCat);
       setSelectedGroup(getActivityGroup(activeCat));
       setIsCustomActivity(false);
@@ -370,13 +370,10 @@ export function CreateLobbyModal({
               </h2>
               <p className="text-xs font-bold text-stone-600 dark:text-stone-400">
                 Hosting as{' '}
-                <strong className="text-stone-950 dark:text-white">
+                <strong className="text-stone-950 dark:text-white inline-flex items-center">
                   {activeUser.name}
-                </strong>{' '}
-                ·{' '}
-                <span className="text-orange-600 dark:text-orange-400 font-extrabold">
-                  {activeUser.skillBadge}
-                </span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 inline ml-1" />
+                </strong>
               </p>
             </div>
           </div>
@@ -501,7 +498,7 @@ export function CreateLobbyModal({
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={`e.g., 1v1 ${category} Rally or Casual Park Match`}
+                placeholder={`e.g., Casual ${category} Meetup`}
                 className="min-h-[44px] w-full px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-sm font-bold text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
               />
             </div>
@@ -515,7 +512,7 @@ export function CreateLobbyModal({
                   rows={2}
                   value={equipmentNote}
                   onChange={(e) => setEquipmentNote(e.target.value)}
-                  placeholder="e.g., I have 2 extra ping pong paddles and balls."
+                  placeholder="e.g., Bringing extra gear, board game, or meetup details..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
                 />
               </div>

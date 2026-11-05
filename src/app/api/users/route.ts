@@ -108,6 +108,7 @@ export async function POST(req: NextRequest) {
           tagline || 'New on Leave The Room! Excited to connect for spontaneous games and meetups.'
         ).trim(),
         neighborhood: (neighborhood || 'Greenwich Village').trim(),
+        onboarded: true,
         verified: false,
         verificationStatus: 'UNVERIFIED',
         role: 'USER',
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
         favoriteActivities:
           favoriteActivities && favoriteActivities.length > 0
             ? favoriteActivities
-            : ['Ping Pong', 'Coffee'],
+            : ['Coffee'],
         reliabilityScore: 95,
         meetupsAttended: 0,
         hoursPlayed: 0,
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest) {
           categories:
             favoriteActivities && favoriteActivities.length > 0
               ? favoriteActivities
-              : ['Ping Pong', 'Coffee'],
+              : ['Coffee'],
           radiusKm: 5,
           note: 'Ready to play today',
           updatedAt: nowIso,
@@ -249,13 +250,14 @@ export async function POST(req: NextRequest) {
           avatar: userAvatar,
           skillBadge: 'Verified Member',
           tagline: 'Signed in with Google! Down for sports, chess, and hanging out.',
-          neighborhood: '',
+          neighborhood: 'Select your city',
+          onboarded: false,
           verified: true,
           verificationStatus: 'VERIFIED',
           role: 'USER',
           isBanned: false,
           authProvider: 'google',
-          favoriteActivities: ['Ping Pong', 'Chess', 'Run Club', 'Coffee'],
+          favoriteActivities: ['Coffee', 'Tennis'],
           reliabilityScore: 100,
           meetupsAttended: 1,
           hoursPlayed: 2,
@@ -266,7 +268,7 @@ export async function POST(req: NextRequest) {
           regularPartnerIds: [],
           beacon: {
             active: true,
-            categories: ['Ping Pong', 'Chess'],
+            categories: ['Coffee', 'Tennis'],
             radiusKm: 15,
             note: 'Open to play nearby',
             updatedAt: nowIso,
@@ -338,13 +340,14 @@ export async function POST(req: NextRequest) {
           avatar: userAvatar,
           skillBadge: 'Verified Member',
           tagline: 'Signed in with Apple! Down for ping pong, tennis, and co-working.',
-          neighborhood: '',
+          neighborhood: 'Select your city',
+          onboarded: false,
           verified: true,
           verificationStatus: 'VERIFIED',
           role: 'USER',
           isBanned: false,
           authProvider: 'apple',
-          favoriteActivities: ['Tennis', 'Ping Pong', 'Co-work'],
+          favoriteActivities: ['Coffee', 'Tennis'],
           reliabilityScore: 100,
           meetupsAttended: 1,
           hoursPlayed: 2,
@@ -355,7 +358,7 @@ export async function POST(req: NextRequest) {
           regularPartnerIds: [],
           beacon: {
             active: true,
-            categories: ['Tennis', 'Co-work'],
+            categories: ['Coffee', 'Tennis'],
             radiusKm: 10,
             note: 'Available for games or coffee',
             updatedAt: nowIso,
@@ -497,6 +500,7 @@ export async function POST(req: NextRequest) {
         tagline,
         neighborhood,
         favoriteActivities,
+        onboarded,
       } = body as {
         userId?: string;
         name?: string;
@@ -506,6 +510,7 @@ export async function POST(req: NextRequest) {
         tagline?: string;
         neighborhood?: string;
         favoriteActivities?: ActivityCategory[];
+        onboarded?: boolean;
       };
 
       // Authorize against authenticated session identity:
@@ -518,7 +523,17 @@ export async function POST(req: NextRequest) {
       }
 
       if (name?.trim()) persona.name = name.trim();
-      if (age) persona.age = Math.max(18, Math.min(99, Number(age)));
+      if (persona.onboarded === true) {
+        // Locked age once onboarded: ignore any attempt to change age
+      } else {
+        if (age !== undefined && !isNaN(Number(age))) {
+          persona.age = Math.max(18, Math.min(99, Number(age)));
+          persona.onboarded = true;
+        }
+      }
+      if (onboarded !== undefined) {
+        persona.onboarded = Boolean(onboarded);
+      }
       if (avatar?.trim()) persona.avatar = avatar.trim();
       if (skillBadge?.trim()) persona.skillBadge = skillBadge.trim();
       if (tagline?.trim()) persona.tagline = tagline.trim();

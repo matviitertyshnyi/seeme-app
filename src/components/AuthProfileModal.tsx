@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
   Check,
   ShieldCheck,
-  Star,
+  Upload,
+  Lock,
+  MapPin,
+  ChevronDown,
 } from 'lucide-react';
 import { ActivityCategory, UserPersona } from '@/types/lobby';
 import {
@@ -13,6 +16,7 @@ import {
   GROUPED_ACTIVITIES,
   CategoryIcon,
 } from '@/components/CategoryIcon';
+import { CityPreset, POPULAR_CITIES } from '@/lib/cities';
 
 interface AuthProfileModalProps {
   isOpen: boolean;
@@ -26,6 +30,7 @@ interface AuthProfileModalProps {
     allPersonas: UserPersona[],
     message: string
   ) => void;
+  onSelectCity?: (city: { lat: number; lng: number; label: string }) => void;
 }
 
 export function GoogleIcon({ className = 'w-5 h-5' }: { className?: string }) {
@@ -59,27 +64,6 @@ export function AppleIcon({ className = 'w-5 h-5' }: { className?: string }) {
   );
 }
 
-const PRESET_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-];
-
-const SKILL_BADGE_PRESETS = [
-  'Beginner',
-  'Casual',
-  'Intermediate',
-  'Advanced',
-  '1550 Elo',
-  '3.5 NTRP',
-  '4.0 NTRP',
-  '5:00/km',
-  'Competitive',
-];
-
 export function AuthProfileModal({
   isOpen,
   initialTab = 'EDIT',
@@ -88,6 +72,7 @@ export function AuthProfileModal({
   personas,
   onSelectUser,
   onUserCreatedOrUpdated,
+  onSelectCity,
 }: AuthProfileModalProps) {
   const [activeTab, setActiveTab] = useState<'LOGIN' | 'EDIT'>(initialTab);
   const [loginError, setLoginError] = useState('');
@@ -96,14 +81,20 @@ export function AuthProfileModal({
   const [name, setName] = useState(activeUser.name);
   const [email, setEmail] = useState(activeUser.email || '');
   const [age, setAge] = useState<number>(activeUser.age);
-  const [neighborhood, setNeighborhood] = useState(activeUser.neighborhood);
+  const [cityInput, setCityInput] = useState(
+    activeUser.neighborhood && activeUser.neighborhood !== 'Select your city'
+      ? activeUser.neighborhood
+      : ''
+  );
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [selectedCityPreset, setSelectedCityPreset] = useState<CityPreset | null>(null);
   const [avatar, setAvatar] = useState(activeUser.avatar);
-  const [skillBadge, setSkillBadge] = useState(activeUser.skillBadge);
   const [tagline, setTagline] = useState(activeUser.tagline);
   const [favoriteActivities, setFavoriteActivities] = useState<ActivityCategory[]>(
-    activeUser.favoriteActivities
+    activeUser.favoriteActivities || ['Coffee', 'Park Walk']
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -113,14 +104,41 @@ export function AuthProfileModal({
         setName(activeUser.name);
         setEmail(activeUser.email || '');
         setAge(activeUser.age);
-        setNeighborhood(activeUser.neighborhood);
+        const currentCity =
+          activeUser.neighborhood && activeUser.neighborhood !== 'Select your city'
+            ? activeUser.neighborhood
+            : '';
+        setCityInput(currentCity);
+        const match = POPULAR_CITIES.find(
+          (c) =>
+            c.label.toLowerCase() === currentCity.toLowerCase() ||
+            c.name.toLowerCase() === currentCity.toLowerCase()
+        );
+        setSelectedCityPreset(match || null);
+        setIsCityDropdownOpen(false);
         setAvatar(activeUser.avatar);
-        setSkillBadge(activeUser.skillBadge);
         setTagline(activeUser.tagline);
-        setFavoriteActivities(activeUser.favoriteActivities || ['Ping Pong', 'Chess']);
+        setFavoriteActivities(
+          activeUser.favoriteActivities && activeUser.favoriteActivities.length > 0
+            ? activeUser.favoriteActivities
+            : ['Coffee', 'Park Walk']
+        );
       }
     }
   }, [isOpen, initialTab, activeUser]);
+
+  const isAgeLocked = activeUser?.onboarded !== false;
+
+  const filteredCities = useMemo(() => {
+    const q = cityInput.trim().toLowerCase();
+    if (!q) return POPULAR_CITIES.slice(0, 14);
+    return POPULAR_CITIES.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.country.toLowerCase().includes(q) ||
+        c.label.toLowerCase().includes(q)
+    );
+  }, [cityInput]);
 
   if (!isOpen) return null;
 
@@ -142,22 +160,84 @@ export function AuthProfileModal({
     }
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 256;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Center-crop
+        const minDim = Math.min(img.width, img.height);
+        const sx = (img.width - minDim) / 2;
+        const sy = (img.height - minDim) / 2;
+
+        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatar(dataUrl);
+      };
+      if (typeof event.target?.result === 'string') {
+        img.src = event.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSelectCityPreset = (preset: CityPreset) => {
+    setCityInput(preset.label);
+    setSelectedCityPreset(preset);
+    setIsCityDropdownOpen(false);
+    if (onSelectCity) {
+      onSelectCity({ lat: preset.lat, lng: preset.lng, label: preset.label });
+    }
+  };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setIsSubmitting(true);
+
+    const chosenCity = cityInput.trim() || 'Select your city';
+    const matchingCityPreset =
+      selectedCityPreset ||
+      POPULAR_CITIES.find(
+        (c) =>
+          c.label.toLowerCase() === chosenCity.toLowerCase() ||
+          c.name.toLowerCase() === chosenCity.toLowerCase()
+      );
+
+    if (matchingCityPreset && onSelectCity) {
+      onSelectCity({
+        lat: matchingCityPreset.lat,
+        lng: matchingCityPreset.lng,
+        label: matchingCityPreset.label,
+      });
+    }
+
     try {
       const res = await fetch('/api/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': activeUser.id,
+          Authorization: `Bearer ${activeUser.id}`,
+        },
         body: JSON.stringify({
           action: 'UPDATE_PROFILE',
           userId: activeUser.id,
-          name,
+          name: name.trim(),
           age,
-          neighborhood,
+          onboarded: true,
+          neighborhood: chosenCity,
           avatar,
-          skillBadge,
           tagline,
           favoriteActivities,
         }),
@@ -192,11 +272,13 @@ export function AuthProfileModal({
         <div className="px-6 py-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-xl font-extrabold text-stone-950 dark:text-white">
-              {initialTab === 'EDIT' ? 'Edit Profile' : 'Sign In & Account'}
+              {activeTab === 'EDIT' ? 'Edit Profile' : 'Sign In & Account'}
             </h2>
             <p className="text-xs font-semibold text-stone-600 dark:text-stone-400">
-              {initialTab === 'EDIT'
-                ? 'Update your photo, skill level badge, bio, and favorite activities'
+              {activeTab === 'EDIT'
+                ? activeUser?.onboarded === false
+                  ? 'Complete Your Profile Setup — Set your photo, age, and city to start using Leave The Room'
+                  : 'Update your photo, city, bio, and favorite activities'
                 : 'Switch account or sign in to Leave The Room'}
             </p>
           </div>
@@ -211,7 +293,7 @@ export function AuthProfileModal({
         </div>
 
         {/* Authentication header when user is signed out or switching accounts */}
-        {initialTab !== 'EDIT' && (
+        {activeTab !== 'EDIT' && (
           <div className="px-6 pt-3 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 pb-3 shrink-0">
             <p className="text-xs font-bold text-stone-600 dark:text-stone-400">
               Sign in with your verified Google or Apple account
@@ -253,72 +335,20 @@ export function AuthProfileModal({
                 </div>
               )}
 
-              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 flex items-center gap-2 text-[11px] font-bold text-stone-600 dark:text-stone-400">
+              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 flex items-center gap-2 text-[11px] font-bold text-stone-600 dark:text-stone-400">
                 <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Verified 1-tap sign-in with your Google or Apple ID. No separate password needed.</span>
-              </div>
-
-              <div className="pt-4 border-t border-stone-200 dark:border-stone-800">
-                <div className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3">
-                  Or 1-Tap Sign In With Existing Demo Account
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {personas.map((p) => {
-                    const isCurrent = p.id === activeUser.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => {
-                          onSelectUser(p);
-                          onClose();
-                        }}
-                        className={`min-h-[56px] p-3 rounded-2xl border text-left flex items-center justify-between gap-2 transition-all ${
-                          isCurrent
-                            ? 'bg-orange-50 dark:bg-orange-950 border-orange-600'
-                            : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border-stone-200 dark:border-stone-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <img
-                            src={p.avatar}
-                            alt={p.name}
-                            className="w-10 h-10 rounded-full object-cover shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <div className="text-xs font-extrabold text-stone-950 dark:text-white truncate">
-                              {p.name}, {p.age}
-                            </div>
-                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-orange-700 dark:text-orange-400">
-                              <span>{p.skillBadge}</span>
-                              <span>·</span>
-                              <span className="inline-flex items-center gap-0.5 text-amber-700 dark:text-amber-400">
-                                <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                                {p.ratingAvg}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        {isCurrent && (
-                          <Check className="w-4 h-4 text-orange-700 dark:text-orange-400 shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                <span>Verified 1-tap sign-in with your Google or Apple ID. Fast, secure, and permanent.</span>
               </div>
             </div>
           )}
 
-
-
-          {/* TAB 3: EDIT CURRENT PROFILE */}
+          {/* TAB 2: EDIT CURRENT PROFILE */}
           {activeTab === 'EDIT' && (
             <form onSubmit={handleEditSubmit} className="space-y-4">
               {/* Trust & Verification Summary Strip */}
               <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
+                  <ShieldCheck className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                   <div>
                     <div className="text-xs font-extrabold text-emerald-950 dark:text-emerald-200">
                       Verified Player Profile · {activeUser.reliabilityScore}% Reliability
@@ -330,26 +360,35 @@ export function AuthProfileModal({
                 </div>
               </div>
 
+              {/* Profile Photo Upload */}
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
-                  Profile Avatar
+                  Profile Photo
                 </label>
-                <div className="grid grid-cols-6 gap-2">
-                  {PRESET_AVATARS.map((url) => (
-                    <button
-                      key={url}
-                      type="button"
-                      onClick={() => setAvatar(url)}
-                      aria-label="Choose profile avatar"
-                      className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all ${
-                        avatar === url
-                          ? 'border-orange-600 ring-2 ring-orange-600'
-                          : 'border-transparent opacity-75 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={url} alt="Avatar" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
+                <div className="flex items-center gap-4">
+                  <div className="relative w-[72px] h-[72px] rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 shrink-0 shadow-sm">
+                    <img
+                      src={avatar || activeUser?.avatar}
+                      alt={name || 'Profile'}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-white text-xs font-extrabold border border-stone-300 dark:border-stone-700 transition-colors shadow-sm w-fit">
+                      <Upload className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                      <span>Upload Photo</span>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                      />
+                    </label>
+                    <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
+                      JPG, PNG or WEBP · Resized & center-cropped to 256x256
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -366,47 +405,113 @@ export function AuthProfileModal({
                     className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
-                    Age
-                  </label>
-                  <input
-                    type="number"
-                    min={18}
-                    max={99}
-                    value={age}
-                    onChange={(e) => setAge(Number(e.target.value) || 24)}
-                    aria-label="Age"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
-                  />
-                </div>
+
+                {/* Age: Locked if already set, or editable once during onboarding */}
+                {isAgeLocked ? (
+                  <div>
+                    <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
+                      Age
+                    </label>
+                    <div className="min-h-[44px] w-full px-3.5 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 text-xs font-bold text-stone-600 dark:text-stone-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                        <span>{activeUser.age}</span>
+                      </span>
+                      <span className="text-[10px] text-stone-500 font-medium">Permanent</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      min={18}
+                      max={99}
+                      value={age}
+                      onChange={(e) => setAge(Math.max(18, Math.min(99, Number(e.target.value) || 18)))}
+                      aria-label="Age"
+                      className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    />
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mt-1">
+                      Set once — cannot be changed later
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
-                    Skill-Level Badge
-                  </label>
+              {/* City Selection from POPULAR_CITIES + Custom City */}
+              <div className="relative">
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
+                  City
+                </label>
+                <div className="relative">
                   <input
                     type="text"
-                    value={skillBadge}
-                    onChange={(e) => setSkillBadge(e.target.value)}
-                    aria-label="Skill badge"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-orange-700 dark:text-orange-400 focus:outline-none focus:border-orange-600"
+                    value={cityInput}
+                    onChange={(e) => {
+                      setCityInput(e.target.value);
+                      setIsCityDropdownOpen(true);
+                      const match = POPULAR_CITIES.find(
+                        (c) =>
+                          c.label.toLowerCase() === e.target.value.trim().toLowerCase() ||
+                          c.name.toLowerCase() === e.target.value.trim().toLowerCase()
+                      );
+                      setSelectedCityPreset(match || null);
+                    }}
+                    onFocus={() => setIsCityDropdownOpen(true)}
+                    placeholder="Search city (e.g. Kyiv, Warsaw, Berlin, London, New York...)"
+                    aria-label="City"
+                    className="min-h-[44px] w-full pl-9 pr-10 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
+                  <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <button
+                    type="button"
+                    onClick={() => setIsCityDropdownOpen((prev) => !prev)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                    aria-label="Toggle city list"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
-                    Neighborhood
-                  </label>
-                  <input
-                    type="text"
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                    aria-label="Neighborhood"
-                    className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
-                  />
-                </div>
+
+                {isCityDropdownOpen && (
+                  <div className="absolute z-50 left-0 right-0 mt-1 max-h-52 overflow-y-auto rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-xl py-1">
+                    {filteredCities.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleSelectCityPreset(c)}
+                        className="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-orange-50 dark:hover:bg-stone-700/70 flex items-center justify-between transition-colors text-stone-900 dark:text-white"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300">
+                            {c.flag || c.countryCode}
+                          </span>
+                          <span>{c.label}</span>
+                        </span>
+                        {cityInput === c.label && (
+                          <Check className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                    {cityInput.trim() &&
+                      !filteredCities.some(
+                        (c) => c.label.toLowerCase() === cityInput.trim().toLowerCase()
+                      ) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsCityDropdownOpen(false);
+                          }}
+                          className="w-full px-3.5 py-2 text-left text-xs font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-stone-700/70 border-t border-stone-100 dark:border-stone-700"
+                        >
+                          Use custom city: &ldquo;{cityInput.trim()}&rdquo;
+                        </button>
+                      )}
+                  </div>
+                )}
               </div>
 
               <div>

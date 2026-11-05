@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb } from '@/lib/db';
+import { readDb, withDbMutation } from '@/lib/db';
+import { verifyUserSessionToken } from '@/lib/oauth';
 import { UserPersona } from '@/types/lobby';
 
 /**
@@ -68,13 +69,15 @@ function parseSessionCookieValue(rawValue?: string): string | null {
 /**
  * Extract authenticated user ID from request headers or cookies.
  * Priority:
- * 1. Cookie: `leavetheroom_session` or `seeme_session` (string ID or JSON `{ userId: string }`)
+ * 1. Cookie: `ltr_session`, `leavetheroom_session`, or `seeme_session` (string ID or JSON `{ userId: string }`)
  * 2. Header: `Authorization: Bearer <userId_or_token>`
- * 3. Header: `x-user-id: <userId>` (for development simulation, Postman, and automated tests)
+ * 3. Header: `x-user-id: <userId>` (gated strictly to non-production dev/test environments)
  */
 export function extractSessionUserId(req: NextRequest): string | null {
   // 1. Check HTTP cookies (new brand prioritized, falling back to legacy brand)
-  const ltrCookieId = parseSessionCookieValue(req.cookies.get('leavetheroom_session')?.value);
+  const ltrCookieId = parseSessionCookieValue(
+    req.cookies.get('ltr_session')?.value || req.cookies.get('leavetheroom_session')?.value
+  );
   if (ltrCookieId) return ltrCookieId;
 
   const seemeCookieId = parseSessionCookieValue(req.cookies.get('seeme_session')?.value);
@@ -89,16 +92,72 @@ export function extractSessionUserId(req: NextRequest): string | null {
     }
   }
 
-  // 3. Check x-user-id header (simulation / dev / test)
-  const xUserId = req.headers.get('x-user-id');
-  if (xUserId && xUserId.trim()) {
-    const trimmed = xUserId.trim();
-    if (trimmed !== 'signed_out' && trimmed !== 'null' && trimmed !== 'undefined') {
-      return trimmed;
+  // 3. Check x-user-id header (strictly development simulation, Postman, and automated tests only)
+  if (process.env.NODE_ENV !== 'production') {
+    const xUserId = req.headers.get('x-user-id');
+    if (xUserId && xUserId.trim()) {
+      const trimmed = xUserId.trim();
+      if (trimmed !== 'signed_out' && trimmed !== 'null' && trimmed !== 'undefined') {
+        return trimmed;
+      }
     }
   }
 
   return null;
+}
+
+async function findOrRehydrateUser(req: NextRequest, userId: string): Promise<UserPersona | undefined> {
+  const db = await readDb();
+  let user = db.personas.find((p) => p.id === userId);
+  if (user) return user;
+
+  // Serverless cold-start resilience: re-hydrate from signed ltr_user_token if available
+  const signedToken = req.cookies.get('ltr_user_token')?.value;
+  const verified = verifyUserSessionToken(signedToken);
+  if (verified && verified.id === userId && verified.email) {
+    user = await withDbMutation(async (txDb) => {
+      const existing = txDb.personas.find((p) => p.id === userId || p.email === verified.email);
+      if (existing) return existing;
+      const rehydrated: UserPersona = {
+        id: verified.id!,
+        email: verified.email!,
+        name: verified.name || 'Member',
+        age: verified.age || 26,
+        avatar:
+          verified.avatar ||
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        skillBadge: 'Verified Member',
+        tagline: 'Verified Member. Ready to meet up!',
+        neighborhood: verified.neighborhood || 'Select your city',
+        onboarded: verified.onboarded ?? false,
+        verified: true,
+        verificationStatus: 'VERIFIED',
+        role: 'USER',
+        isBanned: false,
+        favoriteActivities: ['Coffee', 'Tennis'],
+        reliabilityScore: 100,
+        meetupsAttended: 0,
+        hoursPlayed: 0,
+        ratingAvg: 5.0,
+        ratingCount: 0,
+        streakWeeks: 1,
+        bannedUserIds: [],
+        regularPartnerIds: [],
+        settings: {
+          iosAndroidPush: true,
+          soundEffects: true,
+          hapticFeedback: true,
+          distanceUnit: 'km',
+          profileVisible: true,
+          showReliabilityScore: true,
+        },
+        authProvider: verified.authProvider || 'google',
+      };
+      txDb.personas.unshift(rehydrated);
+      return rehydrated;
+    });
+  }
+  return user;
 }
 
 /**
@@ -112,8 +171,7 @@ export async function requireAuth(req: NextRequest): Promise<{ user: UserPersona
     throw new AuthError('Authentication required', 401, 'UNAUTHORIZED');
   }
 
-  const db = await readDb();
-  const user = db.personas.find((p) => p.id === userId);
+  const user = await findOrRehydrateUser(req, userId);
 
   if (!user) {
     throw new AuthError('User account not found', 401, 'UNAUTHORIZED');
@@ -153,8 +211,7 @@ export async function optionalAuth(req: NextRequest): Promise<{ user: UserPerson
     return { user: null };
   }
 
-  const db = await readDb();
-  const user = db.personas.find((p) => p.id === userId);
+  const user = await findOrRehydrateUser(req, userId);
   if (!user || user.isBanned) {
     return { user: null };
   }

@@ -28,21 +28,21 @@ export const BROAD_CATEGORIES = [
 export type BroadCategory = (typeof BROAD_CATEGORIES)[number];
 
 export const ACTIVITY_GROUPS: ActivityGroup[] = [
+  'Hanging Out',
   'Sports',
   'Gaming',
-  'Hanging Out',
   'Co-working',
 ];
 
 export const GROUPED_ACTIVITIES: Record<string, string[]> = {
-  'Sports & Fitness': ['Ping Pong', 'Tennis', 'Basketball', 'Run Club', 'Pickleball'],
-  'Gaming & Strategy': ['Chess', 'Board Games', 'Card Games', 'Video Games'],
-  'Social & Hangout': ['Coffee', 'Park Walk', 'Food & Bites', 'Drinks & Chat'],
-  'Co-Working': ['Co-work', 'Study Session', 'Quiet Focus'],
-  Sports: ['Ping Pong', 'Tennis', 'Basketball', 'Run Club', 'Pickleball'],
-  Gaming: ['Chess', 'Board Games', 'Card Games', 'Video Games'],
-  'Hanging Out': ['Coffee', 'Park Walk', 'Food & Bites', 'Drinks & Chat'],
-  'Co-working': ['Co-work', 'Study Session', 'Quiet Focus'],
+  'Sports & Fitness': ['Tennis', 'Basketball', 'Run Club', 'Ping Pong', 'Pickleball'],
+  'Gaming & Strategy': ['Board Games', 'Chess', 'Video Games'],
+  'Social & Hangout': ['Coffee', 'Park Walk'],
+  'Co-Working': ['Study Session'],
+  'Hanging Out': ['Coffee', 'Park Walk'],
+  Sports: ['Tennis', 'Basketball', 'Run Club', 'Ping Pong', 'Pickleball'],
+  Gaming: ['Board Games', 'Chess', 'Video Games'],
+  'Co-working': ['Study Session'],
 };
 
 export function getBroadCategory(category: string): BroadCategory {

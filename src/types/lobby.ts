@@ -99,6 +99,7 @@ export interface UserPersona {
   skillBadge: string;
   tagline: string;
   neighborhood: string;
+  onboarded?: boolean;
   verified: boolean;
   verificationStatus?: VerificationStatus;
   verificationRequestedAt?: string;

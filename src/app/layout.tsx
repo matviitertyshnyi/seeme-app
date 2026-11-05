@@ -9,7 +9,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Leave The Room — In-Person Activity Meetups Near You',
+  metadataBase: new URL('https://leavetheroom.tech'),
+  title: {
+    default: 'Leave The Room — Real-World Local Meetups',
+    template: '%s | Leave The Room',
+  },
   description:
     'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
   manifest: '/manifest.json',
@@ -17,6 +21,20 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'Leave The Room',
+  },
+  openGraph: {
+    title: 'Leave The Room — Real-World Local Meetups',
+    description:
+      'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
+    url: 'https://leavetheroom.tech',
+    siteName: 'Leave The Room',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Leave The Room — Real-World Local Meetups',
+    description:
+      'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
   },
 };
 

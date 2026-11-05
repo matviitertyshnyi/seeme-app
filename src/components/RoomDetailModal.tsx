@@ -86,6 +86,7 @@ export function RoomDetailModal({
   const [requestNote, setRequestNote] = useState('');
   const [spotClueInput, setSpotClueInput] = useState('');
   const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const [isSendingMsg, setIsSendingMsg] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -212,6 +213,28 @@ export function RoomDetailModal({
       navigator.clipboard.writeText(`${lobby.venueName}, ${lobby.venueAddress}`);
       setCopiedAddress(true);
       setTimeout(() => setCopiedAddress(false), 2000);
+    }
+  };
+
+  const handleShareMeetup = async () => {
+    if (typeof window === 'undefined') return;
+    const shareUrl = `${window.location.origin}/?meetup=${encodeURIComponent(lobby.id)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${lobby.title} — Leave The Room`,
+          text: `Join our ${lobby.category} meetup at ${lobby.venueName}!`,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // Fallback to clipboard copy
+      }
+    }
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedShareLink(true);
+      setTimeout(() => setCopiedShareLink(false), 2200);
     }
   };
 
@@ -397,14 +420,34 @@ export function RoomDetailModal({
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close meetup details"
-              className="w-11 h-11 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleShareMeetup}
+                aria-label="Share meetup link"
+                className="h-11 px-3.5 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              >
+                {copiedShareLink ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span>Link Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="w-4 h-4 text-orange-300" />
+                    <span>Share</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close meetup details"
+                className="w-11 h-11 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="absolute bottom-3.5 left-4 right-4 text-white">
@@ -698,11 +741,9 @@ export function RoomDetailModal({
                             />
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-sm font-extrabold text-stone-950 dark:text-white">
-                                  {person.name}, {person.age}
-                                </span>
-                                <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 text-[10px] font-extrabold border border-orange-200 dark:border-orange-800">
-                                  {person.skillBadge || 'Active'}
+                                <span className="text-sm font-extrabold text-stone-950 dark:text-white inline-flex items-center gap-1">
+                                  <span>{person.name}, {person.age}</span>
+                                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
                                 </span>
                                 {personIsHost && (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-900 dark:bg-orange-600 text-white text-[10px] font-extrabold uppercase">
@@ -835,11 +876,9 @@ export function RoomDetailModal({
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-extrabold text-stone-950 dark:text-white truncate">
-                              {req.user.name}, {req.user.age}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-900 dark:text-orange-200 text-[10px] font-extrabold">
-                              {req.user.skillBadge || 'Active'}
+                            <span className="text-sm font-extrabold text-stone-950 dark:text-white truncate inline-flex items-center gap-1">
+                              <span>{req.user.name}, {req.user.age}</span>
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
                             </span>
                           </div>
                           <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">

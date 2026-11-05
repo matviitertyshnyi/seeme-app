@@ -13,6 +13,7 @@ function setSessionCookie(response: NextResponse, userId: string) {
     path: '/',
     maxAge: 60 * 60 * 24 * 30, // 30 days
   };
+  response.cookies.set('ltr_session', userId, cookieOptions);
   response.cookies.set('leavetheroom_session', userId, cookieOptions);
   response.cookies.set('seeme_session', userId, cookieOptions);
 }
@@ -25,6 +26,8 @@ function clearSessionCookie(response: NextResponse) {
     path: '/',
     maxAge: 0,
   };
+  response.cookies.set('ltr_session', '', cookieOptions);
+  response.cookies.set('ltr_user_token', '', cookieOptions);
   response.cookies.set('leavetheroom_session', '', cookieOptions);
   response.cookies.set('seeme_session', '', cookieOptions);
 }
