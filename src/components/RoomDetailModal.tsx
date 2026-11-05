@@ -279,14 +279,6 @@ export function RoomDetailModal({
       if (onRequestAuth) onRequestAuth();
       return;
     }
-    const hasRealPhoto =
-      Boolean(activeUser.avatar) &&
-      !activeUser.avatar.includes('unsplash.com') &&
-      Boolean(activeUser.photoVerified || activeUser.avatar.startsWith('data:image/'));
-    if (!hasRealPhoto) {
-      if (onRequestAuth) onRequestAuth();
-      return;
-    }
     setIsLoadingAction(true);
     triggerSensoryFeedback('JOIN', activeUser.settings);
     try {

@@ -244,7 +244,6 @@ export default function LeaveTheRoomHomePage() {
       (activeUser.onboarded === false ||
         !activeUser.age ||
         activeUser.age < 18 ||
-        !activeUser.photoVerified ||
         activeUser.neighborhood === 'Select your city' ||
         !activeUser.neighborhood) &&
       !isSignedOut
@@ -769,16 +768,6 @@ export default function LeaveTheRoomHomePage() {
       setIsAuthModalOpen(true);
       return;
     }
-    const hasRealPhoto =
-      Boolean(activeUser.avatar) &&
-      !activeUser.avatar.includes('unsplash.com') &&
-      Boolean(activeUser.photoVerified || activeUser.avatar.startsWith('data:image/'));
-    if (!hasRealPhoto) {
-      showToast('Please add your real profile photo before hosting a meetup');
-      setAuthModalTab('EDIT');
-      setIsAuthModalOpen(true);
-      return;
-    }
     setCreateModalCategory(options?.category);
     setCreateModalStartTime(options?.startTime);
     setCreateModalCoHost(options?.coHost || null);
@@ -1060,17 +1049,6 @@ export default function LeaveTheRoomHomePage() {
     if (isSignedOut) {
       showToast('Please sign in to join meetups');
       setAuthModalTab('LOGIN');
-      setIsAuthModalOpen(true);
-      return;
-    }
-
-    const hasRealPhoto =
-      Boolean(activeUser.avatar) &&
-      !activeUser.avatar.includes('unsplash.com') &&
-      Boolean(activeUser.photoVerified || activeUser.avatar.startsWith('data:image/'));
-    if (!hasRealPhoto) {
-      showToast('Please upload or verify your real profile photo to join meetups');
-      setAuthModalTab('EDIT');
       setIsAuthModalOpen(true);
       return;
     }
@@ -1519,10 +1497,7 @@ export default function LeaveTheRoomHomePage() {
         onClickParticipant={(userId) => setInspectedUserId(userId)}
         onOpenLightbox={handleOpenLightbox}
         onRequestAuth={() => {
-          setAuthModalTab(isSignedOut ? 'LOGIN' : 'EDIT');
-          if (!isSignedOut) {
-            showToast('Please upload or verify your real profile photo to join meetups');
-          }
+          setAuthModalTab('LOGIN');
           setIsAuthModalOpen(true);
         }}
         onClose={() => setSelectedLobbyId(null)}

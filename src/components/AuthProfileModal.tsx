@@ -269,10 +269,9 @@ export function AuthProfileModal({
       (activeUser as any)?.photoVerified
     );
 
-    if (!hasRealFacePhoto) {
-      setEditError('Real human face photo is required to use Leave The Room. Please upload a clear photo of your face or take a live selfie.');
-      return;
-    }
+    const initialLetter = (name.trim()[0] || 'M').toUpperCase();
+    const fallbackAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="64" fill="%23EA580C"/><text x="50%" y="54%" font-family="system-ui,-apple-system,sans-serif" font-weight="bold" font-size="54" fill="%23FFFFFF" text-anchor="middle" dominant-baseline="middle">${initialLetter}</text></svg>`;
+    const finalAvatar = (avatar && avatar.trim()) || activeUser?.avatar || fallbackAvatar;
 
     setIsSubmitting(true);
 
@@ -306,9 +305,9 @@ export function AuthProfileModal({
           name: name.trim(),
           age: parsedAge,
           onboarded: true,
-          photoVerified: true,
+          photoVerified: hasRealFacePhoto,
           neighborhood: chosenCity,
-          avatar,
+          avatar: finalAvatar,
           tagline,
           favoriteActivities,
         }),
@@ -437,7 +436,7 @@ export function AuthProfileModal({
               {/* Profile Photo Upload & Selfie Camera */}
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
-                  Profile Photo & Real Human Verification
+                  Profile Photo (Optional)
                 </label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Clickable 72x72 Avatar preview */}
@@ -518,9 +517,8 @@ export function AuthProfileModal({
                         <span>✓ Verified Human Face Photo</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold">
-                        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                        <span>Real photo required — shoes, objects, or blank images will be rejected</span>
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 text-stone-600 dark:text-stone-400 text-xs font-medium">
+                        <span>Profile photo is optional. You can upload a photo or selfie anytime.</span>
                       </div>
                     )
                   )}
