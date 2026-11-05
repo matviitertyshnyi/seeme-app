@@ -1486,24 +1486,9 @@ export default function LeaveTheRoomHomePage() {
         )}
       </main>
 
-      {activeNav === 'EXPLORE' && (
-        <div className="fixed bottom-20 left-0 right-0 z-40 pointer-events-none">
-          <div className="max-w-xl mx-auto px-4 flex justify-end">
-            <button
-              type="button"
-              onClick={() => openHostModal({ startTime: 'Now' })}
-              aria-label="Host Meetup"
-              className="pointer-events-auto min-h-[46px] px-5 py-2.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 active:scale-95 text-white text-xs font-bold shadow-[0_4px_24px_rgba(234,88,12,0.45),0_1px_2px_rgba(0,0,0,0.2)] border border-orange-300/30 inline-flex items-center gap-2 transition-all active:scale-[0.98]"
-            >
-              <Plus className="w-4 h-4 stroke-[2.8]" />
-              <span>Host Meetup</span>
-            </button>
-          </div>
-        </div>
-      )}
-
       <BottomNav
         activeTab={activeNav}
+        onOpenHostModal={() => openHostModal({ startTime: 'Now' })}
         onChangeTab={(tab) => {
           if (tab === 'MY_MEETUPS' && isSignedOut) {
             showToast('Please sign in to view your meetups');

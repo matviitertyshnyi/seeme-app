@@ -362,7 +362,7 @@ export function MyMeetupsView({
                       onClick={() => onSelectLobby(room.id)}
                       className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700/60 transition active:scale-[0.98]"
                     >
-                      {isRoomHost ? 'Manage Roster' : 'Meetup Details'}
+                      {isRoomHost ? 'Manage Players' : 'Meetup Details'}
                     </button>
                     <button
                       type="button"

@@ -107,7 +107,7 @@ export function CommunityPoliciesModal({
               5. Reporting & Host Discretion
             </h3>
             <p className="text-stone-500 dark:text-stone-400 text-xs">
-              Hosts have discretion over their participant roster. Any player can block or report bad actors immediately via the player card. Reported violations are promptly investigated by moderation.
+              Hosts have discretion over their meetup participants. Any player can block or report bad actors immediately via the player card. Reported violations are promptly investigated by moderation.
             </p>
           </div>
         </div>

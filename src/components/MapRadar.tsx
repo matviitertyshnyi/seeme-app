@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import {
   Navigation,
@@ -52,9 +52,28 @@ export default function MapRadar({
   const [hoveredLobbyId, setHoveredLobbyId] = useState<string | null>(
     lobbies[0]?.id || null
   );
+  const [mapStatusFilter, setMapStatusFilter] = useState<'ALL' | 'LIVE' | 'UPCOMING'>('ALL');
+
+  const activeLobbies = useMemo(() => {
+    return lobbies.filter((lobby) => {
+      if (lobby.computedStatus === 'FINISHED') return false;
+      if (mapStatusFilter === 'LIVE') return lobby.computedStatus === 'LIVE';
+      if (mapStatusFilter === 'UPCOMING') return lobby.computedStatus === 'UPCOMING';
+      return true;
+    });
+  }, [lobbies, mapStatusFilter]);
+
+  const liveCount = useMemo(
+    () => lobbies.filter((l) => l.computedStatus === 'LIVE').length,
+    [lobbies]
+  );
+  const upcomingCount = useMemo(
+    () => lobbies.filter((l) => l.computedStatus === 'UPCOMING').length,
+    [lobbies]
+  );
 
   const selectedPreviewLobby =
-    lobbies.find((l) => l.id === hoveredLobbyId) || lobbies[0] || null;
+    activeLobbies.find((l) => l.id === hoveredLobbyId) || activeLobbies[0] || null;
 
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
@@ -129,14 +148,12 @@ export default function MapRadar({
     );
 
     // 3. Render status-color-coded pill markers
-    lobbies.forEach((lobby) => {
+    activeLobbies.forEach((lobby) => {
       const isSelected = selectedPreviewLobby?.id === lobby.id;
       const statusDotHex =
         lobby.computedStatus === 'LIVE'
           ? '#10B981'
-          : lobby.computedStatus === 'UPCOMING'
-          ? '#F59E0B'
-          : '#F43F5E';
+          : '#F59E0B';
 
       const borderHex = isSelected ? '#EA580C' : statusDotHex;
 
@@ -175,7 +192,7 @@ export default function MapRadar({
       });
     });
   }, [
-    lobbies,
+    activeLobbies,
     userLat,
     userLng,
     radiusKm,
@@ -196,19 +213,43 @@ export default function MapRadar({
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
       <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 pointer-events-auto">
-        <div className="bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md px-3.5 py-2 rounded-full shadow-md dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.4)] border border-stone-200 dark:border-stone-700/80 flex items-center gap-3 text-xs font-extrabold text-stone-900 dark:text-stone-100">
-          <span className="inline-flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            Live
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-            Upcoming
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-            Finished
-          </span>
+        {/* Interactive Filter Pills: Live and Upcoming only (Finished completely removed) */}
+        <div className="bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md p-1 rounded-full shadow-md dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.4)] border border-stone-200 dark:border-stone-700/80 flex items-center gap-1 text-xs font-extrabold text-stone-900 dark:text-stone-100">
+          <button
+            type="button"
+            onClick={() => setMapStatusFilter('ALL')}
+            className={`min-h-[32px] px-3 rounded-full transition-all text-xs font-bold cursor-pointer ${
+              mapStatusFilter === 'ALL'
+                ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900 shadow-2xs'
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+            }`}
+          >
+            All ({liveCount + upcomingCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setMapStatusFilter('LIVE')}
+            className={`min-h-[32px] px-3 rounded-full transition-all text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer ${
+              mapStatusFilter === 'LIVE'
+                ? 'bg-emerald-600 text-white shadow-2xs'
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            Live ({liveCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setMapStatusFilter('UPCOMING')}
+            className={`min-h-[32px] px-3 rounded-full transition-all text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer ${
+              mapStatusFilter === 'UPCOMING'
+                ? 'bg-amber-500 text-white shadow-2xs'
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+            Upcoming ({upcomingCount})
+          </button>
         </div>
 
         <button

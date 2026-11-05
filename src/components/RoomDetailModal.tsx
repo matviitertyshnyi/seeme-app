@@ -132,10 +132,10 @@ export function RoomDetailModal({
     if (!lobby) return 25;
     const maxP = Math.max(1, lobby.maxParticipants);
     if (arrivedCount >= maxP) return 100;
-    const rosterContribution = (lobby.participants.length / maxP) * 25;
+    const playersContribution = (lobby.participants.length / maxP) * 25;
     const onWayContribution = (onWayCount / maxP) * 25;
     const arrivedContribution = (arrivedCount / maxP) * 25;
-    return Math.min(100, Math.round(25 + rosterContribution + onWayContribution + arrivedContribution));
+    return Math.min(100, Math.round(25 + playersContribution + onWayContribution + arrivedContribution));
   }, [lobby, onWayCount, arrivedCount]);
 
   useEffect(() => {
@@ -564,7 +564,7 @@ export function RoomDetailModal({
           >
             <Users className="w-4 h-4" />
             <span>
-              Details & Roster ({lobby.participants.length}/
+              Details & Players ({lobby.participants.length}/
               {lobby.maxParticipants})
             </span>
           </button>
@@ -589,7 +589,7 @@ export function RoomDetailModal({
 
         {/* BODY: 2 COLUMNS ON DESKTOP, CLEAN SINGLE ACTIVE VIEW ON MOBILE */}
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-          {/* LEFT PANEL: Meetup Details, Check-In, Venue, Roster & Approval Queue */}
+          {/* LEFT PANEL: Meetup Details, Check-In, Venue, Players & Approval Queue */}
           <div
             className={`${
               mobileSection === 'DETAILS' ? 'flex' : 'hidden lg:flex'
@@ -754,7 +754,7 @@ export function RoomDetailModal({
                     Live Arrival Check-In
                   </span>
                   <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
-                    Updates your roster badge
+                    Updates your status badge
                   </span>
                 </div>
 
@@ -879,7 +879,7 @@ export function RoomDetailModal({
               </p>
             </div>
 
-            {/* Roster with Arrival Status, Spot Clues, Ratings & Host Ban */}
+            {/* Players with Arrival Status, Spot Clues, Ratings & Host Ban */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
