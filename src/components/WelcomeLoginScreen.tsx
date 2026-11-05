@@ -22,7 +22,13 @@ export function WelcomeLoginScreen({
 }: WelcomeLoginScreenProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeProvider, setActiveProvider] = useState<'google' | 'apple' | null>(null);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('auth_error') || params.get('oauth_error') || '';
+    }
+    return '';
+  });
 
   const handleGoogle = async () => {
     if (isSubmitting) return;
@@ -136,7 +142,7 @@ export function WelcomeLoginScreen({
             <span>•</span>
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-brand dark:text-brand-accent" />
-              Real-World Venues
+              Real-World Meetups
             </span>
           </div>
 

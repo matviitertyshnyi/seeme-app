@@ -74,7 +74,7 @@ export function CommunityPoliciesModal({
           <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 space-y-1">
             <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-orange-500" />
-              2. Public & Verified Venues Only
+              2. Public & Verified Meetup Spots Only
             </h3>
             <p className="text-stone-500 dark:text-stone-400 text-xs">
               All meetups occur exclusively in public, well-lit spaces: parks, public recreation facilities, verified cafes, libraries, and open courts. Private residences and secluded unverified locations are strictly prohibited.

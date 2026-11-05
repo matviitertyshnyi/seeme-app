@@ -338,7 +338,9 @@ export default function LeaveTheRoomHomePage() {
           window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
         } else if (authError) {
           showToast(`Sign in error: ${authError}`);
+          setTimeout(() => showToast(`Sign in error: ${authError}`), 150);
           url.searchParams.delete('auth_error');
+          url.searchParams.delete('oauth_error');
           window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
         }
 

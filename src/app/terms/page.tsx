@@ -71,12 +71,12 @@ export default function TermsOfServicePage() {
               <h2>2. Real-World Meetup Safety &amp; Assumption of Risk</h2>
             </div>
             <p>
-              Leave The Room facilitates introductions and lobby coordination for physical, in-person activities (such as tennis, basketball, running, chess, ping pong, and board games). We do not own, manage, or inspect meetup venues, nor do we employ attendees.
+              Leave The Room facilitates introductions and lobby coordination for physical, in-person activities (such as tennis, basketball, running, chess, ping pong, and board games). We do not own, manage, or inspect meetup locations, nor do we employ attendees.
             </p>
             <div className="p-4 rounded-xl bg-canvas dark:bg-[#262220] border border-border dark:border-[#3a3533] space-y-2 text-xs">
-              <p className="font-bold text-ink dark:text-white uppercase tracking-wider">Public Venue Recommendation &amp; Personal Responsibility:</p>
+              <p className="font-bold text-ink dark:text-white uppercase tracking-wider">Public Meetup Spot Recommendation &amp; Personal Responsibility:</p>
               <ul className="list-disc pl-4 space-y-1 text-ink-muted dark:text-[#A8A29E]">
-                <li>Always meet in public, well-lit venues (public parks, community centers, cafes, or verified sports complexes).</li>
+                <li>Always meet in public, well-lit places (public parks, community centers, cafes, or verified sports complexes).</li>
                 <li>You voluntarily assume all risks associated with traveling to and participating in physical sports and games, including the risk of athletic injury or physical disputes.</li>
                 <li>You are solely responsible for evaluating your physical fitness and taking reasonable precautions for your personal safety.</li>
               </ul>
