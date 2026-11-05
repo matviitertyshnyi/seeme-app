@@ -13,29 +13,29 @@ export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const code = searchParams.get('code');
   const error = searchParams.get('error');
-  const isMock = searchParams.get('mock') === 'true';
 
   if (error) {
+    console.error('[Google OAuth] Error received from Google callback:', error);
     return NextResponse.redirect(new URL(`/?auth_error=${encodeURIComponent(error)}`, baseUrl));
   }
 
-  try {
-    let userDetails = {
-      email: 'alex.chen.meetups@gmail.com',
-      name: 'Alex Chen',
-      avatar:
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    };
+  if (!code) {
+    console.error('[Google OAuth] Callback missing authorization code');
+    return NextResponse.redirect(
+      new URL('/?auth_error=No+authorization+code+received+from+Google.', baseUrl)
+    );
+  }
 
-    if (!isMock && code) {
-      const exchanged = await exchangeGoogleCode(code, baseUrl);
-      if (exchanged && exchanged.email) {
-        userDetails = {
-          email: exchanged.email,
-          name: exchanged.name || 'Google Explorer',
-          avatar: exchanged.avatar || userDetails.avatar,
-        };
-      }
+  try {
+    const userDetails = await exchangeGoogleCode(code, baseUrl);
+    if (!userDetails || !userDetails.email) {
+      console.error('[Google OAuth] Token exchange did not yield valid user details');
+      return NextResponse.redirect(
+        new URL(
+          '/?auth_error=Google+authentication+failed.+Unable+to+verify+Google+account+details.',
+          baseUrl
+        )
+      );
     }
 
     const persona = await provisionOrFindOAuthUser('google', userDetails);
@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
     return res;
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : 'Google OAuth failed';
+    console.error('[Google OAuth] Exception during OAuth callback handling:', err);
     return NextResponse.redirect(new URL(`/?auth_error=${encodeURIComponent(errorMsg)}`, baseUrl));
   }
 }

@@ -12,25 +12,30 @@ async function handleAppleAuth(
   baseUrl: string,
   idToken?: string | null,
   userJson?: string | null,
-  error?: string | null,
-  isMock?: boolean
+  error?: string | null
 ) {
   if (error) {
     return NextResponse.redirect(new URL(`/?auth_error=${encodeURIComponent(error)}`, baseUrl));
   }
 
+  if (!idToken) {
+    return NextResponse.redirect(
+      new URL('/?auth_error=No+identity+token+received+from+Apple', baseUrl)
+    );
+  }
+
   try {
-    let email = 'jordan.miller.meetups@icloud.com';
-    let name = 'Jordan Miller';
+    const parsed = parseAppleIdToken(idToken);
+    if (!parsed || (!parsed.email && !parsed.sub)) {
+      return NextResponse.redirect(
+        new URL('/?auth_error=Failed+to+parse+Apple+identity+token', baseUrl)
+      );
+    }
+
+    const email = parsed.email || `apple.${parsed.sub.slice(0, 10)}@leavetheroom.app`;
+    let name = 'Apple Member';
     const avatar =
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
-
-    if (!isMock && idToken) {
-      const parsed = parseAppleIdToken(idToken);
-      if (parsed?.email) {
-        email = parsed.email;
-      }
-    }
 
     if (userJson) {
       try {
@@ -71,16 +76,14 @@ export async function POST(req: NextRequest) {
     const userJson = formData.get('user') as string | null;
     const error = formData.get('error') as string | null;
 
-    return await handleAppleAuth(baseUrl, idToken, userJson, error, false);
+    return await handleAppleAuth(baseUrl, idToken, userJson, error);
   } catch {
-    // If formData parsing fails, try query params
     const searchParams = req.nextUrl.searchParams;
     const idToken = searchParams.get('id_token');
     const userJson = searchParams.get('user');
     const error = searchParams.get('error');
-    const isMock = searchParams.get('mock') === 'true';
 
-    return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock);
+    return await handleAppleAuth(baseUrl, idToken, userJson, error);
   }
 }
 
@@ -90,7 +93,6 @@ export async function GET(req: NextRequest) {
   const idToken = searchParams.get('id_token');
   const userJson = searchParams.get('user');
   const error = searchParams.get('error');
-  const isMock = searchParams.get('mock') === 'true';
 
-  return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock);
+  return await handleAppleAuth(baseUrl, idToken, userJson, error);
 }

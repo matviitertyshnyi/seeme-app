@@ -216,6 +216,82 @@
   ],
   "lobbies": [
     {
+      "id": "lobby-6f7e333b-cd05-4156-8661-36959c9e2746",
+      "category": "rrrr",
+      "mapPinLabel": "MEET",
+      "title": "Spontaneous rrrr Meetup (Up to 4)",
+      "equipmentNote": "I have extra gear for rrrr. Drop a message in the meetup chat when you arrive.",
+      "coverImage": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Wały Jagiellońskie, Śródmieście",
+      "venueAddress": "Wały Jagiellońskie, Piaskownia, Stare Miasto, Śródmieście, Gdansk, Gdańsk, Pomeranian Voivodeship, 80-886, Poland",
+      "lat": 54.352,
+      "lng": 18.6466,
+      "startTime": "Now",
+      "startTimeBadge": "Live Now",
+      "roomStatus": "LIVE",
+      "preferredAgeRange": "18–25",
+      "isRecurring": false,
+      "skillCompatibility": "ALL_LEVELS",
+      "maxParticipants": 4,
+      "joinMode": "OPEN",
+      "hostId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+          "name": "matvii",
+          "age": 26,
+          "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+          "skillBadge": "Verified Member",
+          "tagline": "Joined via Google. Ready to meet up!",
+          "joinedAt": "2026-11-05T03:48:36.134Z",
+          "arrivalStatus": "ARRIVED",
+          "reliabilityScore": 100,
+          "ratingAvg": 5
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-05T03:48:36.134Z"
+    },
+    {
+      "id": "lobby-a2f3cdaa-58ee-4ee0-92e3-f961e0ebc434",
+      "category": "Ping Pong",
+      "mapPinLabel": "PONG",
+      "title": "Spontaneous Ping Pong Meetup (Up to 4)",
+      "equipmentNote": "I have extra gear for Ping Pong. Drop a message in the meetup chat when you arrive.",
+      "coverImage": "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Long Lane, Śródmieście",
+      "venueAddress": "23, Long Lane, Główne Miasto, Śródmieście, Gdansk, Gdańsk, Pomeranian Voivodeship, 80-801, Poland",
+      "lat": 54.3491,
+      "lng": 18.6503,
+      "startTime": "Nov 11 at 05:00",
+      "startTimeBadge": "Nov 11 at 05:00",
+      "roomStatus": "UPCOMING",
+      "preferredAgeRange": "18–25",
+      "isRecurring": false,
+      "skillCompatibility": "ALL_LEVELS",
+      "maxParticipants": 4,
+      "joinMode": "OPEN",
+      "hostId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+          "name": "matvii",
+          "age": 26,
+          "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+          "skillBadge": "Verified Member",
+          "tagline": "Joined via Google. Ready to meet up!",
+          "joinedAt": "2026-11-05T03:47:26.790Z",
+          "arrivalStatus": "ON_MY_WAY",
+          "reliabilityScore": 100,
+          "ratingAvg": 5
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-05T03:47:26.790Z"
+    },
+    {
       "id": "lobby-3b250e7d-0d07-4118-95a1-49a4922361ef",
       "category": "Jogging",
       "mapPinLabel": "MEET",
@@ -354,23 +430,6 @@
           "note": "Hey Maya! Walking past Astor Place right now, can be at the tables in 8 mins.",
           "status": "PENDING",
           "createdAt": "2026-11-01T23:32:00.000Z"
-        },
-        {
-          "id": "req-1e5c86b6-4117-492d-aff1-3226f9a9a0a5",
-          "user": {
-            "id": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
-            "name": "Alex Chen",
-            "age": 26,
-            "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-            "skillBadge": "Verified Member",
-            "tagline": "Signed in with Google! Down for sports, chess, and hanging out.",
-            "reliabilityScore": 100,
-            "ratingAvg": 5,
-            "joinedAt": "2026-11-04T22:18:11.455Z"
-          },
-          "note": "hey",
-          "status": "PENDING",
-          "createdAt": "2026-11-04T22:18:11.455Z"
         }
       ],
       "createdAt": "2026-11-01T23:20:00.000Z"
@@ -914,6 +973,46 @@
       "text": "On my way, about 5 mins out.",
       "createdAt": "2026-11-05T02:36:13.818Z",
       "isSystem": false
+    },
+    {
+      "id": "msg-01b323c2-42cc-4f77-9b22-ad91614036dc",
+      "lobbyId": "lobby-a2f3cdaa-58ee-4ee0-92e3-f961e0ebc434",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "Meetup live at Long Lane, Śródmieście. Let me know here when you are heading over.",
+      "createdAt": "2026-11-05T03:47:26.790Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-16e96730-fbd8-4b54-b90c-de1a568b1f04",
+      "lobbyId": "lobby-6f7e333b-cd05-4156-8661-36959c9e2746",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "Meetup live at Wały Jagiellońskie, Śródmieście. Let me know here when you are heading over.",
+      "createdAt": "2026-11-05T03:48:36.134Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-1e9aaa63-c983-4232-8be6-038f61a2f1ff",
+      "lobbyId": "lobby-6f7e333b-cd05-4156-8661-36959c9e2746",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "$query = \"SELECT * FROM users WHERE username = '$username' AND password = '$password'\";",
+      "createdAt": "2026-11-05T03:48:39.129Z",
+      "isSystem": false
+    },
+    {
+      "id": "msg-0ffc211d-e980-4869-b809-58c72a0f0a08",
+      "lobbyId": "lobby-6f7e333b-cd05-4156-8661-36959c9e2746",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "$query = \"SELECT * FROM users WHERE username = '$username' AND password = '$password'\";",
+      "createdAt": "2026-11-05T03:48:55.398Z",
+      "isSystem": false
     }
   ],
   "ratings": [
@@ -946,18 +1045,18 @@
   ],
   "notifications": [
     {
-      "id": "notif-e535b8a4-89d2-48a8-b3f8-1ab7d7944ad2-user-maya",
+      "id": "notif-9f32e821-a427-4315-8a99-f9895453d903-user-maya",
       "userId": "user-maya",
       "type": "BEACON_MATCH",
       "title": "Radar Beacon Match · Ping Pong",
-      "body": "matvii just started \"Jogging\" at Local Park / Community Spot.",
-      "lobbyId": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
+      "body": "matvii just started \"Spontaneous Ping Pong Meetup (Up to 4)\" at Long Lane, Śródmieście.",
+      "lobbyId": "lobby-a2f3cdaa-58ee-4ee0-92e3-f961e0ebc434",
       "read": false,
-      "createdAt": "2026-11-05T02:33:52.884Z"
+      "createdAt": "2026-11-05T03:47:26.790Z"
     },
     {
-      "id": "notif-7b738ec1-53ad-42c9-b1cb-b358a21317ae-user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
-      "userId": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
+      "id": "notif-e535b8a4-89d2-48a8-b3f8-1ab7d7944ad2-user-maya",
+      "userId": "user-maya",
       "type": "BEACON_MATCH",
       "title": "Radar Beacon Match · Ping Pong",
       "body": "matvii just started \"Jogging\" at Local Park / Community Spot.",
@@ -982,25 +1081,6 @@
       "body": "Welcome, Sam Taylor! Your account is verified with a 100% Reliability Score.",
       "read": false,
       "createdAt": "2026-11-04T23:55:57.969Z"
-    },
-    {
-      "id": "notif-4daddd27-486f-4403-95b1-65fe377842c6-user-maya",
-      "userId": "user-maya",
-      "type": "REQUEST",
-      "title": "New Join Request · Ping Pong",
-      "body": "Alex Chen (Verified Member) requested to join \"1v1 Outdoor Table Ping Pong\".",
-      "lobbyId": "lobby-pong-1",
-      "read": false,
-      "createdAt": "2026-11-04T22:18:11.455Z"
-    },
-    {
-      "id": "notif-92c885b4-a6be-4c94-b478-14c1c036b13b",
-      "userId": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
-      "type": "SYSTEM",
-      "title": "Google Sign-In Verified",
-      "body": "Welcome, Alex Chen! Your account is verified with a 100% Reliability Score.",
-      "read": false,
-      "createdAt": "2026-11-04T20:36:59.898Z"
     },
     {
       "id": "notif-1",

@@ -7,11 +7,10 @@ export async function GET(req: NextRequest) {
   const baseUrl = getAppBaseUrl(req);
   const state = crypto.randomUUID();
 
-  // If APPLE_CLIENT_ID is not configured (e.g. local dev before keys are set),
-  // gracefully redirect to the callback with mock mode so dev workflow never breaks.
   if (!process.env.APPLE_CLIENT_ID) {
-    const mockRedirect = new URL('/api/auth/callback/apple?mock=true', baseUrl);
-    return NextResponse.redirect(mockRedirect);
+    return NextResponse.redirect(
+      new URL('/?auth_error=Apple+Sign-In+is+not+configured.+Missing+APPLE_CLIENT_ID.', baseUrl)
+    );
   }
 
   const authUrl = buildAppleAuthUrl(baseUrl, state);

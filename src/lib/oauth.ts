@@ -55,9 +55,14 @@ export async function exchangeGoogleCode(
 ): Promise<OAuthUserDetails | null> {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
+  if (!clientId || !clientSecret) {
+    console.error('[Google OAuth] Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in environment');
+    return null;
+  }
 
   const redirectUri = `${baseUrl}/api/auth/callback/google`;
+  console.log('[Google OAuth] Exchanging auth code at redirectUri:', redirectUri);
+
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -71,19 +76,33 @@ export async function exchangeGoogleCode(
   });
 
   if (!tokenRes.ok) {
+    const errorBody = await tokenRes.text().catch(() => '');
+    console.error(`[Google OAuth] Token exchange failed with HTTP ${tokenRes.status}:`, errorBody);
     return null;
   }
 
   const tokenData = await tokenRes.json();
   const accessToken = tokenData.access_token;
-  if (!accessToken) return null;
+  if (!accessToken) {
+    console.error('[Google OAuth] No access_token returned by Google token endpoint');
+    return null;
+  }
 
   const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (!userinfoRes.ok) return null;
+  if (!userinfoRes.ok) {
+    const errorBody = await userinfoRes.text().catch(() => '');
+    console.error(`[Google OAuth] Userinfo request failed with HTTP ${userinfoRes.status}:`, errorBody);
+    return null;
+  }
+
   const userinfo = await userinfoRes.json();
+  if (!userinfo.email) {
+    console.error('[Google OAuth] No email found in Google userinfo payload:', userinfo);
+    return null;
+  }
 
   return {
     email: userinfo.email,
