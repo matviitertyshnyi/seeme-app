@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   },
   description:
     'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

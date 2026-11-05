@@ -333,7 +333,7 @@ export default function MapRadar({
                 <button
                   type="button"
                   onClick={(e) => onQuickJoin(selectedPreviewLobby, e)}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-extrabold shadow-[0_2px_14px_rgba(234,88,12,0.4)] border border-orange-400/30 transition-all"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-500 text-white text-xs font-extrabold shadow-[0_2px_14px_rgba(234,88,12,0.4)] border border-orange-400/30 transition-all"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   {selectedPreviewLobby.joinMode === 'OPEN' ? 'Join' : 'Request'}

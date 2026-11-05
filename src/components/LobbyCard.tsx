@@ -259,7 +259,7 @@ export function LobbyCard({
               type="button"
               disabled={isJoining}
               onClick={(e) => onQuickJoin(lobby, e)}
-              className="min-h-[42px] px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-95 text-white text-xs font-bold tracking-tight transition active:scale-[0.98] shadow-[0_2px_14px_rgba(234,88,12,0.38)] border border-orange-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              className="min-h-[42px] px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 active:scale-95 text-white text-xs font-bold tracking-tight transition active:scale-[0.98] shadow-[0_2px_14px_rgba(234,88,12,0.38)] border border-orange-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               {lobby.joinMode === 'OPEN' ? t('join_spot') : t('request_spot')}
             </button>

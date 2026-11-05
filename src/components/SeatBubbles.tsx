@@ -73,7 +73,7 @@ export function SeatBubbles({
                 isArrived
                   ? 'bg-emerald-600 shadow-sm'
                   : isHost
-                  ? 'bg-gradient-to-r from-orange-600 to-amber-600 shadow-[0_0_10px_rgba(234,88,12,0.4)]'
+                  ? 'bg-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.4)]'
                   : isMe
                   ? 'bg-orange-500 shadow-[0_0_8px_rgba(234,88,12,0.3)]'
                   : 'bg-stone-300 dark:bg-stone-700'
@@ -96,7 +96,7 @@ export function SeatBubbles({
               {isHost && (
                 <span
                   aria-label="Meetup Host"
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs"
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs"
                 >
                   <Crown className="w-2.5 h-2.5" />
                 </span>

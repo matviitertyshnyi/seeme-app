@@ -66,7 +66,7 @@ export function BottomNav({
         !isSignedOut && meetupsCount > 0 ? (
           <span
             aria-label={`${meetupsCount} meetups`}
-            className="absolute top-1 right-3 sm:right-4 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.5)]"
+            className="absolute top-1 right-3 sm:right-4 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-orange-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.5)]"
           >
             {meetupsCount}
           </span>
@@ -138,7 +138,7 @@ export function BottomNav({
         <span className="leading-tight text-[11px] truncate max-w-[64px]">{item.label}</span>
         {item.badge}
         {isActive && (
-          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
+          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
         )}
       </button>
     );
@@ -163,7 +163,7 @@ export function BottomNav({
             type="button"
             onClick={onOpenHostModal}
             aria-label="Host a Meetup"
-            className="relative -top-1.5 w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-500 text-white flex items-center justify-center shadow-[0_4px_16px_rgba(234,88,12,0.45)] hover:scale-105 active:scale-95 transition-all border-2 border-white dark:border-[#141210] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 cursor-pointer"
+            className="relative -top-1.5 w-11 h-11 rounded-full bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center shadow-[0_4px_16px_rgba(234,88,12,0.45)] hover:scale-105 active:scale-95 transition-all border-2 border-white dark:border-[#141210] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 cursor-pointer"
           >
             <Plus className="w-5 h-5 stroke-[2.8]" />
           </button>

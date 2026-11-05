@@ -737,7 +737,7 @@ export function RoomDetailModal({
               {/* Continuous Progress Bar */}
               <div className="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 transition-all duration-500 rounded-full"
+                  className="h-full bg-orange-600 transition-all duration-500 rounded-full"
                   style={{
                     width: `${meetupProgressPercent}%`,
                   }}

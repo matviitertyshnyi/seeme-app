@@ -282,7 +282,7 @@ export function AgeSelectorBottomSheet({
           <button
             type="button"
             onClick={handleApply}
-            className="min-h-[44px] flex-1 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-[0.98] text-white text-xs font-bold shadow-[0_2px_14px_rgba(234,88,12,0.38)] border border-orange-400/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+            className="min-h-[44px] flex-1 rounded-xl bg-orange-600 hover:bg-orange-500 active:scale-[0.98] text-white text-xs font-bold shadow-[0_2px_14px_rgba(234,88,12,0.38)] border border-orange-400/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             {stagedRanges.length === 0
               ? 'Show All Meetups'

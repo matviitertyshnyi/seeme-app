@@ -116,7 +116,7 @@ export function ProfileView({
             <button
               type="button"
               onClick={() => onSwitchUser(activeUser.id)}
-              className="min-h-[44px] w-full py-3 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-sm transition-all"
+              className="min-h-[44px] w-full py-3 rounded-full bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition-all"
             >
               Continue as {activeUser.name}
             </button>

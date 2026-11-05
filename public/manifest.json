@@ -4,7 +4,15 @@
   "description": "Step outside. Connect for spontaneous in-person sports, games, chess, and real-world meetups with verified nearby people.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#12100E",
-  "theme_color": "#EA580C",
-  "orientation": "portrait-primary"
+  "background_color": "#14151C",
+  "theme_color": "#FF5500",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

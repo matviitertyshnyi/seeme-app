@@ -1407,7 +1407,7 @@ export default function LeaveTheRoomHomePage() {
                       onClick={() => setSelectedBroadCategory(catName)}
                       className={`min-h-[38px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 border transition-all ${
                         isSelected
-                          ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white border-orange-500 shadow-xs'
+                          ? 'bg-orange-600 text-white border-orange-500 shadow-xs'
                           : 'bg-white dark:bg-[#1C1917] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800'
                       }`}
                     >
