@@ -34,6 +34,7 @@ export interface ExploreViewProps {
   currentLang: SupportedLanguage;
   onOpenHostModal: () => void;
   onResetFilters: () => void;
+  onOpenCitySelector?: () => void;
 }
 
 export function ExploreView({
@@ -63,6 +64,7 @@ export function ExploreView({
   currentLang,
   onOpenHostModal,
   onResetFilters,
+  onOpenCitySelector,
 }: ExploreViewProps) {
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
   const locationName = userLocationLabel.split(',')[0];
@@ -121,9 +123,9 @@ export function ExploreView({
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             <button
               type="button"
-              onClick={onNearMeGps}
-              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs shrink-0"
-              title="Tap to update current location"
+              onClick={onOpenCitySelector || onNearMeGps}
+              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs shrink-0 cursor-pointer"
+              title="Tap to select country, city or GPS location"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               <span className="truncate max-w-[115px] sm:max-w-none">{locationName}</span>
@@ -216,6 +218,16 @@ export function ExploreView({
             >
               Reset Filters
             </button>
+
+            {onOpenCitySelector && (
+              <button
+                type="button"
+                onClick={onOpenCitySelector}
+                className="min-h-[42px] px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700 transition active:scale-[0.98]"
+              >
+                Change City
+              </button>
+            )}
           </div>
         </div>
       ) : (

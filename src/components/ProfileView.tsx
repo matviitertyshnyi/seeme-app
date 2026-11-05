@@ -13,6 +13,7 @@ import {
   RotateCcw,
   UserCheck,
   LogOut,
+  MapPin,
 } from 'lucide-react';
 import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import { UserPersona } from '@/types/lobby';
@@ -40,6 +41,7 @@ export interface ProfileViewProps {
   onResetDemoData: () => void;
   onSignOut: () => void;
   onToggleBeacon?: () => void;
+  onOpenCitySelector?: () => void;
 }
 
 export function ProfileView({
@@ -59,8 +61,18 @@ export function ProfileView({
   onResetDemoData,
   onSignOut,
   onToggleBeacon,
+  onOpenCitySelector,
 }: ProfileViewProps) {
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
+
+  const isRealUser = Boolean(
+    activeUser.authProvider === 'google' ||
+      activeUser.authProvider === 'apple' ||
+      activeUser.id.startsWith('user-google-') ||
+      activeUser.id.startsWith('user-apple-') ||
+      activeUser.id.startsWith('user-g-') ||
+      activeUser.id.startsWith('user-a-')
+  );
 
   return (
     <div className="space-y-5">
@@ -146,9 +158,20 @@ export function ProfileView({
                     </span>
                   </div>
 
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                    {activeUser.neighborhood}
-                  </p>
+                  <div className="mt-0.5">
+                    <button
+                      type="button"
+                      onClick={onOpenCitySelector}
+                      className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline inline-flex items-center gap-1 group cursor-pointer"
+                      title="Tap to change your city"
+                    >
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span>{activeUser.neighborhood || 'Select your city'}</span>
+                      <span className="text-[10px] text-stone-500 dark:text-stone-400 font-normal group-hover:text-stone-300">
+                        · Change
+                      </span>
+                    </button>
+                  </div>
 
                   <p className="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
                     {activeUser.tagline}
@@ -307,77 +330,100 @@ export function ProfileView({
             </button>
           </section>
 
-          {/* Switch Active Demo Account */}
-          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                  Switch Active Demo Account
-                </h2>
+          {/* Switch Active Demo Account (Only shown in demo mode, hidden for real logged-in users) */}
+          {!isRealUser ? (
+            <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
+                    Switch Active Demo Account
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={onResetDemoData}
+                  className="min-h-[32px] px-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Demo</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onResetDemoData}
-                className="min-h-[32px] px-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Demo</span>
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {personas
-                .filter(
-                  (p) => !p.name.includes('Adversarial') && !p.name.includes('Auditor')
-                )
-                .map((persona) => {
-                  const isSelected = persona.id === activeUser.id;
-                  return (
-                    <button
-                      key={persona.id}
-                      type="button"
-                      onClick={() => onSwitchUser(persona.id)}
-                      className={`min-h-[48px] p-2 rounded-xl border text-left flex items-center justify-between gap-2 transition-all ${
-                        isSelected
-                          ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500'
-                          : 'bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100 border-stone-200 dark:border-stone-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <img
-                          src={persona.avatar}
-                          alt={persona.name}
-                          className="w-8 h-8 rounded-full object-cover shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <div className="text-xs font-bold text-stone-950 dark:text-stone-100 truncate">
-                            {persona.name}, {persona.age}
-                          </div>
-                          <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
-                            {persona.skillBadge}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {personas
+                  .filter(
+                    (p) => !p.name.includes('Adversarial') && !p.name.includes('Auditor')
+                  )
+                  .map((persona) => {
+                    const isSelected = persona.id === activeUser.id;
+                    return (
+                      <button
+                        key={persona.id}
+                        type="button"
+                        onClick={() => onSwitchUser(persona.id)}
+                        className={`min-h-[48px] p-2 rounded-xl border text-left flex items-center justify-between gap-2 transition-all ${
+                          isSelected
+                            ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500'
+                            : 'bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100 border-stone-200 dark:border-stone-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <img
+                            src={persona.avatar}
+                            alt={persona.name}
+                            className="w-8 h-8 rounded-full object-cover shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-stone-950 dark:text-stone-100 truncate">
+                              {persona.name}, {persona.age}
+                            </div>
+                            <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
+                              {persona.skillBadge}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      {isSelected && (
-                        <UserCheck className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
-            </div>
+                        {isSelected && (
+                          <UserCheck className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
 
-            <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end">
+              <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </section>
+          ) : (
+            /* Real Authenticated User Account Actions */
+            <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
+                  Signed In
+                </h2>
+                <p className="text-xs font-medium text-stone-800 dark:text-stone-200 mt-0.5 truncate">
+                  {activeUser.email || activeUser.name}
+                </p>
+              </div>
+
               <button
                 type="button"
                 onClick={onSignOut}
-                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="min-h-[42px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </button>
-            </div>
-          </section>
+            </section>
+          )}
         </>
       )}
     </div>

@@ -1,6 +1,78 @@
 {
   "personas": [
     {
+      "id": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "email": "vladtratata10@gmail.com",
+      "name": "matvii",
+      "age": 26,
+      "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "skillBadge": "Verified Member",
+      "tagline": "Joined via Google. Ready to meet up!",
+      "neighborhood": "",
+      "verified": true,
+      "verificationStatus": "VERIFIED",
+      "role": "USER",
+      "isBanned": false,
+      "favoriteActivities": [
+        "Ping Pong",
+        "Coffee",
+        "Chess"
+      ],
+      "reliabilityScore": 100,
+      "meetupsAttended": 0,
+      "hoursPlayed": 0,
+      "ratingAvg": 5,
+      "ratingCount": 0,
+      "streakWeeks": 1,
+      "bannedUserIds": [],
+      "regularPartnerIds": [],
+      "settings": {
+        "iosAndroidPush": true,
+        "soundEffects": true,
+        "hapticFeedback": true,
+        "distanceUnit": "km",
+        "profileVisible": true,
+        "showReliabilityScore": true
+      },
+      "authProvider": "google"
+    },
+    {
+      "id": "user-apple-b1b2ad2d-19f3-4b19-ace9-8561d10def5c",
+      "email": "jordan.miller.meetups@icloud.com",
+      "name": "Sam Taylor",
+      "age": 26,
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      "skillBadge": "Verified Member",
+      "tagline": "Joined via Apple ID. Ready to meet up!",
+      "neighborhood": "Greenwich Village",
+      "verified": true,
+      "verificationStatus": "VERIFIED",
+      "role": "USER",
+      "isBanned": false,
+      "favoriteActivities": [
+        "Ping Pong",
+        "Coffee",
+        "Chess"
+      ],
+      "reliabilityScore": 100,
+      "meetupsAttended": 0,
+      "hoursPlayed": 0,
+      "ratingAvg": 5,
+      "ratingCount": 0,
+      "streakWeeks": 1,
+      "bannedUserIds": [],
+      "regularPartnerIds": [],
+      "settings": {
+        "iosAndroidPush": true,
+        "soundEffects": true,
+        "hapticFeedback": true,
+        "distanceUnit": "km",
+        "profileVisible": true,
+        "showReliabilityScore": true
+      },
+      "authProvider": "apple"
+    },
+    {
       "id": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
       "email": "alex.chen.meetups@gmail.com",
       "name": "Alex Chen",
@@ -261,6 +333,82 @@
   ],
   "lobbies": [
     {
+      "id": "lobby-3b250e7d-0d07-4118-95a1-49a4922361ef",
+      "category": "Jogging",
+      "mapPinLabel": "MEET",
+      "title": "Jogging",
+      "equipmentNote": "I have extra gear for Jogging. Drop a message in the meetup chat when you arrive.",
+      "coverImage": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Local Park / Community Spot",
+      "venueAddress": "Central Meeting Spot",
+      "lat": 50.45086,
+      "lng": 30.52544,
+      "startTime": "Later today",
+      "startTimeBadge": "Later today",
+      "roomStatus": "UPCOMING",
+      "preferredAgeRange": "18–25",
+      "isRecurring": false,
+      "skillCompatibility": "CASUAL",
+      "maxParticipants": 2,
+      "joinMode": "APPROVAL_REQUIRED",
+      "hostId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+          "name": "matvii",
+          "age": 26,
+          "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+          "skillBadge": "Verified Member",
+          "tagline": "Joined via Google. Ready to meet up!",
+          "joinedAt": "2026-11-05T02:35:24.482Z",
+          "arrivalStatus": "ON_MY_WAY",
+          "reliabilityScore": 100,
+          "ratingAvg": 5
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-05T02:35:24.482Z"
+    },
+    {
+      "id": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
+      "category": "Ping Pong",
+      "mapPinLabel": "PONG",
+      "title": "Jogging",
+      "equipmentNote": "I have extra gear for Ping Pong. Drop a message in the meetup chat when you arrive.",
+      "coverImage": "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Local Park / Community Spot",
+      "venueAddress": "Central Meeting Spot",
+      "lat": 50.45064,
+      "lng": 30.52322,
+      "startTime": "Later today",
+      "startTimeBadge": "Later today",
+      "roomStatus": "UPCOMING",
+      "preferredAgeRange": "18–25",
+      "isRecurring": false,
+      "skillCompatibility": "CASUAL",
+      "maxParticipants": 2,
+      "joinMode": "OPEN",
+      "hostId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+          "name": "matvii",
+          "age": 26,
+          "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+          "skillBadge": "Verified Member",
+          "tagline": "Joined via Google. Ready to meet up!",
+          "joinedAt": "2026-11-05T02:33:52.884Z",
+          "arrivalStatus": "ON_MY_WAY",
+          "reliabilityScore": 100,
+          "ratingAvg": 5
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-05T02:33:52.884Z"
+    },
+    {
       "id": "lobby-chess-1",
       "category": "Chess",
       "mapPinLabel": "CHESS",
@@ -361,6 +509,23 @@
           "note": "Hey Maya! Walking past Astor Place right now, can be at the tables in 8 mins.",
           "status": "PENDING",
           "createdAt": "2026-11-01T23:32:00.000Z"
+        },
+        {
+          "id": "req-1e5c86b6-4117-492d-aff1-3226f9a9a0a5",
+          "user": {
+            "id": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
+            "name": "Alex Chen",
+            "age": 26,
+            "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+            "skillBadge": "Verified Member",
+            "tagline": "Signed in with Google! Down for sports, chess, and hanging out.",
+            "reliabilityScore": 100,
+            "ratingAvg": 5,
+            "joinedAt": "2026-11-04T22:18:11.455Z"
+          },
+          "note": "hey",
+          "status": "PENDING",
+          "createdAt": "2026-11-04T22:18:11.455Z"
         }
       ],
       "createdAt": "2026-11-01T23:20:00.000Z"
@@ -654,6 +819,189 @@
       ],
       "pendingRequests": [],
       "createdAt": "2026-11-01T22:50:00.000Z"
+    },
+    {
+      "id": "lobby-kyiv-pong-1",
+      "category": "Ping Pong",
+      "mapPinLabel": "PONG",
+      "title": "Shevchenko Park Outdoor Table Tennis Rally",
+      "equipmentNote": "Have 4 Donic paddles and a box of 3-star balls. Ready for casual 1v1 and doubles on the park concrete tables.",
+      "coverImage": "https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Shevchenko Park Ping Pong Spot",
+      "venueAddress": "Taras Shevchenko Park, Kyiv",
+      "lat": 50.4418,
+      "lng": 30.5126,
+      "startTime": "Now",
+      "startTimeBadge": "Live Now",
+      "roomStatus": "LIVE",
+      "skillCompatibility": "ALL_LEVELS",
+      "maxParticipants": 4,
+      "joinMode": "OPEN",
+      "hostId": "user-maya",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-maya",
+          "name": "Maya Lin",
+          "age": 24,
+          "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+          "skillBadge": "Adv Pong",
+          "tagline": "Always down for 1v1 ping pong.",
+          "joinedAt": "2026-11-01T23:00:00.000Z",
+          "arrivalStatus": "ARRIVED",
+          "spotClue": "Near the chess pavilion, green jacket",
+          "reliabilityScore": 99,
+          "ratingAvg": 4.9
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-01T23:00:00.000Z"
+    },
+    {
+      "id": "lobby-kyiv-chess-1",
+      "category": "Chess",
+      "mapPinLabel": "CHESS",
+      "title": "Podil Rapid Chess & Specialty Coffee",
+      "equipmentNote": "Bringing 2 wooden chess sets and clocks. Meet near Kontraktova Square.",
+      "coverImage": "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Kontraktova Square Coffee Spot",
+      "venueAddress": "Podil, Kyiv",
+      "lat": 50.4635,
+      "lng": 30.5192,
+      "startTime": "In 30 mins",
+      "startTimeBadge": "In 30m",
+      "roomStatus": "UPCOMING",
+      "skillCompatibility": "ALL_LEVELS",
+      "maxParticipants": 4,
+      "joinMode": "OPEN",
+      "hostId": "user-liam",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-liam",
+          "name": "Liam Vance",
+          "age": 27,
+          "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+          "skillBadge": "1550 Elo",
+          "tagline": "Rapid chess player.",
+          "joinedAt": "2026-11-01T23:15:00.000Z",
+          "arrivalStatus": "ARRIVED",
+          "spotClue": "Outside corner table",
+          "reliabilityScore": 97,
+          "ratingAvg": 4.8
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-01T23:15:00.000Z"
+    },
+    {
+      "id": "lobby-kyiv-run-1",
+      "category": "Run Club",
+      "mapPinLabel": "RUN",
+      "title": "Trukhaniv Island 5K Scenic River Run",
+      "equipmentNote": "Easy 5:30/km conversational pace across Pedestrian Bridge into the park.",
+      "coverImage": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Parkovy Pedestrian Bridge Entrance",
+      "venueAddress": "Naberezhne Highway, Kyiv",
+      "lat": 50.4578,
+      "lng": 30.5365,
+      "startTime": "In 1 hour",
+      "startTimeBadge": "In 50m",
+      "roomStatus": "UPCOMING",
+      "skillCompatibility": "CASUAL",
+      "maxParticipants": 6,
+      "joinMode": "OPEN",
+      "hostId": "user-marcus",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-marcus",
+          "name": "Marcus Cole",
+          "age": 28,
+          "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+          "skillBadge": "5:00/km",
+          "tagline": "Social distance runs.",
+          "joinedAt": "2026-11-01T23:00:00.000Z",
+          "arrivalStatus": "ON_MY_WAY",
+          "reliabilityScore": 95,
+          "ratingAvg": 4.7
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-01T23:00:00.000Z"
+    },
+    {
+      "id": "lobby-warsaw-pong-1",
+      "category": "Ping Pong",
+      "mapPinLabel": "PONG",
+      "title": "Pole Mokotowskie Table Tennis Match",
+      "equipmentNote": "Playing at concrete tables in Pole Mokotowskie. Extra paddles available.",
+      "coverImage": "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Pole Mokotowskie Sports Spot",
+      "venueAddress": "Pole Mokotowskie, Warsaw",
+      "lat": 52.2104,
+      "lng": 20.9996,
+      "startTime": "Now",
+      "startTimeBadge": "Live Now",
+      "roomStatus": "LIVE",
+      "skillCompatibility": "ALL_LEVELS",
+      "maxParticipants": 4,
+      "joinMode": "OPEN",
+      "hostId": "user-elena",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-elena",
+          "name": "Elena Rostova",
+          "age": 25,
+          "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+          "skillBadge": "Casual",
+          "tagline": "Down for outdoor ping pong.",
+          "joinedAt": "2026-11-01T23:00:00.000Z",
+          "arrivalStatus": "ARRIVED",
+          "spotClue": "Near the pond benches",
+          "reliabilityScore": 96,
+          "ratingAvg": 4.9
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-01T23:00:00.000Z"
+    },
+    {
+      "id": "lobby-warsaw-chess-1",
+      "category": "Chess",
+      "mapPinLabel": "CHESS",
+      "title": "Saxon Garden Casual Chess Rally",
+      "equipmentNote": "Bringing 2 boards to Ogród Saski. All skill levels welcome.",
+      "coverImage": "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=1000&q=80",
+      "venueName": "Ogród Saski Central Walkway",
+      "venueAddress": "Śródmieście, Warsaw",
+      "lat": 52.2405,
+      "lng": 21.0067,
+      "startTime": "In 30 mins",
+      "startTimeBadge": "In 30m",
+      "roomStatus": "UPCOMING",
+      "skillCompatibility": "ALL_LEVELS",
+      "maxParticipants": 4,
+      "joinMode": "OPEN",
+      "hostId": "user-liam",
+      "bannedUserIds": [],
+      "participants": [
+        {
+          "id": "user-liam",
+          "name": "Liam Vance",
+          "age": 27,
+          "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+          "skillBadge": "1550 Elo",
+          "tagline": "Chess player.",
+          "joinedAt": "2026-11-01T23:15:00.000Z",
+          "arrivalStatus": "ARRIVED",
+          "reliabilityScore": 97,
+          "ratingAvg": 4.8
+        }
+      ],
+      "pendingRequests": [],
+      "createdAt": "2026-11-01T23:15:00.000Z"
     }
   ],
   "messages": [
@@ -701,6 +1049,36 @@
       "senderAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
       "text": "Just checked in at the front counter — mention the SeeMe group for Marcus at table 4.",
       "createdAt": "2026-11-01T23:20:00.000Z"
+    },
+    {
+      "id": "msg-fe5f197d-0077-4a4f-9385-7fb164051229",
+      "lobbyId": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "Meetup live at Local Park / Community Spot. Let me know here when you are heading over.",
+      "createdAt": "2026-11-05T02:33:52.884Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-f5939abd-27c1-470f-9c1f-fde6a4b54be7",
+      "lobbyId": "lobby-3b250e7d-0d07-4118-95a1-49a4922361ef",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "Meetup live at Local Park / Community Spot. Let me know here when you are heading over.",
+      "createdAt": "2026-11-05T02:35:24.482Z",
+      "isSystem": true
+    },
+    {
+      "id": "msg-16111572-c7a0-45ad-8c46-df4779618f29",
+      "lobbyId": "lobby-3b250e7d-0d07-4118-95a1-49a4922361ef",
+      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "senderName": "matvii",
+      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
+      "text": "On my way, about 5 mins out.",
+      "createdAt": "2026-11-05T02:36:13.818Z",
+      "isSystem": false
     }
   ],
   "ratings": [
@@ -732,6 +1110,54 @@
     }
   ],
   "notifications": [
+    {
+      "id": "notif-e535b8a4-89d2-48a8-b3f8-1ab7d7944ad2-user-maya",
+      "userId": "user-maya",
+      "type": "BEACON_MATCH",
+      "title": "Radar Beacon Match · Ping Pong",
+      "body": "matvii just started \"Jogging\" at Local Park / Community Spot.",
+      "lobbyId": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
+      "read": false,
+      "createdAt": "2026-11-05T02:33:52.884Z"
+    },
+    {
+      "id": "notif-7b738ec1-53ad-42c9-b1cb-b358a21317ae-user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
+      "userId": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
+      "type": "BEACON_MATCH",
+      "title": "Radar Beacon Match · Ping Pong",
+      "body": "matvii just started \"Jogging\" at Local Park / Community Spot.",
+      "lobbyId": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
+      "read": false,
+      "createdAt": "2026-11-05T02:33:52.884Z"
+    },
+    {
+      "id": "notif-b47e40b3-4f43-43e8-b7f6-3251515acb04",
+      "userId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
+      "type": "SYSTEM",
+      "title": "Google Verified",
+      "body": "Welcome, matvii! Your account is verified with a 100% Reliability Score.",
+      "read": false,
+      "createdAt": "2026-11-05T02:18:05.137Z"
+    },
+    {
+      "id": "notif-cdd8d038-0170-40d3-a3b2-e4050fb70606",
+      "userId": "user-apple-b1b2ad2d-19f3-4b19-ace9-8561d10def5c",
+      "type": "SYSTEM",
+      "title": "Apple ID Verified",
+      "body": "Welcome, Sam Taylor! Your account is verified with a 100% Reliability Score.",
+      "read": false,
+      "createdAt": "2026-11-04T23:55:57.969Z"
+    },
+    {
+      "id": "notif-4daddd27-486f-4403-95b1-65fe377842c6-user-maya",
+      "userId": "user-maya",
+      "type": "REQUEST",
+      "title": "New Join Request · Ping Pong",
+      "body": "Alex Chen (Verified Member) requested to join \"1v1 Outdoor Table Ping Pong\".",
+      "lobbyId": "lobby-pong-1",
+      "read": false,
+      "createdAt": "2026-11-04T22:18:11.455Z"
+    },
     {
       "id": "notif-92c885b4-a6be-4c94-b478-14c1c036b13b",
       "userId": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",

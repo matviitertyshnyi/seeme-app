@@ -16,6 +16,7 @@ export interface RadiusSelectorBottomSheetProps {
   radiusKm: number;
   onSelectRadius: (radius: number) => void;
   userLocationLabel?: string;
+  onOpenCitySelector?: () => void;
 }
 
 export function RadiusSelectorBottomSheet({
@@ -24,6 +25,7 @@ export function RadiusSelectorBottomSheet({
   radiusKm,
   onSelectRadius,
   userLocationLabel = 'Greenwich Village, NYC',
+  onOpenCitySelector,
 }: RadiusSelectorBottomSheetProps) {
   if (!isOpen) return null;
 
@@ -53,8 +55,20 @@ export function RadiusSelectorBottomSheet({
             >
               Distance Radius
             </h2>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-              How far are you willing to travel from {locationName}?
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
+              <span>How far are you willing to travel from {locationName}?</span>
+              {onOpenCitySelector && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenCitySelector();
+                  }}
+                  className="text-orange-600 dark:text-orange-400 font-bold hover:underline"
+                >
+                  Change City
+                </button>
+              )}
             </p>
           </div>
           <button

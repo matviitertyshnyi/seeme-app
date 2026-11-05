@@ -165,8 +165,16 @@ export function CreateLobbyModal({
       if (initialCoHost) {
         setMaxParticipants((prev) => Math.max(prev, 4));
       }
+      if (userLat && userLng) {
+        setLat(userLat);
+        setLng(userLng);
+        if (Math.abs(userLat - 40.7308) > 0.5 || Math.abs(userLng - (-73.9973)) > 0.5) {
+          setVenueName('Local Park / Community Spot');
+          setVenueAddress('Central Meeting Spot');
+        }
+      }
     }
-  }, [isOpen, initialCategory, initialStartTime, initialCoHost]);
+  }, [isOpen, initialCategory, initialStartTime, initialCoHost, userLat, userLng]);
 
   if (!isOpen) return null;
 

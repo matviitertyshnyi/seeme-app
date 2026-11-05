@@ -147,6 +147,11 @@ function readLocalDb(): DatabaseSchema {
         parsed.personas.push(seedPersona);
       }
     });
+    INITIAL_SEED_DATA.lobbies.forEach((seedLobby) => {
+      if (!parsed.lobbies.some((l) => l.id === seedLobby.id)) {
+        parsed.lobbies.push(seedLobby);
+      }
+    });
     return parsed;
   } catch {
     const seedClone = JSON.parse(JSON.stringify(INITIAL_SEED_DATA)) as DatabaseSchema;

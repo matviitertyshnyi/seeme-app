@@ -37,6 +37,8 @@ import { ToastNotification } from '@/components/ToastNotification';
 import { ExploreView } from '@/components/ExploreView';
 import { ProfileView } from '@/components/ProfileView';
 import { RadiusSelectorBottomSheet } from '@/components/RadiusSelectorBottomSheet';
+import { CitySelectorBottomSheet } from '@/components/CitySelectorBottomSheet';
+import { POPULAR_CITIES } from '@/lib/cities';
 import { CategoryFilterBottomSheet } from '@/components/CategoryFilterBottomSheet';
 import { CommunityPoliciesModal } from '@/components/CommunityPoliciesModal';
 import { LanguageSelectorBottomSheet } from '@/components/LanguageSelectorBottomSheet';
@@ -99,7 +101,7 @@ export default function LeaveTheRoomHomePage() {
   );
 
   const [activeNav, setActiveNav] = useState<NavDestination>('EXPLORE');
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const isThemeInitialized = React.useRef(false);
 
   const [selectedBroadCategory, setSelectedBroadCategory] = useState<string>('All Categories');
@@ -148,6 +150,7 @@ export default function LeaveTheRoomHomePage() {
   // Modals & Interactive States
   const [selectedLobbyId, setSelectedLobbyId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCitySelectorOpen, setIsCitySelectorOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'LOGIN' | 'EDIT'>('LOGIN');
   const [isMetricsModalOpen, setIsMetricsModalOpen] = useState(false);
@@ -169,20 +172,18 @@ export default function LeaveTheRoomHomePage() {
     [personas, activePersonaId]
   );
 
-  // Initialize theme from localStorage or system preference
+  // Initialize theme from localStorage or default to dark
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored =
         localStorage.getItem('leavetheroom_theme') ||
         localStorage.getItem('seeme_theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const htmlIsDark = document.documentElement.classList.contains('dark');
-      if (stored === 'dark' || (!stored && prefersDark) || htmlIsDark) {
-        setIsDarkMode(true);
-        document.documentElement.classList.add('dark');
-      } else {
+      if (stored === 'light') {
         setIsDarkMode(false);
         document.documentElement.classList.remove('dark');
+      } else {
+        setIsDarkMode(true);
+        document.documentElement.classList.add('dark');
       }
       isThemeInitialized.current = true;
     }
@@ -306,21 +307,99 @@ export default function LeaveTheRoomHomePage() {
     fetchLobbies();
   }, [fetchLobbies]);
 
-  // Load persistent user session from localStorage
+  // Load persistent user session from server cookie or localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedSession =
-        localStorage.getItem('leavetheroom_session_user_id') ||
-        localStorage.getItem('seeme_session_user_id');
-      if (savedSession && savedSession !== 'signed_out') {
-        setActivePersonaId(savedSession);
-        setIsSignedOut(false);
-      } else {
-        setIsSignedOut(true);
+    async function checkSession() {
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        const authStatus = url.searchParams.get('auth');
+        const authError = url.searchParams.get('auth_error');
+        if (authStatus === 'success') {
+          showToast('Signed in successfully!');
+          url.searchParams.delete('auth');
+          window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+        } else if (authError) {
+          showToast(`Sign in error: ${authError}`);
+          url.searchParams.delete('auth_error');
+          window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+        }
+
+        let loggedInUser: UserPersona | null = null;
+        try {
+          const res = await fetch('/api/auth/session', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.authenticated && data.user) {
+              loggedInUser = data.user;
+              setActivePersonaId(data.user.id);
+              setIsSignedOut(false);
+              localStorage.setItem('leavetheroom_session_user_id', data.user.id);
+              localStorage.setItem('seeme_session_user_id', data.user.id);
+            }
+          }
+        } catch {
+          // fallback to localStorage
+        }
+
+        if (!loggedInUser) {
+          const savedSession =
+            localStorage.getItem('leavetheroom_session_user_id') ||
+            localStorage.getItem('seeme_session_user_id');
+          if (savedSession && savedSession !== 'signed_out') {
+            setActivePersonaId(savedSession);
+            setIsSignedOut(false);
+            const foundInList = personas.find((p) => p.id === savedSession);
+            if (foundInList) loggedInUser = foundInList;
+          } else {
+            setIsSignedOut(true);
+          }
+        }
+
+        // Load saved city location if available, or initialize from user's chosen city
+        const savedLoc = localStorage.getItem('leavetheroom_user_location');
+        if (savedLoc) {
+          try {
+            const parsed = JSON.parse(savedLoc);
+            if (parsed.lat && parsed.lng && parsed.label) {
+              setUserCoords({
+                lat: parsed.lat,
+                lng: parsed.lng,
+                label: parsed.label,
+                isLiveGps: false,
+              });
+            }
+          } catch {}
+        } else if (loggedInUser) {
+          const userCity = loggedInUser.neighborhood;
+          if (userCity && userCity !== 'Greenwich Village') {
+            const matchedPreset = POPULAR_CITIES.find(
+              (c) =>
+                c.label.toLowerCase().includes(userCity.toLowerCase()) ||
+                c.name.toLowerCase() === userCity.toLowerCase()
+            );
+            if (matchedPreset) {
+              const newCoords = {
+                lat: matchedPreset.lat,
+                lng: matchedPreset.lng,
+                label: matchedPreset.label,
+                isLiveGps: false,
+              };
+              setUserCoords(newCoords);
+              localStorage.setItem('leavetheroom_user_location', JSON.stringify(newCoords));
+            } else {
+              setIsCitySelectorOpen(true);
+            }
+          } else {
+            // First time login with no city selected -> prompt user to select their city
+            setIsCitySelectorOpen(true);
+          }
+        }
+
+        setHasCheckedSession(true);
       }
-      setHasCheckedSession(true);
     }
-  }, []);
+    checkSession();
+  }, [showToast]);
 
   const handleSwitchUser = (userId: string) => {
     setActivePersonaId(userId);
@@ -345,74 +424,23 @@ export default function LeaveTheRoomHomePage() {
       localStorage.setItem('seeme_session_user_id', 'signed_out');
       document.cookie = 'leavetheroom_session=signed_out; path=/; max-age=0';
     }
+    fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'LOGOUT' }),
+    }).catch(() => {});
     showToast('Signed out of Leave The Room');
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'GOOGLE_AUTH',
-          email: 'alex.chen.meetups@gmail.com',
-          name: 'Alex Chen',
-          avatar:
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.personas)) setPersonas(data.personas);
-        if (data.persona) {
-          setActivePersonaId(data.persona.id);
-          setIsSignedOut(false);
-          setIsGuestMode(false);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('leavetheroom_session_user_id', data.persona.id);
-            localStorage.setItem('seeme_session_user_id', data.persona.id);
-            document.cookie = `leavetheroom_session=${data.persona.id}; path=/; max-age=31536000; SameSite=Lax`;
-          }
-          triggerSensoryFeedback('SUCCESS', data.persona.settings);
-          showToast(`Signed in with Google as ${data.persona.name}!`);
-        }
-      }
-    } catch {
-      showToast('Could not sign in with Google');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/api/auth/google';
     }
   };
 
   const handleAppleSignIn = async () => {
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'APPLE_AUTH',
-          email: 'apple.member@icloud.com',
-          name: 'Jordan Miller',
-          avatar:
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.personas)) setPersonas(data.personas);
-        if (data.persona) {
-          setActivePersonaId(data.persona.id);
-          setIsSignedOut(false);
-          setIsGuestMode(false);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('leavetheroom_session_user_id', data.persona.id);
-            localStorage.setItem('seeme_session_user_id', data.persona.id);
-            document.cookie = `leavetheroom_session=${data.persona.id}; path=/; max-age=31536000; SameSite=Lax`;
-          }
-          triggerSensoryFeedback('SUCCESS', data.persona.settings);
-          showToast(`Signed in with Apple ID as ${data.persona.name}!`);
-        }
-      }
-    } catch {
-      showToast('Could not sign in with Apple');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/api/auth/apple';
     }
   };
 
@@ -782,6 +810,37 @@ export default function LeaveTheRoomHomePage() {
     }
   };
 
+  const handleSelectCity = async (city: { lat: number; lng: number; label: string }) => {
+    setUserCoords({
+      lat: city.lat,
+      lng: city.lng,
+      label: city.label,
+      isLiveGps: false,
+    });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('leavetheroom_user_location', JSON.stringify(city));
+    }
+    // Update active user's neighborhood in memory and persist to DB
+    if (!isSignedOut && activeUser?.id) {
+      setPersonas((prev) =>
+        prev.map((p) => (p.id === activeUser.id ? { ...p, neighborhood: city.label } : p))
+      );
+      try {
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'UPDATE_PROFILE',
+            userId: activeUser.id,
+            neighborhood: city.label,
+          }),
+        });
+      } catch {}
+    }
+    showToast(`Location set to ${city.label}`);
+    triggerSensoryFeedback('TAP', activeUser.settings);
+  };
+
   const handleNearMeGps = () => {
     if (userCoords.isLiveGps) {
       setUserCoords({
@@ -790,6 +849,9 @@ export default function LeaveTheRoomHomePage() {
         label: DEFAULT_USER_COORDS.label,
         isLiveGps: false,
       });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('leavetheroom_user_location');
+      }
       showToast('Centered on Greenwich Village, NYC');
       return;
     }
@@ -804,40 +866,21 @@ export default function LeaveTheRoomHomePage() {
       (pos) => {
         setIsLocating(false);
         const { latitude, longitude } = pos.coords;
-        const nearestCheck = attachAndSortByDistance(
-          rawLobbies,
-          latitude,
-          longitude
-        );
-        const closestKm = nearestCheck[0]?.distanceKm ?? 0;
-
-        if (closestKm > 50) {
-          showToast('GPS verified: showing NYC meetup zone');
-          setUserCoords({
-            lat: DEFAULT_USER_COORDS.lat,
-            lng: DEFAULT_USER_COORDS.lng,
-            label: 'Greenwich Village, NYC',
-            isLiveGps: true,
-          });
-        } else {
-          setUserCoords({
-            lat: latitude,
-            lng: longitude,
-            label: 'Current GPS Location',
-            isLiveGps: true,
-          });
-          showToast('Updated to your current GPS location');
+        const newCoords = {
+          lat: latitude,
+          lng: longitude,
+          label: 'Current GPS Location',
+          isLiveGps: true,
+        };
+        setUserCoords(newCoords);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('leavetheroom_user_location', JSON.stringify(newCoords));
         }
+        showToast('Updated to your current GPS location');
       },
       () => {
         setIsLocating(false);
-        setUserCoords({
-          lat: DEFAULT_USER_COORDS.lat,
-          lng: DEFAULT_USER_COORDS.lng,
-          label: 'Greenwich Village, NYC',
-          isLiveGps: true,
-        });
-        showToast('Centered on Greenwich Village, NYC');
+        showToast('GPS unavailable. You can choose your city manually.');
       },
       { timeout: 6000 }
     );
@@ -965,6 +1008,7 @@ export default function LeaveTheRoomHomePage() {
             onOpenCategorySheet={() => setIsCategorySheetOpen(true)}
             userLocationLabel={userCoords.label}
             onNearMeGps={handleNearMeGps}
+            onOpenCitySelector={() => setIsCitySelectorOpen(true)}
             radiusKm={radiusKm}
             formatRadiusUnit={formatRadiusUnit}
             onOpenRadiusSheet={() => setIsRadiusSheetOpen(true)}
@@ -1092,6 +1136,7 @@ export default function LeaveTheRoomHomePage() {
             onResetDemoData={handleResetDemoData}
             onSignOut={handleSignOut}
             onToggleBeacon={handleToggleBeacon}
+            onOpenCitySelector={() => setIsCitySelectorOpen(true)}
           />
         )}
       </main>
@@ -1266,6 +1311,17 @@ export default function LeaveTheRoomHomePage() {
           triggerSensoryFeedback('TAP', activeUser.settings);
         }}
         userLocationLabel={userCoords.label}
+        onOpenCitySelector={() => setIsCitySelectorOpen(true)}
+      />
+
+      {/* City & Country Location Selector Bottom Sheet */}
+      <CitySelectorBottomSheet
+        isOpen={isCitySelectorOpen}
+        onClose={() => setIsCitySelectorOpen(false)}
+        currentLocationLabel={userCoords.label}
+        onSelectCity={handleSelectCity}
+        onUseCurrentGps={handleNearMeGps}
+        isLocating={isLocating}
       />
 
       {/* Activity Type Category Filter Bottom Sheet */}

@@ -24,6 +24,7 @@ import { RadiusSelectorBottomSheet } from '../src/components/RadiusSelectorBotto
 import { CategoryFilterBottomSheet } from '../src/components/CategoryFilterBottomSheet';
 import { LanguageSelectorBottomSheet } from '../src/components/LanguageSelectorBottomSheet';
 import { CommunityPoliciesModal } from '../src/components/CommunityPoliciesModal';
+import { CitySelectorBottomSheet } from '../src/components/CitySelectorBottomSheet';
 import { ExploreView } from '../src/components/ExploreView';
 import { ProfileView } from '../src/components/ProfileView';
 
@@ -617,6 +618,39 @@ async function runM3VerificationSuite() {
         policiesOpen.includes('Punctuality &amp; Anti-Flaking Policy') &&
         policiesOpen.includes('Real-Time Arrival Check-In'),
       'CommunityPoliciesModal renders all core community policies and standards when isOpen=true'
+    );
+
+    // 3.5b CitySelectorBottomSheet
+    assert(
+      typeof CitySelectorBottomSheet === 'function',
+      'CitySelectorBottomSheet exports a valid React component function'
+    );
+    const citySheetClosed = renderToStaticMarkup(
+      React.createElement(CitySelectorBottomSheet, {
+        isOpen: false,
+        onClose: () => {},
+        currentLocationLabel: 'Kyiv, Ukraine',
+        onSelectCity: () => {},
+        onUseCurrentGps: () => {},
+      })
+    );
+    assert(citySheetClosed === '', 'CitySelectorBottomSheet renders empty string when isOpen=false');
+
+    const citySheetOpen = renderToStaticMarkup(
+      React.createElement(CitySelectorBottomSheet, {
+        isOpen: true,
+        onClose: () => {},
+        currentLocationLabel: 'Kyiv, Ukraine',
+        onSelectCity: () => {},
+        onUseCurrentGps: () => {},
+      })
+    );
+    assert(
+      citySheetOpen.includes('Select City &amp; Location') &&
+        citySheetOpen.includes('Use My Current GPS Location') &&
+        citySheetOpen.includes('Kyiv') &&
+        citySheetOpen.includes('Warsaw'),
+      'CitySelectorBottomSheet renders search, GPS button, and popular city presets when isOpen=true'
     );
 
     // 3.6 ExploreView

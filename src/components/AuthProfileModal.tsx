@@ -131,68 +131,14 @@ export function AuthProfileModal({
   };
 
   const handleGoogleAuth = async () => {
-    setIsSubmitting(true);
-    setLoginError('');
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'GOOGLE_AUTH',
-          email: 'alex.chen.meetups@gmail.com',
-          name: 'Alex Chen',
-          avatar:
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || 'Google authentication failed');
-        return;
-      }
-      onUserCreatedOrUpdated(
-        data.persona,
-        data.personas,
-        `Signed in with Google as ${data.persona.name}!`
-      );
-      onClose();
-    } catch {
-      setLoginError('Could not connect to Google authentication');
-    } finally {
-      setIsSubmitting(false);
+    if (typeof window !== 'undefined') {
+      window.location.href = '/api/auth/google';
     }
   };
 
   const handleAppleAuth = async () => {
-    setIsSubmitting(true);
-    setLoginError('');
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'APPLE_AUTH',
-          email: 'apple.member@icloud.com',
-          name: 'Jordan Miller',
-          avatar:
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || 'Apple authentication failed');
-        return;
-      }
-      onUserCreatedOrUpdated(
-        data.persona,
-        data.personas,
-        `Signed in with Apple ID as ${data.persona.name}!`
-      );
-      onClose();
-    } catch {
-      setLoginError('Could not connect to Apple authentication');
-    } finally {
-      setIsSubmitting(false);
+    if (typeof window !== 'undefined') {
+      window.location.href = '/api/auth/apple';
     }
   };
 
