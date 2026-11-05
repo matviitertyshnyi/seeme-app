@@ -106,8 +106,16 @@ export function AuthProfileModal({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
+  const prevIsOpen = useRef(false);
+  const prevUserId = useRef(activeUser?.id);
+
   useEffect(() => {
-    if (isOpen) {
+    const justOpened = isOpen && !prevIsOpen.current;
+    const userSwitched = isOpen && activeUser?.id !== prevUserId.current;
+    prevIsOpen.current = isOpen;
+    prevUserId.current = activeUser?.id;
+
+    if (justOpened || userSwitched) {
       setActiveTab(initialTab);
       setLoginError('');
       setFaceError(null);
@@ -137,7 +145,7 @@ export function AuthProfileModal({
         );
       }
     }
-  }, [isOpen, initialTab, activeUser]);
+  }, [isOpen, initialTab, activeUser?.id]);
 
   const isAgeLocked = Boolean(activeUser?.onboarded === true && activeUser?.age && activeUser.age >= 18);
   const isMandatoryOnboarding = activeUser?.onboarded === false || !activeUser?.age || activeUser?.age < 18;
@@ -233,9 +241,6 @@ export function AuthProfileModal({
     setCityInput(preset.label);
     setSelectedCityPreset(preset);
     setIsCityDropdownOpen(false);
-    if (onSelectCity) {
-      onSelectCity({ lat: preset.lat, lng: preset.lng, label: preset.label });
-    }
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
