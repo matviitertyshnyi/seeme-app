@@ -20,7 +20,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req?: NextRequest) {
+export async function GET(req: NextRequest) {
   if (req) await optionalAuth(req);
   const db = await readDb();
   return NextResponse.json({

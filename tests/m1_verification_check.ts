@@ -90,7 +90,7 @@ async function testM1() {
   console.log('PASS: Login password enforcement verified (omitted -> 401, wrong -> 401, correct -> 200)');
 
   // 3. Plaintext password redaction in GET /api/users and GET /api/lobbies
-  const resGetUsers = await getUsers();
+  const resGetUsers = await getUsers(new NextRequest('http://localhost:3000/api/users'));
   const usersData = await resGetUsers.json();
   const leakedInUsers = usersData.personas.some((p: any) => p.password !== undefined);
   if (leakedInUsers) throw new Error('Plaintext password leaked in GET /api/users');

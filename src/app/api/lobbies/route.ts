@@ -34,7 +34,7 @@ function getRoomStatusFromStartTime(startTime: StartTimeOption): RoomStatus {
   return startTime === 'Now' ? 'LIVE' : 'UPCOMING';
 }
 
-export async function GET(req?: NextRequest) {
+export async function GET(req: NextRequest) {
   if (req) await optionalAuth(req);
   const db = await readDb();
   return NextResponse.json({

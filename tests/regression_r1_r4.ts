@@ -374,7 +374,7 @@ export async function runRegressionR1R4(): Promise<TestCollector> {
 
     // 3.2 Inspect GET /api/users
     const getUsersReq = buildRequest('/api/users', { method: 'GET' });
-    const getUsersRes = await getUsersHandler();
+    const getUsersRes = await getUsersHandler(getUsersReq);
     const usersData = await getUsersRes.json();
     const usersPasswordLeaks = findPasswordFieldsRecursively(usersData);
     collector.assert(

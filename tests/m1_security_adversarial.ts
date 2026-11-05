@@ -730,7 +730,7 @@ export async function runSecurityAdversarialSuite() {
   );
 
   // 4.2 GET /api/users
-  const resGetUsers = await getUsers();
+  const resGetUsers = await getUsers(new NextRequest('http://localhost:3000/api/users'));
   const dataGetUsers = await resGetUsers.json();
   const usersLeaks = findPasswordRecursively(dataGetUsers);
   assert(
