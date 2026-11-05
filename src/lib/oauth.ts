@@ -30,14 +30,19 @@ const SESSION_SECRET =
   'ltr-signed-session-fallback-secret';
 
 export function signUserSessionToken(persona: UserPersona): string {
+  const safeAvatar =
+    persona.avatar && !persona.avatar.startsWith('data:') && persona.avatar.length < 1024
+      ? persona.avatar
+      : undefined;
   const payload = {
     id: persona.id,
     email: persona.email,
     name: persona.name,
     age: persona.age,
-    avatar: persona.avatar,
+    avatar: safeAvatar,
     neighborhood: persona.neighborhood,
     onboarded: persona.onboarded,
+    photoVerified: persona.photoVerified,
     authProvider: persona.authProvider,
   };
   const b64 = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');

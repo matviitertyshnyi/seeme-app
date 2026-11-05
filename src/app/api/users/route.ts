@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, withDbMutation } from '@/lib/db';
 import {
+  optionalAuth,
   requireAuth,
   errorResponse,
   AuthError,
   sanitizePersona,
   sanitizePersonas,
 } from '@/lib/auth-guard';
+import { setSessionCookies } from '@/lib/oauth';
 import {
   ActivityCategory,
   DirectMessage,
@@ -18,7 +20,8 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req?: NextRequest) {
+  if (req) await optionalAuth(req);
   const db = await readDb();
   return NextResponse.json({
     personas: sanitizePersonas(db.personas),
@@ -580,11 +583,15 @@ export async function POST(req: NextRequest) {
         });
       });
 
-      return NextResponse.json({
+      const res = NextResponse.json({
         persona: sanitizePersona(persona),
         personas: sanitizePersonas(db.personas),
         lobbies: db.lobbies,
       });
+      if (persona.id === authUser!.id) {
+        setSessionCookies(res, persona.id, persona);
+      }
+      return res;
     }
 
     if (action === 'UPDATE_SETTINGS') {
@@ -804,11 +811,15 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      return NextResponse.json({
+      const res = NextResponse.json({
         persona: sanitizePersona(persona),
         personas: sanitizePersonas(db.personas),
         lobbies: db.lobbies,
       });
+      if (persona.id === authUser!.id) {
+        setSessionCookies(res, persona.id, persona);
+      }
+      return res;
     }
 
     if (action === 'TOGGLE_REGULAR_PARTNER') {
@@ -1103,13 +1114,15 @@ export async function POST(req: NextRequest) {
         });
       });
 
-      return NextResponse.json({
+      const res = NextResponse.json({
         persona: sanitizePersona(persona),
         personas: sanitizePersonas(db.personas),
       });
+      setSessionCookies(res, persona.id, persona);
+      return res;
     }
 
-      return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+    return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
     });
   } catch (err) {
     if (err instanceof AuthError) {

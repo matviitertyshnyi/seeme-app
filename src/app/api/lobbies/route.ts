@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isCloudDatabaseConnected, readDb, resetDb, withDbMutation } from '@/lib/db';
-import { requireAuth, errorResponse, AuthError, sanitizePersonas } from '@/lib/auth-guard';
+import { optionalAuth, requireAuth, errorResponse, AuthError, sanitizePersonas } from '@/lib/auth-guard';
 import { getDefaultCoverForCategory, getMapPinLabelForCategory } from '@/lib/geo';
 import {
   ActivityCategory,
@@ -34,7 +34,8 @@ function getRoomStatusFromStartTime(startTime: StartTimeOption): RoomStatus {
   return startTime === 'Now' ? 'LIVE' : 'UPCOMING';
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req?: NextRequest) {
+  if (req) await optionalAuth(req);
   const db = await readDb();
   return NextResponse.json({
     personas: sanitizePersonas(db.personas),

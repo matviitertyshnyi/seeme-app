@@ -189,9 +189,14 @@ export default function LeaveTheRoomHomePage() {
     neighborhood?: string;
   }>({ isOpen: false, imageUrl: null });
 
+  const [sessionUser, setSessionUser] = useState<UserPersona | null>(null);
+
   const activeUser = useMemo(
-    () => personas.find((p) => p.id === activePersonaId) || personas[0],
-    [personas, activePersonaId]
+    () =>
+      personas.find((p) => p.id === activePersonaId) ||
+      (sessionUser && sessionUser.id === activePersonaId ? sessionUser : null) ||
+      personas[0],
+    [personas, activePersonaId, sessionUser]
   );
 
   const hasPromptedOnboarding = useRef(false);
@@ -326,7 +331,18 @@ export default function LeaveTheRoomHomePage() {
         setRawLobbies(data.lobbies);
       }
       if (Array.isArray(data.personas) && data.personas.length > 0) {
-        setPersonas(data.personas);
+        setPersonas((prev) => {
+          const merged = [...data.personas];
+          prev.forEach((existing) => {
+            if (
+              (existing.id === activePersonaId || existing.authProvider === 'google' || existing.authProvider === 'apple') &&
+              !merged.some((p: UserPersona) => p.id === existing.id)
+            ) {
+              merged.unshift(existing);
+            }
+          });
+          return merged;
+        });
       }
       if (Array.isArray(data.ratings)) {
         setRatings(data.ratings);
@@ -342,7 +358,18 @@ export default function LeaveTheRoomHomePage() {
         if (usersRes.ok) {
           const usersData = await usersRes.json();
           if (Array.isArray(usersData.personas) && usersData.personas.length > 0) {
-            setPersonas(usersData.personas);
+            setPersonas((prev) => {
+              const merged = [...usersData.personas];
+              prev.forEach((existing) => {
+                if (
+                  (existing.id === activePersonaId || existing.authProvider === 'google' || existing.authProvider === 'apple') &&
+                  !merged.some((p: UserPersona) => p.id === existing.id)
+                ) {
+                  merged.unshift(existing);
+                }
+              });
+              return merged;
+            });
           }
           if (Array.isArray(usersData.directMessages)) {
             setDirectMessages(usersData.directMessages);
@@ -396,12 +423,18 @@ export default function LeaveTheRoomHomePage() {
           if (res.ok) {
             const data = await res.json();
             if (data.authenticated && data.user) {
-              loggedInUser = data.user;
-              setActivePersonaId(data.user.id);
+              const authedUser: UserPersona = data.user;
+              loggedInUser = authedUser;
+              setSessionUser(authedUser);
+              setPersonas((prev) => {
+                const without = prev.filter((p) => p.id !== authedUser.id);
+                return [authedUser, ...without];
+              });
+              setActivePersonaId(authedUser.id);
               setIsSignedOut(false);
-              localStorage.setItem('leavetheroom_session_user_id', data.user.id);
-              localStorage.setItem('seeme_session_user_id', data.user.id);
-              if (data.user.onboarded === false || data.user.neighborhood === 'Select your city') {
+              localStorage.setItem('leavetheroom_session_user_id', authedUser.id);
+              localStorage.setItem('seeme_session_user_id', authedUser.id);
+              if (authedUser.onboarded === false || authedUser.neighborhood === 'Select your city') {
                 setAuthModalTab('EDIT');
                 setIsAuthModalOpen(true);
               }

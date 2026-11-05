@@ -11,7 +11,9 @@
       "neighborhood": "Gdansk, Poland",
       "verified": true,
       "verificationStatus": "VERIFIED",
-      "role": "USER",
+      "photoVerified": true,
+      "onboarded": true,
+      "role": "ADMIN",
       "isBanned": false,
       "favoriteActivities": [
         "Ping Pong",
