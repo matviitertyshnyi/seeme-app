@@ -9,6 +9,9 @@ import {
   Lock,
   MapPin,
   ChevronDown,
+  Camera,
+  Maximize2,
+  AlertCircle,
 } from 'lucide-react';
 import { ActivityCategory, UserPersona } from '@/types/lobby';
 import {
@@ -17,6 +20,7 @@ import {
   CategoryIcon,
 } from '@/components/CategoryIcon';
 import { CityPreset, POPULAR_CITIES } from '@/lib/cities';
+import { PhotoLightboxModal } from '@/components/PhotoLightboxModal';
 
 interface AuthProfileModalProps {
   isOpen: boolean;
@@ -94,7 +98,9 @@ export function AuthProfileModal({
     activeUser.favoriteActivities || ['Coffee', 'Park Walk']
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -360,35 +366,77 @@ export function AuthProfileModal({
                 </div>
               </div>
 
-              {/* Profile Photo Upload */}
+              {/* Profile Photo Upload & Selfie Camera */}
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
-                  Profile Photo
+                  Profile Photo & Real Human Verification
                 </label>
-                <div className="flex items-center gap-4">
-                  <div className="relative w-[72px] h-[72px] rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 shrink-0 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  {/* Clickable 72x72 Avatar preview */}
+                  <div
+                    onClick={() => setIsLightboxOpen(true)}
+                    title="Click to view full-screen photo"
+                    className="relative w-[72px] h-[72px] rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 shrink-0 shadow-sm cursor-pointer group hover:ring-2 hover:ring-orange-500 transition-all"
+                  >
                     <img
                       src={avatar || activeUser?.avatar}
                       alt={name || 'Profile'}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                      <Maximize2 className="w-4 h-4 drop-shadow" />
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-white text-xs font-extrabold border border-stone-300 dark:border-stone-700 transition-colors shadow-sm w-fit">
-                      <Upload className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                      <span>Upload Photo</span>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handlePhotoUpload}
-                      />
-                    </label>
+
+                  <div className="flex flex-col gap-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Upload Photo Button */}
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-white text-xs font-extrabold border border-stone-300 dark:border-stone-700 transition-colors shadow-sm">
+                        <Upload className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" />
+                        <span>Upload Photo</span>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handlePhotoUpload}
+                        />
+                      </label>
+
+                      {/* Take Live Selfie Button */}
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-extrabold border border-orange-200 dark:border-orange-800 transition-colors shadow-sm">
+                        <Camera className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                        <span>Take Live Selfie (Camera)</span>
+                        <input
+                          ref={cameraInputRef}
+                          type="file"
+                          accept="image/*"
+                          capture="user"
+                          className="hidden"
+                          onChange={handlePhotoUpload}
+                        />
+                      </label>
+                    </div>
+
                     <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
                       JPG, PNG or WEBP · Resized & center-cropped to 256x256
                     </span>
                   </div>
+                </div>
+
+                {/* Real Human Verification Status Indicator */}
+                <div className="mt-3">
+                  {(avatar && avatar.startsWith('data:image/')) || (activeUser as any)?.photoVerified ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>✓ Verified Human Photo</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>Real photo required to join or host meetups — upload a photo or take a quick selfie</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -583,6 +631,19 @@ export function AuthProfileModal({
           )}
         </div>
       </div>
+
+      <PhotoLightboxModal
+        isOpen={isLightboxOpen}
+        imageUrl={avatar || activeUser?.avatar}
+        name={name}
+        age={age}
+        verified={activeUser.verified}
+        photoVerified={Boolean(
+          avatar?.startsWith('data:image/') || (activeUser as any)?.photoVerified
+        )}
+        neighborhood={cityInput}
+        onClose={() => setIsLightboxOpen(false)}
+      />
     </div>
   );
 }

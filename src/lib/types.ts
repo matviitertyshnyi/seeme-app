@@ -135,6 +135,13 @@ export const UserSchema = z.object({
   streakWeeks: z.number().int().nonnegative().default(1),
   bannedUserIds: z.array(z.string()).default([]),
   regularPartnerIds: z.array(z.string()).default([]),
+  friendIds: z.array(z.string()).optional().default([]),
+  incomingFriendRequestIds: z.array(z.string()).optional().default([]),
+  outgoingFriendRequestIds: z.array(z.string()).optional().default([]),
+  savedLobbyIds: z.array(z.string()).optional().default([]),
+  photoVerified: z.boolean().optional(),
+  selfieVerificationUrl: z.string().optional(),
+  verificationSubmittedAt: z.string().optional(),
   beacon: RadarBeaconSchema.optional(),
   settings: UserSettingsSchema.default({
     iosAndroidPush: true,
@@ -159,6 +166,9 @@ export const UpdateProfileInputSchema = z.object({
   neighborhood: z.string().trim().max(80).optional(),
   onboarded: z.boolean().optional(),
   favoriteActivities: z.array(z.string()).max(20).optional(),
+  photoVerified: z.boolean().optional(),
+  selfieVerificationUrl: z.string().optional(),
+  savedLobbyIds: z.array(z.string()).optional(),
   settings: UserSettingsSchema.partial().optional(),
   beacon: RadarBeaconSchema.optional(),
 });

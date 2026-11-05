@@ -203,6 +203,10 @@ export async function provisionOrFindOAuthUser(
       persona.verified = true;
       persona.verificationStatus = 'VERIFIED';
       persona.authProvider = provider;
+      if (cleanEmail === 'vladtratata10@gmail.com') {
+        persona.role = 'ADMIN';
+        persona.photoVerified = true;
+      }
       if (details.name && !persona.name) {
         persona.name = details.name;
       }
@@ -211,6 +215,13 @@ export async function provisionOrFindOAuthUser(
       }
       return persona;
     }
+
+    const isFounder = cleanEmail === 'vladtratata10@gmail.com';
+    const isRealPhoto = Boolean(
+      details.avatar &&
+      details.avatar.trim() !== '' &&
+      !details.avatar.includes('unsplash')
+    );
 
     const displayName =
       details.name?.trim() || (provider === 'google' ? 'Google Explorer' : 'Apple Explorer');
@@ -226,13 +237,14 @@ export async function provisionOrFindOAuthUser(
       name: displayName,
       age: 26,
       avatar: defaultAvatar,
-      skillBadge: 'Verified Member',
+      skillBadge: isFounder ? 'Lead Founder' : 'Verified Member',
       tagline: `Joined via ${provider === 'google' ? 'Google' : 'Apple ID'}. Ready to meet up!`,
       neighborhood: 'Select your city',
       onboarded: false,
       verified: true,
       verificationStatus: 'VERIFIED',
-      role: 'USER',
+      photoVerified: isFounder ? true : (isRealPhoto ? false : false),
+      role: isFounder ? 'ADMIN' : 'USER',
       isBanned: false,
       favoriteActivities: ['Coffee', 'Tennis'],
       reliabilityScore: 100,
@@ -243,6 +255,10 @@ export async function provisionOrFindOAuthUser(
       streakWeeks: 1,
       bannedUserIds: [],
       regularPartnerIds: [],
+      friendIds: [],
+      incomingFriendRequestIds: [],
+      outgoingFriendRequestIds: [],
+      savedLobbyIds: [],
       settings: {
         iosAndroidPush: true,
         soundEffects: true,

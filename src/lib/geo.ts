@@ -52,6 +52,43 @@ export function formatDistanceLabel(distanceKm: number): string {
 }
 
 export function deriveRoomStatus(lobby: Lobby): RoomStatus {
+  if (lobby.roomStatus === 'FINISHED') {
+    return 'FINISHED';
+  }
+
+  // Auto-expire stale meetups created more than 6 hours ago
+  const isSeedLobby =
+    lobby.id.startsWith('lobby-1') ||
+    lobby.id.startsWith('lobby-2') ||
+    lobby.id.startsWith('lobby-3') ||
+    lobby.id.startsWith('lobby-4') ||
+    lobby.id.startsWith('lobby-5') ||
+    lobby.id.startsWith('lobby-6') ||
+    lobby.id.startsWith('lobby-chess') ||
+    lobby.id.startsWith('lobby-pong') ||
+    lobby.id.startsWith('lobby-coffee') ||
+    lobby.id.startsWith('lobby-board') ||
+    lobby.id.startsWith('lobby-tennis') ||
+    lobby.id.startsWith('lobby-hoops') ||
+    lobby.id.startsWith('lobby-cowork') ||
+    lobby.id.startsWith('lobby-run') ||
+    lobby.id.startsWith('lobby-kyiv') ||
+    lobby.id.startsWith('lobby-warsaw');
+
+  if (!isSeedLobby && lobby.createdAt) {
+    const createdTime = new Date(lobby.createdAt).getTime();
+    if (!isNaN(createdTime) && Date.now() - createdTime > 6 * 60 * 60 * 1000) {
+      if (
+        lobby.startTime === 'Now' ||
+        lobby.startTime === 'In 30 mins' ||
+        lobby.startTime === 'In 1 hour' ||
+        lobby.startTime === 'Later today'
+      ) {
+        return 'FINISHED';
+      }
+    }
+  }
+
   if (lobby.roomStatus) {
     return lobby.roomStatus;
   }
@@ -59,6 +96,37 @@ export function deriveRoomStatus(lobby: Lobby): RoomStatus {
     return 'LIVE';
   }
   return 'UPCOMING';
+}
+
+export function getCountdownLabel(lobby: Lobby): string | null {
+  if (deriveRoomStatus(lobby) === 'FINISHED') {
+    return null;
+  }
+
+  if (lobby.startTime === 'In 30 mins' || lobby.startTime === 'In 1 hour') {
+    const totalMinutes = lobby.startTime === 'In 30 mins' ? 30 : 60;
+    if (lobby.createdAt) {
+      const createdTime = new Date(lobby.createdAt).getTime();
+      if (!isNaN(createdTime)) {
+        const elapsedMinutes = Math.floor((Date.now() - createdTime) / 60000);
+        const remainingMinutes = totalMinutes - elapsedMinutes;
+        if (remainingMinutes > 0 && remainingMinutes <= totalMinutes) {
+          return `Starts in ${remainingMinutes}m`;
+        }
+      }
+    }
+    return lobby.startTime === 'In 30 mins' ? 'Starts in 30m' : 'Starts in 1h';
+  }
+
+  if (typeof lobby.startTime === 'string' && lobby.startTime.includes('at ')) {
+    return lobby.startTimeBadge || lobby.startTime;
+  }
+
+  if (lobby.startTime === 'Now') {
+    return 'Live Now';
+  }
+
+  return lobby.startTimeBadge || lobby.startTime || null;
 }
 
 /**

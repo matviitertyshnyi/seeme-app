@@ -78,7 +78,17 @@ export interface PlayerRating {
 export interface AppNotification {
   id: string;
   userId: string;
-  type: 'REQUEST' | 'APPROVED' | 'CHECK_IN' | 'BEACON_MATCH' | 'RATING' | 'INVITE' | 'SYSTEM';
+  type:
+    | 'REQUEST'
+    | 'APPROVED'
+    | 'CHECK_IN'
+    | 'BEACON_MATCH'
+    | 'RATING'
+    | 'INVITE'
+    | 'SYSTEM'
+    | 'FRIEND_REQUEST'
+    | 'FRIEND_ACCEPTED'
+    | 'DIRECT_MESSAGE';
   title: string;
   body: string;
   lobbyId?: string;
@@ -88,6 +98,18 @@ export interface AppNotification {
 
 export type UserRole = 'ADMIN' | 'USER';
 export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
+
+export interface DirectMessage {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  senderName: string;
+  senderAvatar: string;
+  text: string;
+  lobbyInviteId?: string;
+  createdAt: string;
+  read?: boolean;
+}
 
 export interface UserPersona {
   id: string;
@@ -116,6 +138,13 @@ export interface UserPersona {
   streakWeeks: number;
   bannedUserIds: string[];
   regularPartnerIds: string[];
+  friendIds?: string[];
+  incomingFriendRequestIds?: string[];
+  outgoingFriendRequestIds?: string[];
+  savedLobbyIds?: string[];
+  photoVerified?: boolean;
+  selfieVerificationUrl?: string;
+  verificationSubmittedAt?: string;
   beacon?: RadarBeacon;
   settings: UserSettings;
   authProvider?: 'google' | 'apple' | 'email' | 'demo';
@@ -202,4 +231,5 @@ export interface DatabaseSchema {
   messages: ChatMessage[];
   ratings: PlayerRating[];
   notifications: AppNotification[];
+  directMessages?: DirectMessage[];
 }

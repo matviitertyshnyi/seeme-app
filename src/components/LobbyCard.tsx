@@ -10,6 +10,8 @@ import {
   Users,
   Calendar,
   ShieldCheck,
+  Clock,
+  Bookmark,
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
@@ -21,6 +23,9 @@ interface LobbyCardProps {
   onQuickJoin: (lobby: LobbyWithDistance, e: React.MouseEvent) => void;
   isJoining?: boolean;
   language?: SupportedLanguage;
+  isSaved?: boolean;
+  onToggleSave?: (lobbyId: string, e: React.MouseEvent) => void;
+  onClickUser?: (userId: string, e: React.MouseEvent) => void;
 }
 
 export function LobbyCard({
@@ -30,6 +35,9 @@ export function LobbyCard({
   onQuickJoin,
   isJoining = false,
   language = 'en',
+  isSaved = false,
+  onToggleSave,
+  onClickUser,
 }: LobbyCardProps) {
   const t = (key: any, params?: any) => getTranslation(language, key, params);
   const isParticipant = lobby.participants.some((p) => p.id === activeUser.id);
@@ -85,13 +93,31 @@ export function LobbyCard({
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-300 text-[10px] font-semibold tracking-wide uppercase">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <Clock className="w-3 h-3 text-amber-400 shrink-0" />
               <span>{lobby.startTimeBadge || t('status_upcoming')}</span>
             </div>
           )}
         </div>
 
         <div className="absolute top-3 right-3 flex items-center gap-1.5 flex-wrap justify-end">
+          {onToggleSave && (
+            <button
+              type="button"
+              aria-label="Save meetup"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSave?.(lobby.id, e);
+              }}
+              className={`p-1.5 rounded-md border backdrop-blur-md transition-colors ${
+                isSaved
+                  ? 'bg-orange-500/30 border-orange-400/60 text-orange-400'
+                  : 'bg-black/60 border-white/10 text-stone-300 hover:text-white hover:bg-black/80'
+              }`}
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-orange-400 text-orange-400' : ''}`} />
+            </button>
+          )}
+
           {lobby.joinMode === 'OPEN' && lobby.computedStatus !== 'FINISHED' && !isFull && (
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-950/70 border border-emerald-500/40 backdrop-blur-md text-emerald-300 text-[10px] font-semibold tracking-wide">
               <Zap className="w-2.5 h-2.5 fill-emerald-400 text-emerald-400" />
@@ -144,7 +170,19 @@ export function LobbyCard({
       </div>
 
       <div className="p-3.5 flex items-center justify-between gap-3 bg-white dark:bg-[#1C1917] border-t border-stone-100 dark:border-stone-800/70 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          onClick={
+            onClickUser && hostPerson
+              ? (e) => {
+                  e.stopPropagation();
+                  onClickUser(hostPerson.id, e);
+                }
+              : undefined
+          }
+          className={`flex items-center gap-2.5 min-w-0 ${
+            onClickUser && hostPerson ? 'cursor-pointer hover:opacity-85 transition-opacity' : ''
+          }`}
+        >
           <div className="flex items-center -space-x-2 shrink-0">
             {hostPerson && (
               <img

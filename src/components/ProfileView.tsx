@@ -42,6 +42,8 @@ export interface ProfileViewProps {
   onSignOut: () => void;
   onToggleBeacon?: () => void;
   onOpenCitySelector?: () => void;
+  onOpenLightbox?: (url: string, name: string) => void;
+  onOpenFriendsDrawer?: () => void;
 }
 
 export function ProfileView({
@@ -62,6 +64,8 @@ export function ProfileView({
   onSignOut,
   onToggleBeacon,
   onOpenCitySelector,
+  onOpenLightbox,
+  onOpenFriendsDrawer,
 }: ProfileViewProps) {
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
 
@@ -132,11 +136,16 @@ export function ProfileView({
           <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_20px_-4px_rgba(0,0,0,0.5)] space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3.5 min-w-0">
-                <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onOpenLightbox?.(activeUser.avatar, activeUser.name)}
+                  title="Click to view full-screen photo"
+                  className="relative shrink-0 rounded-full group focus:outline-none cursor-pointer"
+                >
                   <img
                     src={activeUser.avatar}
                     alt={activeUser.name}
-                    className="w-16 h-16 rounded-full object-cover ring-2 ring-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.3)]"
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-orange-500 group-hover:ring-4 group-hover:ring-orange-400/50 shadow-[0_0_16px_rgba(234,88,12,0.3)] transition-all"
                   />
                   {activeUser.verified && (
                     <span
@@ -146,7 +155,7 @@ export function ProfileView({
                       <ShieldCheck className="w-3 h-3" />
                     </span>
                   )}
-                </div>
+                </button>
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -227,6 +236,42 @@ export function ProfileView({
                 </div>
               </div>
             </div>
+          </section>
+
+          {/* Friends & Direct Messages Card */}
+          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200/90 dark:border-stone-800/90 shadow-2xs hover:border-orange-500/40 transition-colors">
+            <button
+              type="button"
+              onClick={onOpenFriendsDrawer}
+              className="w-full flex items-center justify-between text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                      Friends & Direct Messages
+                    </h2>
+                    {Boolean(((activeUser as any).incomingFriendRequestIds?.length || 0) > 0) && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-600 text-white animate-pulse">
+                        {(activeUser as any).incomingFriendRequestIds.length} new
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-0.5">
+                    {((activeUser as any).friendIds?.length || 0) === 1
+                      ? '1 Friend connected · Chat 1-on-1'
+                      : `${(activeUser as any).friendIds?.length || 0} Friends connected · Chat 1-on-1`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold text-xs shrink-0 group-hover:translate-x-0.5 transition-transform">
+                <span>Open</span>
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </button>
           </section>
 
           {/* Dark Mode & Appearance Toggle Card */}

@@ -25,7 +25,11 @@ export function WelcomeLoginScreen({
   const [errorMsg, setErrorMsg] = useState(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      return params.get('auth_error') || params.get('oauth_error') || '';
+      const raw = params.get('auth_error') || params.get('oauth_error') || '';
+      if (raw.toLowerCase().includes('apple')) {
+        return 'Apple Sign-In is currently in review. Please use Continue with Google for instant access.';
+      }
+      return raw;
     }
     return '';
   });
@@ -51,9 +55,21 @@ export function WelcomeLoginScreen({
     setActiveProvider('apple');
     setErrorMsg('');
     try {
+      if (
+        typeof window !== 'undefined' &&
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1'
+      ) {
+        setErrorMsg(
+          'Apple Sign-In is currently in review. Please use Continue with Google for instant access.'
+        );
+        return;
+      }
       await onAppleSignIn();
     } catch {
-      setErrorMsg('Apple Sign-In failed. Please try again.');
+      setErrorMsg(
+        'Apple Sign-In is currently in review. Please use Continue with Google for instant access.'
+      );
     } finally {
       setIsSubmitting(false);
       setActiveProvider(null);

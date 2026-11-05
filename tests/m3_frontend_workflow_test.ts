@@ -614,7 +614,8 @@ async function runM3VerificationSuite() {
     // Note: & is escaped as &amp;
     assert(
       policiesOpen.includes('Community Policies') &&
-        policiesOpen.includes('Public &amp; Verified Venues Only') &&
+        (policiesOpen.includes('Public &amp; Verified Meetup Spots Only') ||
+          policiesOpen.includes('Public &amp; Verified Venues Only')) &&
         policiesOpen.includes('Punctuality &amp; Anti-Flaking Policy') &&
         policiesOpen.includes('Real-Time Arrival Check-In'),
       'CommunityPoliciesModal renders all core community policies and standards when isOpen=true'

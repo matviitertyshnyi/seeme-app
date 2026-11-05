@@ -11,6 +11,7 @@ import {
   ActivityCategory,
   ActivityGroup,
   AppNotification,
+  DirectMessage,
   Lobby,
   LobbyWithDistance,
   PlayerRating,
@@ -56,6 +57,10 @@ import {
   MobilePushBanner,
   NotificationDrawer,
 } from '@/components/NotificationCenter';
+import { PhotoLightboxModal } from '@/components/PhotoLightboxModal';
+import { PlayerProfileSheet } from '@/components/PlayerProfileSheet';
+import { FriendsChatDrawer } from '@/components/FriendsChatDrawer';
+import { EditMeetupModal } from '@/components/EditMeetupModal';
 
 const MapRadar = dynamic(() => import('@/components/MapRadar'), {
   ssr: false,
@@ -166,6 +171,23 @@ export default function LeaveTheRoomHomePage() {
 
   const [joiningLobbyId, setJoiningLobbyId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Social, Lightbox, Bookmarks & Edit Meetup States
+  const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [isFriendsDrawerOpen, setIsFriendsDrawerOpen] = useState(false);
+  const [activeChatPartnerId, setActiveChatPartnerId] = useState<string | null>(null);
+  const [inspectedUserId, setInspectedUserId] = useState<string | null>(null);
+  const [editingLobbyId, setEditingLobbyId] = useState<string | null>(null);
+  const [lightboxData, setLightboxData] = useState<{
+    isOpen: boolean;
+    imageUrl: string | null;
+    name?: string;
+    age?: number;
+    verified?: boolean;
+    photoVerified?: boolean;
+    neighborhood?: string;
+  }>({ isOpen: false, imageUrl: null });
 
   const activeUser = useMemo(
     () => personas.find((p) => p.id === activePersonaId) || personas[0],
@@ -312,6 +334,24 @@ export default function LeaveTheRoomHomePage() {
       if (Array.isArray(data.notifications)) {
         setNotifications(data.notifications);
       }
+      if (Array.isArray(data.directMessages)) {
+        setDirectMessages(data.directMessages);
+      }
+      try {
+        const usersRes = await fetch('/api/users', { cache: 'no-store' });
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          if (Array.isArray(usersData.personas) && usersData.personas.length > 0) {
+            setPersonas(usersData.personas);
+          }
+          if (Array.isArray(usersData.directMessages)) {
+            setDirectMessages(usersData.directMessages);
+          }
+          if (Array.isArray(usersData.notifications)) {
+            setNotifications(usersData.notifications);
+          }
+        }
+      } catch {}
     } catch {
       // Fallback to local seed state
     }
@@ -319,6 +359,12 @@ export default function LeaveTheRoomHomePage() {
 
   useEffect(() => {
     fetchLobbies();
+    const intervalId = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchLobbies();
+      }
+    }, 12000);
+    return () => clearInterval(intervalId);
   }, [fetchLobbies]);
 
   // Load persistent user session from server cookie or localStorage
@@ -560,6 +606,13 @@ export default function LeaveTheRoomHomePage() {
         }
       }
 
+      if (showSavedOnly) {
+        const savedIds = activeUser.savedLobbyIds || [];
+        if (!savedIds.includes(lobby.id)) {
+          return false;
+        }
+      }
+
       return true;
     });
   }, [
@@ -569,6 +622,8 @@ export default function LeaveTheRoomHomePage() {
     selectedAgeFilters,
     radiusKm,
     statusFilter,
+    showSavedOnly,
+    activeUser.savedLobbyIds,
     activeUser.bannedUserIds,
     activeUser.id,
   ]);
@@ -636,6 +691,16 @@ export default function LeaveTheRoomHomePage() {
     if (isSignedOut) {
       showToast('Please sign in to host a meetup');
       setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    const hasRealPhoto =
+      Boolean(activeUser.avatar) &&
+      !activeUser.avatar.includes('unsplash.com') &&
+      (activeUser.photoVerified || activeUser.verified || activeUser.avatar.startsWith('data:image/') || activeUser.avatar.includes('googleusercontent.com'));
+    if (!hasRealPhoto) {
+      showToast('Please add your real profile photo before hosting a meetup');
+      setAuthModalTab('EDIT');
       setIsAuthModalOpen(true);
       return;
     }
@@ -924,6 +989,17 @@ export default function LeaveTheRoomHomePage() {
       return;
     }
 
+    const hasRealPhoto =
+      Boolean(activeUser.avatar) &&
+      !activeUser.avatar.includes('unsplash.com') &&
+      (activeUser.photoVerified || activeUser.verified || activeUser.avatar.startsWith('data:image/') || activeUser.avatar.includes('googleusercontent.com'));
+    if (!hasRealPhoto) {
+      showToast('Please upload or verify your real profile photo to join meetups');
+      setAuthModalTab('EDIT');
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     const alreadyIn = lobby.participants.some((p) => p.id === activeUser.id);
     if (alreadyIn) {
       setSelectedLobbyId(lobby.id);
@@ -988,6 +1064,163 @@ export default function LeaveTheRoomHomePage() {
     }
   };
 
+  // Social: Open Lightbox
+  const handleOpenLightbox = useCallback(
+    (
+      imageUrl: string,
+      name?: string,
+      age?: number,
+      verified?: boolean,
+      neighborhood?: string
+    ) => {
+      if (!imageUrl) return;
+      setLightboxData({
+        isOpen: true,
+        imageUrl,
+        name,
+        age,
+        verified,
+        photoVerified: verified,
+        neighborhood,
+      });
+    },
+    []
+  );
+
+  // Social: Friend Requests & Direct Messages
+  const handleSendFriendRequest = async (targetUserId: string) => {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': activeUser.id,
+        Authorization: `Bearer ${activeUser.id}`,
+      },
+      body: JSON.stringify({
+        action: 'SEND_FRIEND_REQUEST',
+        targetUserId,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.personas)) setPersonas(data.personas);
+      if (Array.isArray(data.notifications)) setNotifications(data.notifications);
+      triggerSensoryFeedback('SUCCESS', activeUser.settings);
+      showToast('Friend request sent!');
+    }
+  };
+
+  const handleAcceptFriendRequest = async (targetUserId: string) => {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': activeUser.id,
+        Authorization: `Bearer ${activeUser.id}`,
+      },
+      body: JSON.stringify({
+        action: 'ACCEPT_FRIEND_REQUEST',
+        targetUserId,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.personas)) setPersonas(data.personas);
+      if (Array.isArray(data.notifications)) setNotifications(data.notifications);
+      triggerSensoryFeedback('SUCCESS', activeUser.settings);
+      showToast('Friend request accepted!');
+    }
+  };
+
+  const handleRemoveOrDeclineFriend = async (targetUserId: string) => {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': activeUser.id,
+        Authorization: `Bearer ${activeUser.id}`,
+      },
+      body: JSON.stringify({
+        action: 'DECLINE_OR_REMOVE_FRIEND',
+        targetUserId,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.personas)) setPersonas(data.personas);
+      showToast('Updated friend list');
+    }
+  };
+
+  const handleSendDirectMessage = async (
+    toUserId: string,
+    text: string,
+    lobbyInviteId?: string
+  ) => {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': activeUser.id,
+        Authorization: `Bearer ${activeUser.id}`,
+      },
+      body: JSON.stringify({
+        action: 'SEND_DIRECT_MESSAGE',
+        toUserId,
+        text,
+        lobbyInviteId,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.directMessages)) {
+        setDirectMessages(data.directMessages);
+      }
+      triggerSensoryFeedback('TAP', activeUser.settings);
+    }
+  };
+
+  const handleToggleSaveLobby = async (lobbyId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': activeUser.id,
+        Authorization: `Bearer ${activeUser.id}`,
+      },
+      body: JSON.stringify({
+        action: 'TOGGLE_SAVE_LOBBY',
+        lobbyId,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.personas)) setPersonas(data.personas);
+      const isNowSaved = data.persona?.savedLobbyIds?.includes(lobbyId);
+      triggerSensoryFeedback('TAP', activeUser.settings);
+      showToast(isNowSaved ? 'Meetup saved to Bookmarks' : 'Removed from Saved');
+    }
+  };
+
+  const inspectedUser = useMemo(
+    () => (inspectedUserId ? personas.find((p) => p.id === inspectedUserId) || null : null),
+    [personas, inspectedUserId]
+  );
+
+  const editingLobby = useMemo(
+    () => (editingLobbyId ? lobbiesWithDistance.find((l) => l.id === editingLobbyId) || null : null),
+    [lobbiesWithDistance, editingLobbyId]
+  );
+
+  const activeHostedLobby = useMemo(
+    () =>
+      lobbiesWithDistance.find(
+        (l) => l.hostId === activeUser.id && l.computedStatus !== 'FINISHED'
+      ) || null,
+    [lobbiesWithDistance, activeUser.id]
+  );
+
 
   if (!hasCheckedSession) {
     return (
@@ -1046,6 +1279,13 @@ export default function LeaveTheRoomHomePage() {
             availableToJoinLobbies={availableToJoinLobbies}
             joinedFilteredLobbies={joinedFilteredLobbies}
             activeUser={activeUser}
+            personas={personas}
+            onClickUser={(userId) => setInspectedUserId(userId)}
+            onToggleBeacon={handleToggleBeacon}
+            savedLobbyIds={activeUser.savedLobbyIds || []}
+            onToggleSaveLobby={handleToggleSaveLobby}
+            showSavedOnly={showSavedOnly}
+            onToggleSavedOnly={() => setShowSavedOnly((prev) => !prev)}
             onSelectLobby={(lobbyId) => setSelectedLobbyId(lobbyId)}
             onQuickJoin={handleQuickJoin}
             joiningLobbyId={joiningLobbyId}
@@ -1057,7 +1297,7 @@ export default function LeaveTheRoomHomePage() {
                     ? selectedCategory
                     : selectedGroup !== 'All Activities'
                     ? GROUPED_ACTIVITIES[selectedGroup][0]
-                    : 'Ping Pong',
+                    : 'Coffee',
                 startTime: statusFilter === 'UPCOMING' ? 'In 30 mins' : 'Now',
               })
             }
@@ -1067,6 +1307,7 @@ export default function LeaveTheRoomHomePage() {
               setStatusFilter('ALL');
               setRadiusKm(50);
               setSelectedAgeFilters([]);
+              setShowSavedOnly(false);
             }}
           />
         )}
@@ -1127,6 +1368,7 @@ export default function LeaveTheRoomHomePage() {
           <MyMeetupsView
             activeUser={activeUser}
             lobbies={lobbiesWithDistance}
+            savedLobbyIds={activeUser.savedLobbyIds || []}
             selectedLobbyId={selectedLobbyId}
             onSelectLobby={(id) => setSelectedLobbyId(id)}
             onOpenHostModal={openHostModal}
@@ -1161,6 +1403,10 @@ export default function LeaveTheRoomHomePage() {
             onSignOut={handleSignOut}
             onToggleBeacon={handleToggleBeacon}
             onOpenCitySelector={() => setIsCitySelectorOpen(true)}
+            onOpenLightbox={(url, name) =>
+              handleOpenLightbox(url, name, activeUser.age, activeUser.verified, activeUser.neighborhood)
+            }
+            onOpenFriendsDrawer={() => setIsFriendsDrawerOpen(true)}
           />
         )}
       </main>
@@ -1207,8 +1453,16 @@ export default function LeaveTheRoomHomePage() {
         lobby={selectedLobby}
         activeUser={activeUser}
         isSignedOut={isSignedOut}
+        isSaved={Boolean(selectedLobby && activeUser.savedLobbyIds?.includes(selectedLobby.id))}
+        onToggleSave={(lobbyId) => handleToggleSaveLobby(lobbyId)}
+        onOpenEditMeetup={(lobbyToEdit) => setEditingLobbyId(lobbyToEdit.id)}
+        onClickParticipant={(userId) => setInspectedUserId(userId)}
+        onOpenLightbox={handleOpenLightbox}
         onRequestAuth={() => {
-          setAuthModalTab('LOGIN');
+          setAuthModalTab(isSignedOut ? 'LOGIN' : 'EDIT');
+          if (!isSignedOut) {
+            showToast('Please upload or verify your real profile photo to join meetups');
+          }
           setIsAuthModalOpen(true);
         }}
         onClose={() => setSelectedLobbyId(null)}
@@ -1221,6 +1475,71 @@ export default function LeaveTheRoomHomePage() {
         }}
         onQuickRatePlayer={handleQuickFistBumpRate}
         onToggleRegularPartner={handleToggleRegularPartner}
+      />
+
+      {/* Host Edit Meetup Modal */}
+      {editingLobby && (
+        <EditMeetupModal
+          isOpen={Boolean(editingLobby)}
+          onClose={() => setEditingLobbyId(null)}
+          lobby={editingLobby}
+          activeUser={activeUser}
+          onUpdated={async () => {
+            await fetchLobbies();
+            showToast('Meetup details updated!');
+          }}
+        />
+      )}
+
+      {/* Player Profile Sheet (Tinder / Badoo / Yubo Style) */}
+      <PlayerProfileSheet
+        user={inspectedUser}
+        activeUser={activeUser}
+        isOpen={Boolean(inspectedUser)}
+        onClose={() => setInspectedUserId(null)}
+        onOpenLightbox={handleOpenLightbox}
+        onSendFriendRequest={handleSendFriendRequest}
+        onAcceptFriendRequest={handleAcceptFriendRequest}
+        onRemoveFriend={handleRemoveOrDeclineFriend}
+        onOpenDirectChat={(targetUser) => {
+          setInspectedUserId(null);
+          setActiveChatPartnerId(targetUser.id);
+          setIsFriendsDrawerOpen(true);
+        }}
+        onBlockUser={(targetUserId) => {
+          setInspectedUserId(null);
+          handleBanOrUnbanUser(targetUserId, 'BAN_USER');
+        }}
+      />
+
+      {/* Friends & 1-on-1 Direct Messages Drawer */}
+      <FriendsChatDrawer
+        isOpen={isFriendsDrawerOpen}
+        onClose={() => setIsFriendsDrawerOpen(false)}
+        activeUser={activeUser}
+        personas={personas}
+        directMessages={directMessages}
+        activeChatPartnerId={activeChatPartnerId}
+        onSelectChatPartner={(uid) => setActiveChatPartnerId(uid)}
+        onSendDirectMessage={handleSendDirectMessage}
+        onAcceptFriendRequest={handleAcceptFriendRequest}
+        onDeclineFriendRequest={handleRemoveOrDeclineFriend}
+        onSendFriendRequest={handleSendFriendRequest}
+        onOpenPlayerProfile={(user) => setInspectedUserId(user.id)}
+        onOpenLightbox={(url, name) => handleOpenLightbox(url, name)}
+        activeHostedLobbyId={activeHostedLobby?.id || null}
+      />
+
+      {/* Full-Screen Profile Photo Lightbox */}
+      <PhotoLightboxModal
+        isOpen={lightboxData.isOpen}
+        imageUrl={lightboxData.imageUrl}
+        name={lightboxData.name}
+        age={lightboxData.age}
+        verified={lightboxData.verified}
+        photoVerified={lightboxData.photoVerified}
+        neighborhood={lightboxData.neighborhood}
+        onClose={() => setLightboxData((prev) => ({ ...prev, isOpen: false }))}
       />
 
       {/* Host Meetup Modal */}

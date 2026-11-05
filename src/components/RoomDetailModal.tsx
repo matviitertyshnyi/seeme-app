@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   ThumbsUp,
   Users,
+  Edit3,
 } from 'lucide-react';
 import {
   ArrivalStatus,
@@ -51,6 +52,16 @@ interface RoomDetailModalProps {
     name: string
   ) => Promise<void>;
   onToggleRegularPartner?: (partnerId: string, name: string) => Promise<void>;
+  isSaved?: boolean;
+  onToggleSave?: (lobbyId: string) => void;
+  onOpenEditMeetup?: (lobby: LobbyWithDistance) => void;
+  onClickParticipant?: (userId: string) => void;
+  onOpenLightbox?: (
+    imageUrl: string,
+    name: string,
+    age?: number,
+    verified?: boolean
+  ) => void;
 }
 
 const QUICK_COORDINATION_REPLIES = [
@@ -77,6 +88,11 @@ export function RoomDetailModal({
   onLobbyDeleted,
   onQuickRatePlayer,
   onToggleRegularPartner,
+  isSaved = false,
+  onToggleSave,
+  onOpenEditMeetup,
+  onClickParticipant,
+  onOpenLightbox,
 }: RoomDetailModalProps) {
   const [mobileSection, setMobileSection] = useState<'DETAILS' | 'CHAT'>(
     'DETAILS'
@@ -103,6 +119,17 @@ export function RoomDetailModal({
   const isFull = lobby
     ? lobby.participants.length >= lobby.maxParticipants || isFinished
     : false;
+  const onWayCount = lobby
+    ? lobby.participants.filter(
+        (p) =>
+          p.arrivalStatus === 'ON_MY_WAY' ||
+          p.arrivalStatus === 'FIVE_MIN_OUT' ||
+          p.arrivalStatus === 'ARRIVED'
+      ).length
+    : 0;
+  const arrivedCount = lobby
+    ? lobby.participants.filter((p) => p.arrivalStatus === 'ARRIVED').length
+    : 0;
 
   useEffect(() => {
     if (myParticipantRecord?.spotClue) {
@@ -242,6 +269,14 @@ export function RoomDetailModal({
     e.preventDefault();
     if (isLoadingAction) return;
     if (isSignedOut) {
+      if (onRequestAuth) onRequestAuth();
+      return;
+    }
+    const hasRealPhoto =
+      Boolean(activeUser.avatar) &&
+      !activeUser.avatar.includes('unsplash.com') &&
+      (activeUser.photoVerified || activeUser.verified || activeUser.avatar.startsWith('data:image/') || activeUser.avatar.includes('googleusercontent.com'));
+    if (!hasRealPhoto) {
       if (onRequestAuth) onRequestAuth();
       return;
     }
@@ -421,6 +456,36 @@ export function RoomDetailModal({
             </div>
 
             <div className="flex items-center gap-2">
+              {onToggleSave && (
+                <button
+                  type="button"
+                  onClick={() => onToggleSave(lobby.id)}
+                  aria-label={isSaved ? 'Remove saved meetup' : 'Save meetup'}
+                  title={isSaved ? 'Remove saved meetup' : 'Save meetup'}
+                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer ${
+                    isSaved
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-stone-900/80 hover:bg-stone-900 text-white'
+                  }`}
+                >
+                  <Bookmark
+                    className={`w-4 h-4 ${isSaved ? 'fill-white text-white' : 'text-stone-300'}`}
+                  />
+                </button>
+              )}
+
+              {isHost && onOpenEditMeetup && (
+                <button
+                  type="button"
+                  onClick={() => onOpenEditMeetup(lobby)}
+                  aria-label="Edit meetup details"
+                  className="h-11 px-3.5 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer"
+                >
+                  <Edit3 className="w-4 h-4 text-orange-300" />
+                  <span>Edit</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleShareMeetup}
@@ -562,6 +627,121 @@ export function RoomDetailModal({
                 )}
               </div>
             )}
+
+            {/* DOORDASH-STYLE 4-STEP LIVE ARRIVAL TRACKER */}
+            <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 space-y-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Meetup Progress
+                </span>
+                <span className="text-[11px] font-bold text-stone-700 dark:text-stone-300">
+                  {arrivedCount > 0
+                    ? `${arrivedCount} of ${lobby.participants.length} at spot`
+                    : onWayCount > 0
+                    ? `${onWayCount} en route`
+                    : `${lobby.participants.length}/${lobby.maxParticipants} joined`}
+                </span>
+              </div>
+
+              {/* 4 Step Tracker */}
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                {/* Step 1: Created */}
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                    <Check className="w-4 h-4 stroke-[2.8]" />
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-900 dark:text-stone-100 mt-1 leading-tight">
+                    Created
+                  </span>
+                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
+                    Live
+                  </span>
+                </div>
+
+                {/* Step 2: Filling Up */}
+                <div className="flex flex-col items-center text-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                      lobby.participants.length >= 1
+                        ? 'bg-orange-600 text-white shadow-xs'
+                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
+                    }`}
+                  >
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-900 dark:text-stone-100 mt-1 leading-tight">
+                    Filling Up
+                  </span>
+                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
+                    {lobby.participants.length}/{lobby.maxParticipants} Joined
+                  </span>
+                </div>
+
+                {/* Step 3: On The Way */}
+                <div className="flex flex-col items-center text-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                      onWayCount > 0
+                        ? 'bg-amber-500 text-white shadow-xs animate-pulse'
+                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
+                    }`}
+                  >
+                    <Navigation className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-900 dark:text-stone-100 mt-1 leading-tight">
+                    On The Way
+                  </span>
+                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
+                    {onWayCount} En Route
+                  </span>
+                </div>
+
+                {/* Step 4: At Meetup Spot */}
+                <div className="flex flex-col items-center text-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                      arrivedCount > 0
+                        ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/30'
+                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
+                    }`}
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <span
+                    className={`text-[11px] font-bold mt-1 leading-tight ${
+                      arrivedCount > 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-stone-900 dark:text-stone-100'
+                    }`}
+                  >
+                    At Meetup Spot
+                  </span>
+                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
+                    {arrivedCount > 0
+                      ? `${arrivedCount}/${lobby.participants.length} Here!`
+                      : '0 Here'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Continuous Progress Bar */}
+              <div className="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 transition-all duration-500 rounded-full"
+                  style={{
+                    width:
+                      arrivedCount > 0
+                        ? '100%'
+                        : onWayCount > 0
+                        ? '75%'
+                        : lobby.participants.length >= lobby.maxParticipants
+                        ? '50%'
+                        : '25%',
+                  }}
+                />
+              </div>
+            </div>
 
             {/* LIVE ARRIVAL CHECK-IN & VISUAL SPOT CLUE BAR (For Confirmed Participants) */}
             {isParticipant && (
@@ -717,6 +897,7 @@ export function RoomDetailModal({
                   hostId={lobby.hostId}
                   activeUserId={activeUser.id}
                   showSkillBadges
+                  onParticipantClick={(p) => onClickParticipant?.(p.id)}
                 />
 
                 <div className="pt-3 border-t border-stone-200 dark:border-stone-700 space-y-2.5">
@@ -733,7 +914,20 @@ export function RoomDetailModal({
                         className="bg-white dark:bg-stone-900 rounded-xl p-3 border border-stone-200 dark:border-stone-800 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            onClick={() => {
+                              if (onClickParticipant) {
+                                onClickParticipant(person.id);
+                              } else if (onOpenLightbox) {
+                                onOpenLightbox(person.avatar, person.name, person.age, true);
+                              }
+                            }}
+                            className={`flex items-center gap-3 min-w-0 ${
+                              onClickParticipant || onOpenLightbox
+                                ? 'cursor-pointer hover:opacity-80 transition-opacity'
+                                : ''
+                            }`}
+                          >
                             <img
                               src={person.avatar}
                               alt={person.name}
@@ -868,7 +1062,20 @@ export function RoomDetailModal({
                     className="bg-white dark:bg-stone-900 rounded-xl p-3.5 shadow-sm border border-amber-200 dark:border-amber-800 space-y-2.5"
                   >
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        onClick={() => {
+                          if (onClickParticipant) {
+                            onClickParticipant(req.user.id);
+                          } else if (onOpenLightbox) {
+                            onOpenLightbox(req.user.avatar, req.user.name, req.user.age, true);
+                          }
+                        }}
+                        className={`flex items-center gap-2.5 min-w-0 ${
+                          onClickParticipant || onOpenLightbox
+                            ? 'cursor-pointer hover:opacity-80 transition-opacity'
+                            : ''
+                        }`}
+                      >
                         <img
                           src={req.user.avatar}
                           alt={req.user.name}
@@ -1039,7 +1246,18 @@ export function RoomDetailModal({
                           <img
                             src={msg.senderAvatar}
                             alt={msg.senderName}
-                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-white dark:border-stone-800 shadow-sm"
+                            onClick={() => {
+                              if (onClickParticipant) {
+                                onClickParticipant(msg.senderId);
+                              } else if (onOpenLightbox) {
+                                onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, true);
+                              }
+                            }}
+                            className={`w-8 h-8 rounded-full object-cover shrink-0 border border-white dark:border-stone-800 shadow-sm ${
+                              onClickParticipant || onOpenLightbox
+                                ? 'cursor-pointer hover:scale-105 transition-transform'
+                                : ''
+                            }`}
                           />
                           <div
                             className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
@@ -1049,9 +1267,23 @@ export function RoomDetailModal({
                             }`}
                           >
                             {!isMine && (
-                              <div className="text-[11px] font-extrabold text-orange-700 dark:text-orange-400 mb-0.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (onClickParticipant) {
+                                    onClickParticipant(msg.senderId);
+                                  } else if (onOpenLightbox) {
+                                    onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, true);
+                                  }
+                                }}
+                                className={`text-[11px] font-extrabold text-orange-700 dark:text-orange-400 mb-0.5 text-left block ${
+                                  onClickParticipant || onOpenLightbox
+                                    ? 'hover:underline cursor-pointer'
+                                    : ''
+                                }`}
+                              >
                                 {msg.senderName}
-                              </div>
+                              </button>
                             )}
                             <p className="font-medium">{msg.text}</p>
                           </div>

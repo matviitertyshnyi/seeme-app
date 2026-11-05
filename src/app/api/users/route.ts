@@ -9,6 +9,7 @@ import {
 } from '@/lib/auth-guard';
 import {
   ActivityCategory,
+  DirectMessage,
   PlayerRating,
   RadarBeacon,
   UserPersona,
@@ -23,6 +24,7 @@ export async function GET() {
     personas: sanitizePersonas(db.personas),
     ratings: db.ratings || [],
     notifications: db.notifications || [],
+    directMessages: db.directMessages || [],
   });
 }
 
@@ -43,6 +45,12 @@ export async function POST(req: NextRequest) {
       'UNBAN_USER',
       'TOGGLE_REGULAR_PARTNER',
       'MARK_NOTIFICATIONS_READ',
+      'SEND_FRIEND_REQUEST',
+      'ACCEPT_FRIEND_REQUEST',
+      'DECLINE_OR_REMOVE_FRIEND',
+      'SEND_DIRECT_MESSAGE',
+      'TOGGLE_SAVE_LOBBY',
+      'SUBMIT_PHOTO_VERIFICATION',
     ]);
 
     let authUser: UserPersona | undefined;
@@ -240,7 +248,12 @@ export async function POST(req: NextRequest) {
         if (avatar && !found.avatar.includes('unsplash')) {
           found.avatar = avatar;
         }
+        if (userEmail === 'vladtratata10@gmail.com') {
+          found.role = 'ADMIN';
+          found.photoVerified = true;
+        }
       } else {
+        const isFounder = userEmail === 'vladtratata10@gmail.com';
         const newUserId = `user-g-${crypto.randomUUID()}`;
         found = {
           id: newUserId,
@@ -248,13 +261,14 @@ export async function POST(req: NextRequest) {
           name: userName,
           age: 26,
           avatar: userAvatar,
-          skillBadge: 'Verified Member',
+          skillBadge: isFounder ? 'Lead Founder' : 'Verified Member',
           tagline: 'Signed in with Google! Down for sports, chess, and hanging out.',
           neighborhood: 'Select your city',
           onboarded: false,
           verified: true,
           verificationStatus: 'VERIFIED',
-          role: 'USER',
+          photoVerified: isFounder ? true : false,
+          role: isFounder ? 'ADMIN' : 'USER',
           isBanned: false,
           authProvider: 'google',
           favoriteActivities: ['Coffee', 'Tennis'],
@@ -541,6 +555,17 @@ export async function POST(req: NextRequest) {
       if (Array.isArray(favoriteActivities) && favoriteActivities.length > 0) {
         persona.favoriteActivities = favoriteActivities;
       }
+      if (body.photoVerified === true || (avatar && avatar.startsWith('data:image/'))) {
+        persona.photoVerified = true;
+        persona.verified = true;
+        persona.verificationStatus = 'VERIFIED';
+      }
+      if (body.selfieVerificationUrl) {
+        persona.selfieVerificationUrl = body.selfieVerificationUrl;
+      }
+      if (Array.isArray(body.savedLobbyIds)) {
+        persona.savedLobbyIds = body.savedLobbyIds;
+      }
 
       // Sync participant snapshots across active lobbies
       db.lobbies.forEach((lobby) => {
@@ -822,6 +847,266 @@ export async function POST(req: NextRequest) {
         n.userId === targetUserId ? { ...n, read: true } : n
       );
       return NextResponse.json({ notifications: db.notifications });
+    }
+
+    if (action === 'SEND_FRIEND_REQUEST') {
+      const { targetUserId } = body as { targetUserId: string };
+      if (!targetUserId || targetUserId === authUser!.id) {
+        return errorResponse('Invalid target user for friend request', 400);
+      }
+
+      const caller = db.personas.find((p) => p.id === authUser!.id);
+      const target = db.personas.find((p) => p.id === targetUserId);
+      if (!caller) return errorResponse('Caller not found', 404);
+      if (!target) return errorResponse('Target user not found', 404);
+
+      caller.friendIds = caller.friendIds || [];
+      caller.outgoingFriendRequestIds = caller.outgoingFriendRequestIds || [];
+      caller.incomingFriendRequestIds = caller.incomingFriendRequestIds || [];
+      target.friendIds = target.friendIds || [];
+      target.outgoingFriendRequestIds = target.outgoingFriendRequestIds || [];
+      target.incomingFriendRequestIds = target.incomingFriendRequestIds || [];
+
+      db.notifications = db.notifications || [];
+
+      // If already friends, return current state
+      if (caller.friendIds.includes(targetUserId)) {
+        return NextResponse.json({
+          persona: sanitizePersona(caller),
+          personas: sanitizePersonas(db.personas),
+          notifications: db.notifications,
+        });
+      }
+
+      // If target already sent caller a friend request, auto-accept both into friendIds!
+      if (caller.incomingFriendRequestIds.includes(targetUserId)) {
+        caller.incomingFriendRequestIds = caller.incomingFriendRequestIds.filter((id) => id !== targetUserId);
+        target.outgoingFriendRequestIds = target.outgoingFriendRequestIds.filter((id) => id !== caller.id);
+
+        if (!caller.friendIds.includes(targetUserId)) caller.friendIds.push(targetUserId);
+        if (!target.friendIds.includes(caller.id)) target.friendIds.push(caller.id);
+
+        caller.regularPartnerIds = caller.regularPartnerIds || [];
+        target.regularPartnerIds = target.regularPartnerIds || [];
+        if (!caller.regularPartnerIds.includes(targetUserId)) caller.regularPartnerIds.push(targetUserId);
+        if (!target.regularPartnerIds.includes(caller.id)) target.regularPartnerIds.push(caller.id);
+
+        db.notifications.unshift({
+          id: `notif-${crypto.randomUUID()}`,
+          userId: targetUserId,
+          type: 'FRIEND_ACCEPTED',
+          title: 'Friend Request Accepted',
+          body: `${caller.name} accepted your friend request! You can now send direct messages.`,
+          read: false,
+          createdAt: nowIso,
+        });
+      } else {
+        if (!caller.outgoingFriendRequestIds.includes(targetUserId)) {
+          caller.outgoingFriendRequestIds.push(targetUserId);
+        }
+        if (!target.incomingFriendRequestIds.includes(caller.id)) {
+          target.incomingFriendRequestIds.push(caller.id);
+        }
+
+        db.notifications.unshift({
+          id: `notif-${crypto.randomUUID()}`,
+          userId: targetUserId,
+          type: 'FRIEND_REQUEST',
+          title: 'New Friend Request',
+          body: `${caller.name} sent you a friend request!`,
+          read: false,
+          createdAt: nowIso,
+        });
+      }
+
+      return NextResponse.json({
+        persona: sanitizePersona(caller),
+        personas: sanitizePersonas(db.personas),
+        notifications: db.notifications,
+      });
+    }
+
+    if (action === 'ACCEPT_FRIEND_REQUEST') {
+      const { targetUserId } = body as { targetUserId: string };
+      if (!targetUserId || targetUserId === authUser!.id) {
+        return errorResponse('Invalid target user', 400);
+      }
+
+      const caller = db.personas.find((p) => p.id === authUser!.id);
+      const target = db.personas.find((p) => p.id === targetUserId);
+      if (!caller) return errorResponse('Caller not found', 404);
+      if (!target) return errorResponse('Target user not found', 404);
+
+      caller.friendIds = caller.friendIds || [];
+      caller.incomingFriendRequestIds = caller.incomingFriendRequestIds || [];
+      caller.outgoingFriendRequestIds = caller.outgoingFriendRequestIds || [];
+      caller.regularPartnerIds = caller.regularPartnerIds || [];
+
+      target.friendIds = target.friendIds || [];
+      target.incomingFriendRequestIds = target.incomingFriendRequestIds || [];
+      target.outgoingFriendRequestIds = target.outgoingFriendRequestIds || [];
+      target.regularPartnerIds = target.regularPartnerIds || [];
+
+      caller.incomingFriendRequestIds = caller.incomingFriendRequestIds.filter((id) => id !== targetUserId);
+      caller.outgoingFriendRequestIds = caller.outgoingFriendRequestIds.filter((id) => id !== targetUserId);
+      target.incomingFriendRequestIds = target.incomingFriendRequestIds.filter((id) => id !== caller.id);
+      target.outgoingFriendRequestIds = target.outgoingFriendRequestIds.filter((id) => id !== caller.id);
+
+      if (!caller.friendIds.includes(targetUserId)) caller.friendIds.push(targetUserId);
+      if (!target.friendIds.includes(caller.id)) target.friendIds.push(caller.id);
+      if (!caller.regularPartnerIds.includes(targetUserId)) caller.regularPartnerIds.push(targetUserId);
+      if (!target.regularPartnerIds.includes(caller.id)) target.regularPartnerIds.push(caller.id);
+
+      db.notifications = db.notifications || [];
+      db.notifications.unshift({
+        id: `notif-${crypto.randomUUID()}`,
+        userId: targetUserId,
+        type: 'FRIEND_ACCEPTED',
+        title: 'Friend Request Accepted',
+        body: `${caller.name} accepted your friend request! You can now send direct messages.`,
+        read: false,
+        createdAt: nowIso,
+      });
+
+      return NextResponse.json({
+        persona: sanitizePersona(caller),
+        personas: sanitizePersonas(db.personas),
+        notifications: db.notifications,
+      });
+    }
+
+    if (action === 'DECLINE_OR_REMOVE_FRIEND') {
+      const { targetUserId } = body as { targetUserId: string };
+      if (!targetUserId) {
+        return errorResponse('Target user ID is required', 400);
+      }
+
+      const caller = db.personas.find((p) => p.id === authUser!.id);
+      const target = db.personas.find((p) => p.id === targetUserId);
+      if (!caller) return errorResponse('Caller not found', 404);
+
+      caller.friendIds = (caller.friendIds || []).filter((id) => id !== targetUserId);
+      caller.incomingFriendRequestIds = (caller.incomingFriendRequestIds || []).filter((id) => id !== targetUserId);
+      caller.outgoingFriendRequestIds = (caller.outgoingFriendRequestIds || []).filter((id) => id !== targetUserId);
+
+      if (target) {
+        target.friendIds = (target.friendIds || []).filter((id) => id !== caller.id);
+        target.incomingFriendRequestIds = (target.incomingFriendRequestIds || []).filter((id) => id !== caller.id);
+        target.outgoingFriendRequestIds = (target.outgoingFriendRequestIds || []).filter((id) => id !== caller.id);
+      }
+
+      return NextResponse.json({
+        persona: sanitizePersona(caller),
+        personas: sanitizePersonas(db.personas),
+      });
+    }
+
+    if (action === 'SEND_DIRECT_MESSAGE') {
+      const { toUserId, text, lobbyInviteId } = body as {
+        toUserId: string;
+        text: string;
+        lobbyInviteId?: string;
+      };
+
+      if (!toUserId || toUserId === authUser!.id) {
+        return errorResponse('Valid recipient is required', 400);
+      }
+      if (!text || !text.trim()) {
+        return errorResponse('Message text is required', 400);
+      }
+
+      const caller = db.personas.find((p) => p.id === authUser!.id) || authUser!;
+      const target = db.personas.find((p) => p.id === toUserId);
+      if (!target) {
+        return errorResponse('Recipient user not found', 404);
+      }
+
+      const newMsg: DirectMessage = {
+        id: `dm-${crypto.randomUUID()}`,
+        fromUserId: caller.id,
+        toUserId,
+        senderName: caller.name || 'Friend',
+        senderAvatar: caller.avatar || '',
+        text: text.trim(),
+        lobbyInviteId: lobbyInviteId?.trim() || undefined,
+        createdAt: nowIso,
+        read: false,
+      };
+
+      db.directMessages = db.directMessages || [];
+      db.directMessages.push(newMsg);
+
+      db.notifications = db.notifications || [];
+      db.notifications.unshift({
+        id: `notif-${crypto.randomUUID()}`,
+        userId: toUserId,
+        type: 'DIRECT_MESSAGE',
+        title: `Direct Message from ${caller.name || 'Friend'}`,
+        body: text.trim().length > 80 ? `${text.trim().slice(0, 77)}...` : text.trim(),
+        read: false,
+        createdAt: nowIso,
+      });
+
+      return NextResponse.json({
+        message: newMsg,
+        directMessages: db.directMessages,
+        notifications: db.notifications,
+      });
+    }
+
+    if (action === 'TOGGLE_SAVE_LOBBY') {
+      const { lobbyId } = body as { lobbyId: string };
+      if (!lobbyId || !lobbyId.trim()) {
+        return errorResponse('Lobby ID is required', 400);
+      }
+
+      const caller = db.personas.find((p) => p.id === authUser!.id);
+      if (!caller) return errorResponse('Caller not found', 404);
+
+      caller.savedLobbyIds = caller.savedLobbyIds || [];
+      if (caller.savedLobbyIds.includes(lobbyId)) {
+        caller.savedLobbyIds = caller.savedLobbyIds.filter((id) => id !== lobbyId);
+      } else {
+        caller.savedLobbyIds.push(lobbyId);
+      }
+
+      return NextResponse.json({
+        persona: sanitizePersona(caller),
+        personas: sanitizePersonas(db.personas),
+      });
+    }
+
+    if (action === 'SUBMIT_PHOTO_VERIFICATION') {
+      const { avatar, selfieDataUrl } = body as {
+        avatar?: string;
+        selfieDataUrl?: string;
+      };
+
+      const persona = db.personas.find((p) => p.id === authUser!.id);
+      if (!persona) return errorResponse('User not found', 404);
+
+      if (avatar && avatar.trim()) {
+        persona.avatar = avatar.trim();
+      }
+      persona.selfieVerificationUrl = selfieDataUrl || persona.avatar;
+      persona.photoVerified = true;
+      persona.verified = true;
+      persona.verificationStatus = 'VERIFIED';
+      persona.verificationSubmittedAt = nowIso;
+
+      // Sync avatar across active lobbies
+      db.lobbies.forEach((lobby) => {
+        lobby.participants.forEach((part) => {
+          if (part.id === persona.id) {
+            part.avatar = persona.avatar;
+          }
+        });
+      });
+
+      return NextResponse.json({
+        persona: sanitizePersona(persona),
+        personas: sanitizePersonas(db.personas),
+      });
     }
 
       return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });

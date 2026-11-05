@@ -11,6 +11,7 @@ import {
   Bell,
   MapPin,
   Calendar,
+  Bookmark,
 } from 'lucide-react';
 import {
   ActivityCategory,
@@ -19,7 +20,7 @@ import {
   UserPersona,
 } from '@/types/lobby';
 
-export type MyMeetupsTab = 'HOSTING' | 'JOINED' | 'PAST';
+export type MyMeetupsTab = 'HOSTING' | 'JOINED' | 'SAVED' | 'PAST';
 
 export interface MyMeetupsViewProps {
   activeUser: UserPersona;
@@ -30,6 +31,7 @@ export interface MyMeetupsViewProps {
   onQuickJoin?: (lobby: LobbyWithDistance, e: React.MouseEvent) => void;
   onNavigateExplore: () => void;
   nearestOpenMeetup?: LobbyWithDistance | null;
+  savedLobbyIds?: string[];
 }
 
 export function MyMeetupsView({
@@ -41,6 +43,7 @@ export function MyMeetupsView({
   onQuickJoin,
   onNavigateExplore,
   nearestOpenMeetup,
+  savedLobbyIds = [],
 }: MyMeetupsViewProps) {
   const [activeTab, setActiveTab] = useState<MyMeetupsTab>('HOSTING');
 
@@ -80,6 +83,11 @@ export function MyMeetupsView({
     );
   }, [myAllRooms, activeUser.id]);
 
+  const mySavedRooms = useMemo(() => {
+    if (!savedLobbyIds || savedLobbyIds.length === 0) return [];
+    return lobbies.filter((lobby) => savedLobbyIds.includes(lobby.id));
+  }, [lobbies, savedLobbyIds]);
+
   const totalPendingRequests = useMemo(() => {
     return myHostingRooms.reduce((acc, r) => acc + r.pendingRequests.length, 0);
   }, [myHostingRooms]);
@@ -90,12 +98,14 @@ export function MyMeetupsView({
         return myHostingRooms;
       case 'JOINED':
         return myJoinedRooms;
+      case 'SAVED':
+        return mySavedRooms;
       case 'PAST':
         return myPastRooms;
       default:
         return [];
     }
-  }, [activeTab, myHostingRooms, myJoinedRooms, myPastRooms]);
+  }, [activeTab, myHostingRooms, myJoinedRooms, mySavedRooms, myPastRooms]);
 
   return (
     <div className="space-y-4">
@@ -111,7 +121,7 @@ export function MyMeetupsView({
       <div
         role="tablist"
         aria-label="My Meetup Categories"
-        className="grid grid-cols-3 p-1.5 rounded-2xl bg-stone-100 dark:bg-[#141210] border border-stone-200 dark:border-stone-800/90 shadow-inner dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] text-xs font-semibold"
+        className="grid grid-cols-4 p-1.5 rounded-2xl bg-stone-100 dark:bg-[#141210] border border-stone-200 dark:border-stone-800/90 shadow-inner dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] text-xs font-semibold"
       >
         <button
           type="button"
@@ -120,7 +130,7 @@ export function MyMeetupsView({
           aria-controls="panel-hosting"
           aria-selected={activeTab === 'HOSTING'}
           onClick={() => setActiveTab('HOSTING')}
-          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'HOSTING'
               ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
@@ -143,7 +153,7 @@ export function MyMeetupsView({
           aria-controls="panel-joined"
           aria-selected={activeTab === 'JOINED'}
           onClick={() => setActiveTab('JOINED')}
-          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'JOINED'
               ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
@@ -159,11 +169,31 @@ export function MyMeetupsView({
         <button
           type="button"
           role="tab"
+          id="tab-saved"
+          aria-controls="panel-saved"
+          aria-selected={activeTab === 'SAVED'}
+          onClick={() => setActiveTab('SAVED')}
+          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
+            activeTab === 'SAVED'
+              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
+              : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
+          }`}
+        >
+          <Bookmark className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
+          <span>Saved</span>
+          <span className="text-[11px] font-bold text-stone-400">
+            ({mySavedRooms.length})
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
           id="tab-past"
           aria-controls="panel-past"
           aria-selected={activeTab === 'PAST'}
           onClick={() => setActiveTab('PAST')}
-          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+          className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'PAST'
               ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
@@ -228,6 +258,30 @@ export function MyMeetupsView({
               </>
             )}
 
+            {activeTab === 'SAVED' && (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border border-amber-200 dark:border-amber-800">
+                  <Bookmark className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
+                    No Saved Meetups
+                  </h2>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 max-w-sm mx-auto">
+                    You haven&apos;t saved any meetups yet. Bookmark interesting meetups in Explore to easily access them here.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onNavigateExplore}
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-[0_4px_16px_rgba(234,88,12,0.4)] border border-orange-400/30 transition active:scale-[0.98] inline-flex items-center gap-1.5"
+                >
+                  <Compass className="w-4 h-4" />
+                  <span>Discover Open Meetups</span>
+                </button>
+              </>
+            )}
+
             {activeTab === 'PAST' && (
               <>
                 <div className="w-12 h-12 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-400 flex items-center justify-center mx-auto border border-stone-200 dark:border-stone-700">
@@ -255,6 +309,7 @@ export function MyMeetupsView({
           <div className="space-y-3">
             {currentTabRooms.map((room) => {
               const isRoomHost = room.hostId === activeUser.id;
+              const isJoined = room.participants.some((p) => p.id === activeUser.id);
               const pendingCount = room.pendingRequests.length;
 
               return (
@@ -265,7 +320,11 @@ export function MyMeetupsView({
                   <div className="flex items-center justify-between text-xs font-semibold">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-orange-600 dark:text-orange-400 uppercase tracking-wide text-[10px] font-bold">
-                        {isRoomHost ? 'Your Hosted Meetup' : 'Joined Session'} · {room.category}
+                        {isRoomHost
+                          ? 'Your Hosted Meetup'
+                          : isJoined
+                          ? 'Joined Session'
+                          : 'Saved Meetup'} · {room.category}
                       </span>
                       {room.isRecurring && (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-md bg-orange-950/70 border border-orange-500/30 text-orange-300 text-[10px] font-semibold">

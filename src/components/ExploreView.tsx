@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, SearchX, Plus } from 'lucide-react';
+import { Search, X, ChevronDown, SearchX, Plus, Bookmark } from 'lucide-react';
 import { LobbyWithDistance, RoomStatus, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
@@ -35,6 +35,13 @@ export interface ExploreViewProps {
   onOpenHostModal: () => void;
   onResetFilters: () => void;
   onOpenCitySelector?: () => void;
+  personas?: UserPersona[];
+  onClickUser?: (userId: string) => void;
+  onToggleBeacon?: () => void;
+  savedLobbyIds?: string[];
+  onToggleSaveLobby?: (lobbyId: string, e: React.MouseEvent) => void;
+  showSavedOnly?: boolean;
+  onToggleSavedOnly?: () => void;
 }
 
 export function ExploreView({
@@ -65,9 +72,49 @@ export function ExploreView({
   onOpenHostModal,
   onResetFilters,
   onOpenCitySelector,
+  personas = [],
+  onClickUser,
+  onToggleBeacon,
+  savedLobbyIds = [],
+  onToggleSaveLobby,
+  showSavedOnly = false,
+  onToggleSavedOnly,
 }: ExploreViewProps) {
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
   const locationName = userLocationLabel.split(',')[0];
+
+  const peopleDownToMeet = React.useMemo(() => {
+    if (!personas || personas.length === 0) return [];
+    const others = personas.filter((p) => p.id !== activeUser.id);
+    const filtered = others.filter(
+      (p) =>
+        p.beacon?.active ||
+        p.verified ||
+        (activeUser.neighborhood &&
+          p.neighborhood &&
+          p.neighborhood.toLowerCase() === activeUser.neighborhood.toLowerCase())
+    );
+    return filtered.length > 0 ? filtered : others;
+  }, [personas, activeUser.id, activeUser.neighborhood]);
+
+  const displayAvailable = React.useMemo(() => {
+    if (showSavedOnly && savedLobbyIds) {
+      return availableToJoinLobbies.filter((l) => savedLobbyIds.includes(l.id));
+    }
+    return availableToJoinLobbies;
+  }, [showSavedOnly, savedLobbyIds, availableToJoinLobbies]);
+
+  const displayJoined = React.useMemo(() => {
+    if (showSavedOnly && savedLobbyIds) {
+      return joinedFilteredLobbies.filter((l) => savedLobbyIds.includes(l.id));
+    }
+    return joinedFilteredLobbies;
+  }, [showSavedOnly, savedLobbyIds, joinedFilteredLobbies]);
+
+  const effectiveTotalCount =
+    showSavedOnly && savedLobbyIds
+      ? displayAvailable.length + displayJoined.length
+      : filteredLobbiesCount;
 
   return (
     <div className="space-y-4">
@@ -181,11 +228,97 @@ export function ExploreView({
               />
               <span>{currentLang === 'uk' ? 'Наживо' : 'Live'}</span>
             </button>
+
+            {onToggleSavedOnly && (
+              <button
+                type="button"
+                onClick={onToggleSavedOnly}
+                aria-label="Filter to saved meetups"
+                className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 ${
+                  showSavedOnly
+                    ? 'bg-orange-600 text-white shadow-2xs'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                <Bookmark className={`w-3 h-3 ${showSavedOnly ? 'fill-white text-white' : 'text-stone-400'}`} />
+                <span>{currentLang === 'uk' ? 'Збережені' : 'Saved'}</span>
+              </button>
+            )}
           </div>
         </div>
       </section>
 
-      {filteredLobbiesCount === 0 ? (
+      {/* "People Down to Meet" Horizontal Strip (Yubo/Badoo style) */}
+      {peopleDownToMeet.length > 0 && (
+        <section
+          aria-label="People Down to Meet Today"
+          className="bg-white dark:bg-[#1C1917] rounded-2xl p-3 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100 truncate">
+                People Down to Meet
+              </h2>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                {peopleDownToMeet.length} Active
+              </span>
+            </div>
+
+            {onToggleBeacon && (
+              <button
+                type="button"
+                onClick={onToggleBeacon}
+                aria-label="Toggle beacon: I'm Free Today"
+                className={`min-h-[28px] px-2.5 py-0.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1.5 shrink-0 transition-all border ${
+                  activeUser.beacon?.active
+                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 shadow-xs'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700/80 hover:bg-stone-200 dark:hover:bg-stone-700'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    activeUser.beacon?.active ? 'bg-emerald-500 animate-ping' : 'bg-stone-400'
+                  }`}
+                />
+                <span>I&apos;m Free Today</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-0.5">
+            {peopleDownToMeet.map((person) => (
+              <button
+                key={person.id}
+                type="button"
+                onClick={() => onClickUser?.(person.id)}
+                className="flex flex-col items-center gap-1 shrink-0 group focus:outline-none cursor-pointer"
+                title={`${person.name}, ${person.age} · ${person.skillBadge || 'Verified Player'}`}
+              >
+                <div className="relative">
+                  <img
+                    src={person.avatar}
+                    alt={person.name}
+                    className="w-11 h-11 rounded-full object-cover border-2 border-stone-200 dark:border-stone-750 group-hover:scale-105 group-hover:border-orange-500 transition-all"
+                  />
+                  {person.beacon?.active ? (
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-stone-900 animate-pulse" />
+                  ) : person.verified ? (
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 text-[8px] font-bold">
+                      ✓
+                    </span>
+                  ) : null}
+                </div>
+                <span className="text-[11px] font-medium text-stone-800 dark:text-stone-200 group-hover:text-orange-500 transition-colors truncate max-w-[56px] text-center">
+                  {person.name.split(' ')[0]}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {effectiveTotalCount === 0 ? (
         <div className="bg-white dark:bg-[#1C1917] rounded-3xl p-8 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.5)] max-w-lg mx-auto space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/15 to-amber-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto shadow-[0_0_16px_rgba(234,88,12,0.2)]">
             <SearchX className="w-6 h-6" />
@@ -193,11 +326,12 @@ export function ExploreView({
 
           <div>
             <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
-              No Meetups Found Nearby
+              {showSavedOnly ? 'No Saved Meetups' : 'No Meetups Found Nearby'}
             </h2>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
-              No active meetups matched your current filters. Expand your radius, switch
-              categories, or start a meetup.
+              {showSavedOnly
+                ? 'You have not saved any meetups yet. Tap the bookmark icon on any meetup card to save it.'
+                : 'No active meetups matched your current filters. Expand your radius, switch categories, or start a meetup.'}
             </p>
           </div>
 
@@ -233,13 +367,13 @@ export function ExploreView({
       ) : (
         <div className="space-y-5">
           {/* SECTION A: AVAILABLE MEETUPS TO JOIN */}
-          {availableToJoinLobbies.length > 0 && (
+          {displayAvailable.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center justify-between px-0.5">
                 <div>
                   <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100">
                     {t('available_meetups') || 'Available Meetups'} (
-                    {availableToJoinLobbies.length})
+                    {displayAvailable.length})
                   </h2>
                   <p className="text-xs text-stone-500 dark:text-stone-400">
                     {t('sorted_by_distance') || 'Sorted by distance and live status'}
@@ -248,7 +382,7 @@ export function ExploreView({
               </div>
 
               <div className="space-y-3.5">
-                {availableToJoinLobbies.map((lobby) => (
+                {displayAvailable.map((lobby) => (
                   <LobbyCard
                     key={lobby.id}
                     lobby={lobby}
@@ -257,6 +391,12 @@ export function ExploreView({
                     onQuickJoin={onQuickJoin}
                     isJoining={joiningLobbyId === lobby.id}
                     language={currentLang}
+                    isSaved={savedLobbyIds?.includes(lobby.id)}
+                    onToggleSave={onToggleSaveLobby}
+                    onClickUser={(uid, e) => {
+                      e.stopPropagation();
+                      onClickUser?.(uid);
+                    }}
                   />
                 ))}
               </div>
@@ -264,14 +404,14 @@ export function ExploreView({
           )}
 
           {/* SECTION B: MEETUPS YOU ARE IN */}
-          {joinedFilteredLobbies.length > 0 && (
+          {displayJoined.length > 0 && (
             <section className="space-y-3 pt-3 border-t border-stone-200/80 dark:border-stone-800/80">
               <div className="flex items-center justify-between px-0.5">
                 <div>
                   <h2 className="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span>
-                      Meetups You Are In ({joinedFilteredLobbies.length})
+                      Meetups You Are In ({displayJoined.length})
                     </span>
                   </h2>
                   <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -281,7 +421,7 @@ export function ExploreView({
               </div>
 
               <div className="space-y-3.5">
-                {joinedFilteredLobbies.map((lobby) => (
+                {displayJoined.map((lobby) => (
                   <LobbyCard
                     key={lobby.id}
                     lobby={lobby}
@@ -290,6 +430,12 @@ export function ExploreView({
                     onQuickJoin={onQuickJoin}
                     isJoining={joiningLobbyId === lobby.id}
                     language={currentLang}
+                    isSaved={savedLobbyIds?.includes(lobby.id)}
+                    onToggleSave={onToggleSaveLobby}
+                    onClickUser={(uid, e) => {
+                      e.stopPropagation();
+                      onClickUser?.(uid);
+                    }}
                   />
                 ))}
               </div>

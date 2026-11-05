@@ -11,6 +11,7 @@ interface SeatBubblesProps {
   activeUserId?: string;
   onEmptySeatClick?: (e: React.MouseEvent) => void;
   showSkillBadges?: boolean;
+  onParticipantClick?: (person: Participant) => void;
 }
 
 export function SeatBubbles({
@@ -20,6 +21,7 @@ export function SeatBubbles({
   activeUserId,
   onEmptySeatClick,
   showSkillBadges = true,
+  onParticipantClick,
 }: SeatBubblesProps) {
   const actualHostId = hostId || participants[0]?.id || '';
   const openSeatsCount = Math.max(0, maxParticipants - participants.length);
@@ -37,7 +39,30 @@ export function SeatBubbles({
         return (
           <div
             key={person.id}
-            className="group relative flex flex-col items-center"
+            role={onParticipantClick ? 'button' : undefined}
+            tabIndex={onParticipantClick ? 0 : undefined}
+            onClick={
+              onParticipantClick
+                ? (e) => {
+                    e.stopPropagation();
+                    onParticipantClick(person);
+                  }
+                : undefined
+            }
+            onKeyDown={
+              onParticipantClick
+                ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onParticipantClick(person);
+                    }
+                  }
+                : undefined
+            }
+            className={`group relative flex flex-col items-center ${
+              onParticipantClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''
+            }`}
             title={`${person.name}, ${person.age} · ${skillLabel}${
               isArrived ? ' · Arrived at venue' : isFiveMin ? ' · 5m away' : ''
             }${person.spotClue ? ` ("${person.spotClue}")` : ''}`}
