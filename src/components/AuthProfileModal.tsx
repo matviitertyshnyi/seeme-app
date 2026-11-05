@@ -21,6 +21,7 @@ import {
 } from '@/components/CategoryIcon';
 import { CityPreset, POPULAR_CITIES } from '@/lib/cities';
 import { PhotoLightboxModal } from '@/components/PhotoLightboxModal';
+import { verifyHumanFace } from '@/lib/face-detection';
 
 interface AuthProfileModalProps {
   isOpen: boolean;
@@ -84,7 +85,7 @@ export function AuthProfileModal({
   // Register / Edit Form State
   const [name, setName] = useState(activeUser.name);
   const [email, setEmail] = useState(activeUser.email || '');
-  const [age, setAge] = useState<number>(activeUser.age);
+  const [age, setAge] = useState<number>(activeUser.age && activeUser.age >= 18 ? activeUser.age : 21);
   const [cityInput, setCityInput] = useState(
     activeUser.neighborhood && activeUser.neighborhood !== 'Select your city'
       ? activeUser.neighborhood
@@ -98,6 +99,9 @@ export function AuthProfileModal({
     activeUser.favoriteActivities || ['Coffee', 'Park Walk']
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [faceChecking, setFaceChecking] = useState(false);
+  const [faceError, setFaceError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -106,10 +110,12 @@ export function AuthProfileModal({
     if (isOpen) {
       setActiveTab(initialTab);
       setLoginError('');
+      setFaceError(null);
+      setEditError(null);
       if (initialTab === 'EDIT') {
         setName(activeUser.name);
         setEmail(activeUser.email || '');
-        setAge(activeUser.age);
+        setAge(activeUser.age && activeUser.age >= 18 ? activeUser.age : 21);
         const currentCity =
           activeUser.neighborhood && activeUser.neighborhood !== 'Select your city'
             ? activeUser.neighborhood
@@ -133,7 +139,8 @@ export function AuthProfileModal({
     }
   }, [isOpen, initialTab, activeUser]);
 
-  const isAgeLocked = activeUser?.onboarded !== false;
+  const isAgeLocked = Boolean(activeUser?.onboarded === true && activeUser?.age && activeUser.age >= 18);
+  const isMandatoryOnboarding = activeUser?.onboarded === false || !activeUser?.age || activeUser?.age < 18;
 
   const filteredCities = useMemo(() => {
     const q = cityInput.trim().toLowerCase();
@@ -170,16 +177,23 @@ export function AuthProfileModal({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setFaceChecking(true);
+    setFaceError(null);
+    setEditError(null);
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
-        const size = 256;
+        const size = 320;
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        if (!ctx) {
+          setFaceChecking(false);
+          return;
+        }
 
         // Center-crop
         const minDim = Math.min(img.width, img.height);
@@ -187,8 +201,26 @@ export function AuthProfileModal({
         const sy = (img.height - minDim) / 2;
 
         ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        setAvatar(dataUrl);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+        // Run Human Face Verification to reject shoes / non-human images
+        try {
+          const result = await verifyHumanFace(dataUrl);
+          if (!result.isValidFace) {
+            setFaceError(result.message);
+            setFaceChecking(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            if (cameraInputRef.current) cameraInputRef.current.value = '';
+            return;
+          }
+          setAvatar(dataUrl);
+          setFaceError(null);
+        } catch {
+          // If detection fails unexpectedly, keep image
+          setAvatar(dataUrl);
+        } finally {
+          setFaceChecking(false);
+        }
       };
       if (typeof event.target?.result === 'string') {
         img.src = event.target.result;
@@ -208,10 +240,37 @@ export function AuthProfileModal({
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    setEditError(null);
+
+    if (!name.trim()) {
+      setEditError('Please enter your full name');
+      return;
+    }
+
+    const parsedAge = Number(age);
+    if (!parsedAge || isNaN(parsedAge) || parsedAge < 18 || parsedAge > 99) {
+      setEditError('Please enter a valid age (must be between 18 and 99)');
+      return;
+    }
+
+    const chosenCity = cityInput.trim();
+    if (!chosenCity || chosenCity === 'Select your city') {
+      setEditError('Please select or type your city');
+      return;
+    }
+
+    const hasRealFacePhoto = Boolean(
+      (avatar && avatar.startsWith('data:image/')) ||
+      (activeUser as any)?.photoVerified
+    );
+
+    if (!hasRealFacePhoto) {
+      setEditError('Real human face photo is required to use Leave The Room. Please upload a clear photo of your face or take a live selfie.');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    const chosenCity = cityInput.trim() || 'Select your city';
     const matchingCityPreset =
       selectedCityPreset ||
       POPULAR_CITIES.find(
@@ -240,8 +299,9 @@ export function AuthProfileModal({
           action: 'UPDATE_PROFILE',
           userId: activeUser.id,
           name: name.trim(),
-          age,
+          age: parsedAge,
           onboarded: true,
+          photoVerified: true,
           neighborhood: chosenCity,
           avatar,
           tagline,
@@ -256,6 +316,9 @@ export function AuthProfileModal({
           'Profile setup saved!'
         );
         onClose();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setEditError(errData.error || 'Failed to save profile. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -425,17 +488,36 @@ export function AuthProfileModal({
                 </div>
 
                 {/* Real Human Verification Status Indicator */}
-                <div className="mt-3">
-                  {(avatar && avatar.startsWith('data:image/')) || (activeUser as any)?.photoVerified ? (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span>✓ Verified Human Photo</span>
+                <div className="mt-3 space-y-2">
+                  {faceChecking && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-bold">
+                      <span className="w-3.5 h-3.5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                      <span>Verifying human face in photo...</span>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold">
-                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                      <span>Real photo required to join or host meetups — upload a photo or take a quick selfie</span>
+                  )}
+
+                  {faceError && (
+                    <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-300 dark:border-red-800 text-red-900 dark:text-red-200 text-xs font-semibold">
+                      <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-extrabold block">Real Human Face Required</span>
+                        <span>{faceError}</span>
+                      </div>
                     </div>
+                  )}
+
+                  {!faceChecking && !faceError && (
+                    (avatar && avatar.startsWith('data:image/')) || (activeUser as any)?.photoVerified ? (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>✓ Verified Human Face Photo</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+                        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>Real photo required — shoes, objects, or blank images will be rejected</span>
+                      </div>
+                    )
                   )}
                 </div>
               </div>
@@ -611,20 +693,33 @@ export function AuthProfileModal({
                 </div>
               </div>
 
+              {editError && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-300 dark:border-red-800 text-red-900 dark:text-red-200 text-xs font-semibold">
+                  <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
               <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="min-h-[44px] px-5 py-2.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-extrabold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-                >
-                  Cancel
-                </button>
+                {!isMandatoryOnboarding && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-extrabold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="min-h-[44px] px-6 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm transition-all"
+                  disabled={isSubmitting || faceChecking}
+                  className="min-h-[44px] px-6 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Saving...' : 'Save Profile'}
+                  {isSubmitting
+                    ? 'Saving...'
+                    : isMandatoryOnboarding
+                    ? 'Complete Profile & Enter App'
+                    : 'Save Profile'}
                 </button>
               </div>
             </form>

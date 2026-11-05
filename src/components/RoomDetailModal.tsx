@@ -275,7 +275,7 @@ export function RoomDetailModal({
     const hasRealPhoto =
       Boolean(activeUser.avatar) &&
       !activeUser.avatar.includes('unsplash.com') &&
-      (activeUser.photoVerified || activeUser.verified || activeUser.avatar.startsWith('data:image/') || activeUser.avatar.includes('googleusercontent.com'));
+      Boolean(activeUser.photoVerified || activeUser.avatar.startsWith('data:image/'));
     if (!hasRealPhoto) {
       if (onRequestAuth) onRequestAuth();
       return;

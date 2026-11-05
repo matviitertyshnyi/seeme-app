@@ -185,11 +185,21 @@ export function LobbyCard({
         >
           <div className="flex items-center -space-x-2 shrink-0">
             {hostPerson && (
-              <img
-                src={hostPerson.avatar}
-                alt={hostPerson.name}
-                className="w-8 h-8 rounded-full border-2 border-white dark:border-stone-800 object-cover"
-              />
+              <div className="relative">
+                <img
+                  src={hostPerson.avatar}
+                  alt={hostPerson.name}
+                  className="w-8 h-8 rounded-full border-2 border-white dark:border-stone-800 object-cover bg-stone-100 dark:bg-stone-800"
+                />
+                {((hostPerson as any).photoVerified || (hostPerson as any).verified) && (
+                  <span
+                    title="Verified Member"
+                    className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-1 ring-white dark:ring-stone-900 shadow-2xs z-10"
+                  >
+                    <ShieldCheck className="w-2 h-2" />
+                  </span>
+                )}
+              </div>
             )}
             {otherCount > 0 && (
               <div className="w-8 h-8 rounded-full border-2 border-white dark:border-stone-800 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[11px] font-bold">

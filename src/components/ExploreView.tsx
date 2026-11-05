@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, SearchX, Plus, Bookmark } from 'lucide-react';
+import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck } from 'lucide-react';
 import { LobbyWithDistance, RoomStatus, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
@@ -299,15 +299,22 @@ export function ExploreView({
                   <img
                     src={person.avatar}
                     alt={person.name}
-                    className="w-11 h-11 rounded-full object-cover border-2 border-stone-200 dark:border-stone-750 group-hover:scale-105 group-hover:border-orange-500 transition-all"
+                    className="w-11 h-11 rounded-full object-cover border-2 border-stone-200 dark:border-stone-750 group-hover:scale-105 group-hover:border-orange-500 transition-all bg-stone-100 dark:bg-stone-800"
                   />
-                  {person.beacon?.active ? (
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-stone-900 animate-pulse" />
-                  ) : person.verified ? (
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 text-[8px] font-bold">
-                      ✓
+                  {(person.photoVerified || person.verified) && (
+                    <span
+                      title="Verified Human Member"
+                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs z-10"
+                    >
+                      <ShieldCheck className="w-2.5 h-2.5" />
                     </span>
-                  ) : null}
+                  )}
+                  {person.beacon?.active && (
+                    <span
+                      title="Free to Meet Today"
+                      className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-stone-900 animate-pulse"
+                    />
+                  )}
                 </div>
                 <span className="text-[11px] font-medium text-stone-800 dark:text-stone-200 group-hover:text-orange-500 transition-colors truncate max-w-[56px] text-center">
                   {person.name.split(' ')[0]}

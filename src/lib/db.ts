@@ -139,19 +139,9 @@ function readLocalDb(): DatabaseSchema {
     if (!parsed || !Array.isArray(parsed.lobbies) || !Array.isArray(parsed.personas)) {
       throw new Error('Invalid database structure');
     }
-    if (!Array.isArray(parsed.ratings)) parsed.ratings = INITIAL_SEED_DATA.ratings || [];
-    if (!Array.isArray(parsed.notifications)) parsed.notifications = INITIAL_SEED_DATA.notifications || [];
-    if (!Array.isArray(parsed.messages)) parsed.messages = INITIAL_SEED_DATA.messages || [];
-    INITIAL_SEED_DATA.personas.forEach((seedPersona) => {
-      if (!parsed.personas.some((p) => p.id === seedPersona.id)) {
-        parsed.personas.push(seedPersona);
-      }
-    });
-    INITIAL_SEED_DATA.lobbies.forEach((seedLobby) => {
-      if (!parsed.lobbies.some((l) => l.id === seedLobby.id)) {
-        parsed.lobbies.push(seedLobby);
-      }
-    });
+    if (!Array.isArray(parsed.ratings)) parsed.ratings = [];
+    if (!Array.isArray(parsed.notifications)) parsed.notifications = [];
+    if (!Array.isArray(parsed.messages)) parsed.messages = [];
     return parsed;
   } catch {
     const seedClone = JSON.parse(JSON.stringify(INITIAL_SEED_DATA)) as DatabaseSchema;

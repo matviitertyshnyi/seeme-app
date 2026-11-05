@@ -90,7 +90,7 @@ type NavDestination = 'EXPLORE' | 'MAP' | 'MY_MEETUPS' | 'PROFILE';
 export default function LeaveTheRoomHomePage() {
   const [personas, setPersonas] = useState<UserPersona[]>(DEMO_PERSONAS);
   const [activePersonaId, setActivePersonaId] = useState<string>(
-    DEMO_PERSONAS[0].id
+    DEMO_PERSONAS[0]?.id || ''
   );
   const [isSignedOut, setIsSignedOut] = useState<boolean>(true);
   const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
@@ -191,12 +191,49 @@ export default function LeaveTheRoomHomePage() {
 
   const [sessionUser, setSessionUser] = useState<UserPersona | null>(null);
 
+  const GUEST_FALLBACK_USER: UserPersona = useMemo(() => ({
+    id: 'guest',
+    name: 'Explorer',
+    age: 0,
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
+    skillBadge: 'New Member',
+    tagline: 'Ready to discover meetups',
+    neighborhood: 'Select your city',
+    onboarded: false,
+    verified: false,
+    photoVerified: false,
+    role: 'USER',
+    isBanned: false,
+    favoriteActivities: ['Coffee', 'Park Walk'],
+    reliabilityScore: 100,
+    meetupsAttended: 0,
+    hoursPlayed: 0,
+    ratingAvg: 5.0,
+    ratingCount: 0,
+    streakWeeks: 1,
+    bannedUserIds: [],
+    regularPartnerIds: [],
+    friendIds: [],
+    incomingFriendRequestIds: [],
+    outgoingFriendRequestIds: [],
+    savedLobbyIds: [],
+    settings: {
+      iosAndroidPush: true,
+      soundEffects: true,
+      hapticFeedback: true,
+      distanceUnit: 'km',
+      profileVisible: true,
+      showReliabilityScore: true,
+    },
+  }), []);
+
   const activeUser = useMemo(
     () =>
       personas.find((p) => p.id === activePersonaId) ||
       (sessionUser && sessionUser.id === activePersonaId ? sessionUser : null) ||
-      personas[0],
-    [personas, activePersonaId, sessionUser]
+      personas[0] ||
+      GUEST_FALLBACK_USER,
+    [personas, activePersonaId, sessionUser, GUEST_FALLBACK_USER]
   );
 
   const hasPromptedOnboarding = useRef(false);
@@ -204,7 +241,12 @@ export default function LeaveTheRoomHomePage() {
     if (
       !hasPromptedOnboarding.current &&
       activeUser &&
-      activeUser.onboarded === false &&
+      (activeUser.onboarded === false ||
+        !activeUser.age ||
+        activeUser.age < 18 ||
+        !activeUser.photoVerified ||
+        activeUser.neighborhood === 'Select your city' ||
+        !activeUser.neighborhood) &&
       !isSignedOut
     ) {
       hasPromptedOnboarding.current = true;
@@ -730,7 +772,7 @@ export default function LeaveTheRoomHomePage() {
     const hasRealPhoto =
       Boolean(activeUser.avatar) &&
       !activeUser.avatar.includes('unsplash.com') &&
-      (activeUser.photoVerified || activeUser.verified || activeUser.avatar.startsWith('data:image/') || activeUser.avatar.includes('googleusercontent.com'));
+      Boolean(activeUser.photoVerified || activeUser.avatar.startsWith('data:image/'));
     if (!hasRealPhoto) {
       showToast('Please add your real profile photo before hosting a meetup');
       setAuthModalTab('EDIT');
@@ -1025,7 +1067,7 @@ export default function LeaveTheRoomHomePage() {
     const hasRealPhoto =
       Boolean(activeUser.avatar) &&
       !activeUser.avatar.includes('unsplash.com') &&
-      (activeUser.photoVerified || activeUser.verified || activeUser.avatar.startsWith('data:image/') || activeUser.avatar.includes('googleusercontent.com'));
+      Boolean(activeUser.photoVerified || activeUser.avatar.startsWith('data:image/'));
     if (!hasRealPhoto) {
       showToast('Please upload or verify your real profile photo to join meetups');
       setAuthModalTab('EDIT');

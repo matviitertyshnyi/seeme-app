@@ -84,6 +84,15 @@ export function SeatBubbles({
                 alt={person.name}
                 className="w-full h-full rounded-full object-cover border-2 border-white dark:border-stone-900 bg-stone-100 dark:bg-stone-800"
               />
+              {((person as any).photoVerified || (person as any).verified) && !isHost && (
+                <span
+                  aria-label="Verified Human Member"
+                  title="Verified Member"
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs z-10"
+                >
+                  <ShieldCheck className="w-2.5 h-2.5" />
+                </span>
+              )}
               {isHost && (
                 <span
                   aria-label="Meetup Host"
