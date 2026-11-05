@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   X,
   MapPin,
@@ -121,15 +121,22 @@ export function RoomDetailModal({
     : false;
   const onWayCount = lobby
     ? lobby.participants.filter(
-        (p) =>
-          p.arrivalStatus === 'ON_MY_WAY' ||
-          p.arrivalStatus === 'FIVE_MIN_OUT' ||
-          p.arrivalStatus === 'ARRIVED'
+        (p) => p.arrivalStatus === 'ON_MY_WAY' || p.arrivalStatus === 'FIVE_MIN_OUT'
       ).length
     : 0;
   const arrivedCount = lobby
     ? lobby.participants.filter((p) => p.arrivalStatus === 'ARRIVED').length
     : 0;
+
+  const meetupProgressPercent = useMemo(() => {
+    if (!lobby) return 25;
+    const maxP = Math.max(1, lobby.maxParticipants);
+    if (arrivedCount >= maxP) return 100;
+    const rosterContribution = (lobby.participants.length / maxP) * 25;
+    const onWayContribution = (onWayCount / maxP) * 25;
+    const arrivedContribution = (arrivedCount / maxP) * 25;
+    return Math.min(100, Math.round(25 + rosterContribution + onWayContribution + arrivedContribution));
+  }, [lobby, onWayCount, arrivedCount]);
 
   useEffect(() => {
     if (myParticipantRecord?.spotClue) {
@@ -637,10 +644,10 @@ export function RoomDetailModal({
                 </span>
                 <span className="text-[11px] font-bold text-stone-700 dark:text-stone-300">
                   {arrivedCount > 0
-                    ? `${arrivedCount} of ${lobby.participants.length} at spot`
+                    ? `${arrivedCount} of ${lobby.maxParticipants} at spot`
                     : onWayCount > 0
-                    ? `${onWayCount} en route`
-                    : `${lobby.participants.length}/${lobby.maxParticipants} joined`}
+                    ? `${onWayCount} of ${lobby.maxParticipants} en route`
+                    : `${lobby.participants.length} of ${lobby.maxParticipants} joined`}
                 </span>
               </div>
 
@@ -701,8 +708,10 @@ export function RoomDetailModal({
                 <div className="flex flex-col items-center text-center">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                      arrivedCount > 0
+                      arrivedCount >= lobby.maxParticipants
                         ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/30'
+                        : arrivedCount > 0
+                        ? 'bg-emerald-600/80 text-white shadow-xs'
                         : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
                     }`}
                   >
@@ -719,8 +728,8 @@ export function RoomDetailModal({
                   </span>
                   <span className="text-[9px] text-stone-500 dark:text-stone-400">
                     {arrivedCount > 0
-                      ? `${arrivedCount}/${lobby.participants.length} Here!`
-                      : '0 Here'}
+                      ? `${arrivedCount}/${lobby.maxParticipants} Arrived`
+                      : `0/${lobby.maxParticipants} Here`}
                   </span>
                 </div>
               </div>
@@ -730,14 +739,7 @@ export function RoomDetailModal({
                 <div
                   className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 transition-all duration-500 rounded-full"
                   style={{
-                    width:
-                      arrivedCount > 0
-                        ? '100%'
-                        : onWayCount > 0
-                        ? '75%'
-                        : lobby.participants.length >= lobby.maxParticipants
-                        ? '50%'
-                        : '25%',
+                    width: `${meetupProgressPercent}%`,
                   }}
                 />
               </div>
