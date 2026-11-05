@@ -146,7 +146,7 @@ export function getDefaultCoverForCategory(category: ActivityCategory): string {
  * into a numeric closed interval [minAge, maxAge].
  */
 export function parseAgeRangeToInterval(rangeStr?: string): [number, number] {
-  if (!rangeStr || rangeStr.includes('All Ages') || rangeStr === 'Any') {
+  if (!rangeStr || rangeStr.includes('All Ages') || rangeStr.includes('No preference') || rangeStr === 'Any') {
     return [18, 99];
   }
 
@@ -181,7 +181,7 @@ export function doesMeetupMatchAgeFilters(
     return true;
   }
 
-  if (!meetupRangeStr || meetupRangeStr.includes('All Ages') || meetupRangeStr === 'Any') {
+  if (!meetupRangeStr || meetupRangeStr.includes('All Ages') || meetupRangeStr.includes('No preference') || meetupRangeStr === 'Any') {
     return true;
   }
 

@@ -164,6 +164,7 @@ export type UpdateProfileInput = z.infer<typeof UpdateProfileInputSchema>;
 
 // Age preference schema
 export const AgeRangeOptionSchema = z.enum([
+  'No preference',
   'All Ages (18+)',
   '18–25',
   '20s & 30s',
@@ -173,6 +174,7 @@ export const AgeRangeOptionSchema = z.enum([
 ]);
 
 export const AGE_RANGE_OPTIONS: AgeRangeOption[] = [
+  'No preference',
   'All Ages (18+)',
   '18–25',
   '20s & 30s',
@@ -189,7 +191,7 @@ export const CreateMeetupInputSchema = z.object({
     .min(3, 'Title must be at least 3 characters')
     .max(100, 'Title cannot exceed 100 characters'),
   category: ActivityCategorySchema,
-  preferredAgeRange: z.string().optional().default('All Ages (18+)'),
+  preferredAgeRange: z.string().optional().default('No preference'),
   equipmentNote: z
     .string()
     .trim()
@@ -244,7 +246,7 @@ export const MeetupSchema = z.object({
   category: ActivityCategorySchema,
   mapPinLabel: z.string().default('MEETUP'),
   title: z.string().min(1),
-  preferredAgeRange: z.string().optional().default('All Ages (18+)'),
+  preferredAgeRange: z.string().optional().default('No preference'),
   equipmentNote: z.string().default(''),
   coverImage: z.string(),
   venueName: z.string().min(1),

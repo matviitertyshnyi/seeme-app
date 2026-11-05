@@ -20,7 +20,7 @@ import {
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[220px] rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse flex items-center justify-center text-xs text-stone-500 font-semibold">
+    <div className="w-full h-[360px] sm:h-[420px] rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse flex items-center justify-center text-xs text-stone-500 font-semibold">
       Loading interactive spot picker...
     </div>
   ),
@@ -60,7 +60,6 @@ const START_TIME_OPTIONS: StartTimeOption[] = [
   'Now',
   'In 30 mins',
   'In 1 hour',
-  'Later today',
 ];
 
 const PLAYER_CAPS = [2, 3, 4, 5, 6, 8];
@@ -147,15 +146,11 @@ export function CreateLobbyModal({
 
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
   const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
-  const [preferredAgeRange, setPreferredAgeRange] = useState<string>('All Ages (18+)');
+  const [preferredAgeRange, setPreferredAgeRange] = useState<string>('No preference');
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
   const [recurringDay, setRecurringDay] = useState<string>('Friday');
   const [recurringTime, setRecurringTime] = useState<string>('20:00');
   const [showPinMap, setShowPinMap] = useState<boolean>(true);
-  const [selectedCoHostId, setSelectedCoHostId] = useState<string | null>(
-    initialCoHost?.id || null
-  );
-  const [showOptionalCoHost, setShowOptionalCoHost] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -219,13 +214,8 @@ export function CreateLobbyModal({
       if (initialStartTime) {
         setStartTime(initialStartTime);
         setIsExactTime(
-          !['Now', 'In 30 mins', 'In 1 hour', 'Later today'].includes(initialStartTime)
+          !['Now', 'In 30 mins', 'In 1 hour'].includes(initialStartTime)
         );
-      }
-      setSelectedCoHostId(initialCoHost ? initialCoHost.id : null);
-      setShowOptionalCoHost(Boolean(initialCoHost));
-      if (initialCoHost) {
-        setMaxParticipants((prev) => Math.max(prev, 4));
       }
       if (userLat && userLng) {
         setLat(userLat);
@@ -233,16 +223,9 @@ export function CreateLobbyModal({
         reverseGeocode(userLat, userLng);
       }
     }
-  }, [isOpen, initialCategory, initialStartTime, initialCoHost, userLat, userLng]);
+  }, [isOpen, initialCategory, initialStartTime, userLat, userLng]);
 
   if (!isOpen) return null;
-
-  const availableCoHosts = personas.filter(
-    (p) =>
-      p.id !== activeUser.id && !activeUser.bannedUserIds?.includes(p.id)
-  );
-  const selectedCoHost =
-    availableCoHosts.find((p) => p.id === selectedCoHostId) || null;
 
   const previewParticipants: Participant[] = [
     {
@@ -255,20 +238,6 @@ export function CreateLobbyModal({
       ratingAvg: activeUser.ratingAvg,
       joinedAt: new Date().toISOString(),
     },
-    ...(selectedCoHost
-      ? [
-          {
-            id: selectedCoHost.id,
-            name: selectedCoHost.name,
-            age: selectedCoHost.age,
-            avatar: selectedCoHost.avatar,
-            skillBadge: selectedCoHost.skillBadge,
-            reliabilityScore: selectedCoHost.reliabilityScore,
-            ratingAvg: selectedCoHost.ratingAvg,
-            joinedAt: new Date().toISOString(),
-          },
-        ]
-      : []),
   ];
 
   const handleUseMyLocation = () => {
@@ -354,19 +323,7 @@ export function CreateLobbyModal({
             ratingAvg: activeUser.ratingAvg,
             joinedAt: new Date().toISOString(),
           },
-          coHost: selectedCoHost
-            ? {
-                id: selectedCoHost.id,
-                name: selectedCoHost.name,
-                age: selectedCoHost.age,
-                avatar: selectedCoHost.avatar,
-                skillBadge: selectedCoHost.skillBadge,
-                tagline: selectedCoHost.tagline,
-                reliabilityScore: selectedCoHost.reliabilityScore,
-                ratingAvg: selectedCoHost.ratingAvg,
-                joinedAt: new Date().toISOString(),
-              }
-            : null,
+          coHost: null,
         }),
       });
 
@@ -576,29 +533,6 @@ export function CreateLobbyModal({
                 />
               </div>
             </div>
-
-            <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5 flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                Skill Level
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {SKILL_COMPAT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSkillCompatibility(opt.value)}
-                    className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-extrabold border transition-all ${
-                      skillCompatibility === opt.value
-                        ? 'bg-orange-600 text-white border-orange-600'
-                        : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* 3. Meetup Location & Map Pinning */}
@@ -677,7 +611,7 @@ export function CreateLobbyModal({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {START_TIME_OPTIONS.map((opt) => (
                   <button
                     key={opt}
@@ -896,14 +830,14 @@ export function CreateLobbyModal({
               7. Age Preference
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-              {['All Ages (18+)', '18–25', '20s & 30s', '25–35', '30+', '40+'].map((ageOpt) => (
+              {['No preference', '18–25', '20s & 30s', '25–35', '30+', '40+'].map((ageOpt) => (
                 <button
                   key={ageOpt}
                   type="button"
                   onClick={() => setPreferredAgeRange(ageOpt)}
                   className={`min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold border transition-all ${
                     preferredAgeRange === ageOpt
-                      ? 'bg-brand text-white border-brand shadow-sm'
+                      ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                       : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
                   }`}
                 >
@@ -912,65 +846,6 @@ export function CreateLobbyModal({
               ))}
             </div>
           </div>
-
-          {/* Niche Optional Co-Host Selector: tucked cleanly inside the Hosting Flow only */}
-          {availableCoHosts.length > 0 && (
-            <div className="border-t border-stone-200 dark:border-stone-800 pt-3">
-              <button
-                type="button"
-                onClick={() => setShowOptionalCoHost((prev) => !prev)}
-                className="min-h-[44px] w-full flex items-center justify-between text-xs font-extrabold text-stone-700 dark:text-stone-300 hover:text-orange-600 dark:hover:text-orange-400"
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <UserPlus className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                  {selectedCoHost
-                    ? `Co-Hosting with ${selectedCoHost.name}`
-                    : 'Add an optional Co-Host'}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    showOptionalCoHost ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {showOptionalCoHost && (
-                <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {availableCoHosts.map((person) => {
-                    const isCoHost = selectedCoHostId === person.id;
-                    return (
-                      <button
-                        key={person.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedCoHostId(isCoHost ? null : person.id)
-                        }
-                        className={`min-h-[48px] p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
-                          isCoHost
-                            ? 'bg-orange-50 dark:bg-orange-950 border-orange-600 ring-1 ring-orange-600'
-                            : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 border-stone-200 dark:border-stone-700'
-                        }`}
-                      >
-                        <img
-                          src={person.avatar}
-                          alt={person.name}
-                          className="w-9 h-9 rounded-full object-cover shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <div className="text-xs font-extrabold text-stone-950 dark:text-white truncate">
-                            {person.name.split(' ')[0]}, {person.age}
-                          </div>
-                          <div className="text-[11px] font-bold text-orange-600 dark:text-orange-400 truncate">
-                            {person.skillBadge}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="pt-2 flex items-center justify-end gap-3">
             <button

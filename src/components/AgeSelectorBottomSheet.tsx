@@ -207,7 +207,7 @@ export function AgeSelectorBottomSheet({
           >
             <div>
               <div className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                <span>All Ages (18+)</span>
+                <span>No preference</span>
                 <span className="text-[10px] font-medium text-stone-500 dark:text-stone-400">
                   (Default)
                 </span>

@@ -88,7 +88,7 @@ export default function LocationPickerMap({
   }, [lat, lng]);
 
   return (
-    <div className="relative isolate z-0 w-full h-[220px] rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700/80 shadow-inner bg-stone-100 dark:bg-stone-900">
+    <div className="relative isolate z-0 w-full h-[360px] sm:h-[420px] rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700/80 shadow-inner bg-stone-100 dark:bg-stone-900">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
       <div className="absolute bottom-2 left-2 right-2 z-[1000] pointer-events-none">
         <div className="bg-stone-950/85 backdrop-blur-md text-stone-200 text-[11px] font-semibold px-3 py-1.5 rounded-xl text-center shadow-md border border-white/10">

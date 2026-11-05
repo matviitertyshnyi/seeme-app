@@ -51,6 +51,7 @@ export interface UserSettings {
 }
 
 export type AgeRangeOption =
+  | 'No preference'
   | 'All Ages (18+)'
   | '18–25'
   | '20s & 30s'

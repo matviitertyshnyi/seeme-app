@@ -37,89 +37,6 @@
       "authProvider": "google"
     },
     {
-      "id": "user-apple-b1b2ad2d-19f3-4b19-ace9-8561d10def5c",
-      "email": "jordan.miller.meetups@icloud.com",
-      "name": "Sam Taylor",
-      "age": 26,
-      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-      "skillBadge": "Verified Member",
-      "tagline": "Joined via Apple ID. Ready to meet up!",
-      "neighborhood": "Greenwich Village",
-      "verified": true,
-      "verificationStatus": "VERIFIED",
-      "role": "USER",
-      "isBanned": false,
-      "favoriteActivities": [
-        "Ping Pong",
-        "Coffee",
-        "Chess"
-      ],
-      "reliabilityScore": 100,
-      "meetupsAttended": 0,
-      "hoursPlayed": 0,
-      "ratingAvg": 5,
-      "ratingCount": 0,
-      "streakWeeks": 1,
-      "bannedUserIds": [],
-      "regularPartnerIds": [],
-      "settings": {
-        "iosAndroidPush": true,
-        "soundEffects": true,
-        "hapticFeedback": true,
-        "distanceUnit": "km",
-        "profileVisible": true,
-        "showReliabilityScore": true
-      },
-      "authProvider": "apple"
-    },
-    {
-      "id": "user-g-0cb1a77a-9cb7-4ded-897a-3f78abf89413",
-      "email": "alex.chen.meetups@gmail.com",
-      "name": "Alex Chen",
-      "age": 26,
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-      "skillBadge": "Verified Member",
-      "tagline": "Signed in with Google! Down for sports, chess, and hanging out.",
-      "neighborhood": "Greenwich Village",
-      "verified": true,
-      "verificationStatus": "VERIFIED",
-      "role": "USER",
-      "isBanned": false,
-      "authProvider": "google",
-      "favoriteActivities": [
-        "Ping Pong",
-        "Chess",
-        "Run Club",
-        "Coffee"
-      ],
-      "reliabilityScore": 100,
-      "meetupsAttended": 1,
-      "hoursPlayed": 2,
-      "ratingAvg": 5,
-      "ratingCount": 1,
-      "streakWeeks": 1,
-      "bannedUserIds": [],
-      "regularPartnerIds": [],
-      "beacon": {
-        "active": true,
-        "categories": [
-          "Ping Pong",
-          "Chess"
-        ],
-        "radiusKm": 15,
-        "note": "Open to play nearby",
-        "updatedAt": "2026-11-04T20:36:59.898Z"
-      },
-      "settings": {
-        "iosAndroidPush": true,
-        "soundEffects": true,
-        "hapticFeedback": true,
-        "distanceUnit": "km",
-        "profileVisible": true,
-        "showReliabilityScore": true
-      }
-    },
-    {
       "id": "user-maya",
       "email": "maya@seeme.app",
       "name": "Maya Lin",
@@ -295,40 +212,6 @@
         "profileVisible": true,
         "showReliabilityScore": true
       }
-    },
-    {
-      "id": "user-google-1793640464684",
-      "email": "alex.rivera@leavetheroom.app",
-      "name": "Alex Rivera",
-      "age": 26,
-      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80",
-      "skillBadge": "Active Member",
-      "tagline": "Casual sports & board game enthusiast.",
-      "neighborhood": "East Village",
-      "verified": true,
-      "role": "USER",
-      "isBanned": false,
-      "authProvider": "google",
-      "favoriteActivities": [
-        "Ping Pong",
-        "Chess"
-      ],
-      "reliabilityScore": 98,
-      "meetupsAttended": 5,
-      "hoursPlayed": 10,
-      "ratingAvg": 4.9,
-      "ratingCount": 4,
-      "streakWeeks": 2,
-      "bannedUserIds": [],
-      "regularPartnerIds": [],
-      "settings": {
-        "iosAndroidPush": true,
-        "soundEffects": true,
-        "hapticFeedback": true,
-        "distanceUnit": "km",
-        "profileVisible": true,
-        "showReliabilityScore": true
-      }
     }
   ],
   "lobbies": [
@@ -369,44 +252,6 @@
       ],
       "pendingRequests": [],
       "createdAt": "2026-11-05T02:35:24.482Z"
-    },
-    {
-      "id": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
-      "category": "Ping Pong",
-      "mapPinLabel": "PONG",
-      "title": "Jogging",
-      "equipmentNote": "I have extra gear for Ping Pong. Drop a message in the meetup chat when you arrive.",
-      "coverImage": "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&w=1000&q=80",
-      "venueName": "Local Park / Community Spot",
-      "venueAddress": "Central Meeting Spot",
-      "lat": 50.45064,
-      "lng": 30.52322,
-      "startTime": "Later today",
-      "startTimeBadge": "Later today",
-      "roomStatus": "UPCOMING",
-      "preferredAgeRange": "18–25",
-      "isRecurring": false,
-      "skillCompatibility": "CASUAL",
-      "maxParticipants": 2,
-      "joinMode": "OPEN",
-      "hostId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
-      "bannedUserIds": [],
-      "participants": [
-        {
-          "id": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
-          "name": "matvii",
-          "age": 26,
-          "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
-          "skillBadge": "Verified Member",
-          "tagline": "Joined via Google. Ready to meet up!",
-          "joinedAt": "2026-11-05T02:33:52.884Z",
-          "arrivalStatus": "ON_MY_WAY",
-          "reliabilityScore": 100,
-          "ratingAvg": 5
-        }
-      ],
-      "pendingRequests": [],
-      "createdAt": "2026-11-05T02:33:52.884Z"
     },
     {
       "id": "lobby-chess-1",
@@ -1049,16 +894,6 @@
       "senderAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
       "text": "Just checked in at the front counter — mention the SeeMe group for Marcus at table 4.",
       "createdAt": "2026-11-01T23:20:00.000Z"
-    },
-    {
-      "id": "msg-fe5f197d-0077-4a4f-9385-7fb164051229",
-      "lobbyId": "lobby-d5d719f9-fef1-4863-8fb3-2ba6d4ceb7c0",
-      "senderId": "user-google-fd08591d-8f6e-4401-a2e3-494f5b5ab413",
-      "senderName": "matvii",
-      "senderAvatar": "https://lh3.googleusercontent.com/a/ACg8ocJOxsZ9h4o11AFt1mcVkObthfJduHWhUneg0j5h8EQVntshqgy1=s96-c",
-      "text": "Meetup live at Local Park / Community Spot. Let me know here when you are heading over.",
-      "createdAt": "2026-11-05T02:33:52.884Z",
-      "isSystem": true
     },
     {
       "id": "msg-f5939abd-27c1-470f-9c1f-fde6a4b54be7",

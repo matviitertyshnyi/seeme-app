@@ -98,7 +98,7 @@ export function LobbyCard({
             </div>
           )}
 
-          {lobby.preferredAgeRange && lobby.preferredAgeRange !== 'All Ages (18+)' && (
+          {lobby.preferredAgeRange && lobby.preferredAgeRange !== 'No preference' && lobby.preferredAgeRange !== 'All Ages (18+)' && (
             <div className="px-2 py-0.5 rounded-md bg-black/60 border border-white/10 backdrop-blur-md text-stone-200 text-[10px] font-medium">
               {lobby.preferredAgeRange}
             </div>
