@@ -20,7 +20,7 @@ export type ActivityCategory =
   | 'Study Session'
   | string;
 
-export type StartTimeOption = 'Now' | 'In 30 mins' | 'In 1 hour' | 'Later today';
+export type StartTimeOption = 'Now' | 'In 30 mins' | 'In 1 hour' | 'Later today' | string;
 
 export type RoomStatus = 'LIVE' | 'UPCOMING' | 'FINISHED';
 

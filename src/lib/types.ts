@@ -33,11 +33,9 @@ export function validatePayload<T>(
 // Activity and status schemas
 export const ActivityCategorySchema = z.string().min(1, 'Category is required');
 
-export const StartTimeOptionSchema = z.enum([
-  'Now',
-  'In 30 mins',
-  'In 1 hour',
-  'Later today',
+export const StartTimeOptionSchema = z.union([
+  z.enum(['Now', 'In 30 mins', 'In 1 hour', 'Later today']),
+  z.string().min(1),
 ]);
 
 export const RoomStatusSchema = z.enum(['LIVE', 'UPCOMING', 'FINISHED']);

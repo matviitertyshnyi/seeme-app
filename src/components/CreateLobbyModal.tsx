@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   X,
@@ -56,39 +56,6 @@ interface CreateLobbyModalProps {
   onCreated: (newLobby: Lobby) => void;
 }
 
-const PRESET_VENUES = [
-  {
-    name: 'Washington Sq Park SW Tables',
-    address: 'MacDougal St & W 4th St, Greenwich Village',
-    lat: 40.7302,
-    lng: -73.9985,
-  },
-  {
-    name: 'Tompkins Square Concrete Tables',
-    address: 'E 7th St & Ave A, East Village',
-    lat: 40.7265,
-    lng: -73.9815,
-  },
-  {
-    name: 'Hudson River Park Pier 40 Courts',
-    address: '353 West St, West Village',
-    lat: 40.7289,
-    lng: -74.0108,
-  },
-  {
-    name: 'The Uncommons Board Game Cafe',
-    address: '230 Thompson St, Greenwich Village',
-    lat: 40.7294,
-    lng: -73.9987,
-  },
-  {
-    name: 'Bryant Park Tables & Lawn',
-    address: '42nd St & 6th Ave, Midtown',
-    lat: 40.7536,
-    lng: -73.9832,
-  },
-];
-
 const START_TIME_OPTIONS: StartTimeOption[] = [
   'Now',
   'In 30 mins',
@@ -103,6 +70,36 @@ const SKILL_COMPAT_OPTIONS: { value: SkillCompatibility; label: string }[] = [
   { value: 'CASUAL', label: 'Casual' },
   { value: 'COMPETITIVE', label: 'Competitive' },
 ];
+
+function formatExactTime(dateStr: string, timeStr: string): string {
+  if (!dateStr || !timeStr) return '';
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const [h, min] = timeStr.split(':').map(Number);
+    const target = new Date(y, m - 1, d, h, min);
+    const now = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(now.getDate() + 1);
+
+    const isToday =
+      target.getDate() === now.getDate() &&
+      target.getMonth() === now.getMonth() &&
+      target.getFullYear() === now.getFullYear();
+
+    const isTomorrow =
+      target.getDate() === tomorrow.getDate() &&
+      target.getMonth() === tomorrow.getMonth() &&
+      target.getFullYear() === tomorrow.getFullYear();
+
+    const timePart = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+    if (isToday) return `Today at ${timePart}`;
+    if (isTomorrow) return `Tomorrow at ${timePart}`;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[target.getMonth()]} ${target.getDate()} at ${timePart}`;
+  } catch {
+    return `${dateStr} ${timeStr}`;
+  }
+}
 
 export function CreateLobbyModal({
   isOpen,
@@ -128,13 +125,26 @@ export function CreateLobbyModal({
   const [spotClue, setSpotClue] = useState('');
   const [skillCompatibility, setSkillCompatibility] =
     useState<SkillCompatibility>('ALL_LEVELS');
-  const [venueName, setVenueName] = useState(PRESET_VENUES[0].name);
-  const [venueAddress, setVenueAddress] = useState(PRESET_VENUES[0].address);
-  const [lat, setLat] = useState<number>(PRESET_VENUES[0].lat);
-  const [lng, setLng] = useState<number>(PRESET_VENUES[0].lng);
+  const [venueName, setVenueName] = useState('Meetup Location');
+  const [venueAddress, setVenueAddress] = useState('Meetup Location');
+  const [lat, setLat] = useState<number>(userLat || 50.4501);
+  const [lng, setLng] = useState<number>(userLng || 30.5234);
   const [startTime, setStartTime] = useState<StartTimeOption>(
     initialStartTime || 'Now'
   );
+  const [isExactTime, setIsExactTime] = useState<boolean>(false);
+  const [exactDate, setExactDate] = useState<string>(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
+  const [exactTime, setExactTime] = useState<string>(() => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1);
+    const hours = String(d.getHours()).padStart(2, '0');
+    return `${hours}:00`;
+  });
+  const geocodeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
   const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
   const [preferredAgeRange, setPreferredAgeRange] = useState<string>('All Ages (18+)');
@@ -149,6 +159,55 @@ export function CreateLobbyModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const reverseGeocode = async (targetLat: number, targetLng: number) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${targetLat}&lon=${targetLng}&zoom=18&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const addr = data.address || {};
+        const spot =
+          data.name ||
+          addr.amenity ||
+          addr.leisure ||
+          addr.building ||
+          addr.park ||
+          addr.road ||
+          '';
+        const district =
+          addr.suburb ||
+          addr.neighbourhood ||
+          addr.city_district ||
+          addr.quarter ||
+          addr.city ||
+          addr.town ||
+          addr.village ||
+          '';
+        const label =
+          [spot, district].filter(Boolean).join(', ') ||
+          (data.display_name ? data.display_name.split(',').slice(0, 2).join(',').trim() : '') ||
+          `Spot (${targetLat.toFixed(4)}, ${targetLng.toFixed(4)})`;
+
+        setVenueName(label);
+        setVenueAddress(data.display_name || label);
+        return;
+      }
+    } catch {}
+    setVenueName(`Spot (${targetLat.toFixed(4)}, ${targetLng.toFixed(4)})`);
+    setVenueAddress(`Coords: ${targetLat.toFixed(4)}, ${targetLng.toFixed(4)}`);
+  };
+
+  const handleLocationChange = (newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current);
+    geocodeTimerRef.current = setTimeout(() => {
+      reverseGeocode(newLat, newLng);
+    }, 400);
+  };
+
   useEffect(() => {
     if (isOpen) {
       const activeCat =
@@ -159,6 +218,9 @@ export function CreateLobbyModal({
       setCustomActivityInput('');
       if (initialStartTime) {
         setStartTime(initialStartTime);
+        setIsExactTime(
+          !['Now', 'In 30 mins', 'In 1 hour', 'Later today'].includes(initialStartTime)
+        );
       }
       setSelectedCoHostId(initialCoHost ? initialCoHost.id : null);
       setShowOptionalCoHost(Boolean(initialCoHost));
@@ -168,10 +230,7 @@ export function CreateLobbyModal({
       if (userLat && userLng) {
         setLat(userLat);
         setLng(userLng);
-        if (Math.abs(userLat - 40.7308) > 0.5 || Math.abs(userLng - (-73.9973)) > 0.5) {
-          setVenueName('Local Park / Community Spot');
-          setVenueAddress('Central Meeting Spot');
-        }
+        reverseGeocode(userLat, userLng);
       }
     }
   }, [isOpen, initialCategory, initialStartTime, initialCoHost, userLat, userLng]);
@@ -212,19 +271,31 @@ export function CreateLobbyModal({
       : []),
   ];
 
-  const handleSelectPresetVenue = (preset: (typeof PRESET_VENUES)[number]) => {
-    setVenueName(preset.name);
-    setVenueAddress(preset.address);
-    setLat(preset.lat);
-    setLng(preset.lng);
+  const handleUseMyLocation = () => {
+    if (userLat && userLng) {
+      const targetLat = Number(userLat.toFixed(5));
+      const targetLng = Number(userLng.toFixed(5));
+      setLat(targetLat);
+      setLng(targetLng);
+      reverseGeocode(targetLat, targetLng);
+    }
   };
 
-  const handleUseMyLocation = () => {
-    setLat(Number(userLat.toFixed(5)));
-    setLng(Number(userLng.toFixed(5)));
-    if (!venueName) {
-      setVenueName('Current GPS Spot');
-    }
+  const handleSelectExactTimeOption = () => {
+    setIsExactTime(true);
+    setStartTime(formatExactTime(exactDate, exactTime));
+  };
+
+  const handleExactDateChange = (newDate: string) => {
+    setExactDate(newDate);
+    setIsExactTime(true);
+    setStartTime(formatExactTime(newDate, exactTime));
+  };
+
+  const handleExactTimeChange = (newTime: string) => {
+    setExactTime(newTime);
+    setIsExactTime(true);
+    setStartTime(formatExactTime(exactDate, newTime));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -530,12 +601,12 @@ export function CreateLobbyModal({
             </div>
           </div>
 
-          {/* 3. Real-Life Venue & Map Pinning */}
+          {/* 3. Meetup Location & Map Pinning */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                3. Venue Location
+                3. Meetup Location
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -562,67 +633,61 @@ export function CreateLobbyModal({
               <LocationPickerMap
                 lat={lat}
                 lng={lng}
-                onLocationChange={(newLat, newLng) => {
-                  setLat(newLat);
-                  setLng(newLng);
-                  if (!venueAddress || venueAddress.startsWith('Coords:')) {
-                    setVenueAddress(`Coords: ${newLat.toFixed(4)}, ${newLng.toFixed(4)}`);
-                  }
-                }}
+                onLocationChange={handleLocationChange}
                 venueName={venueName}
               />
             )}
 
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-              {PRESET_VENUES.map((preset) => (
-                <button
-                  key={preset.name}
-                  type="button"
-                  onClick={() => handleSelectPresetVenue(preset)}
-                  className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap border transition-colors ${
-                    venueName === preset.name
-                      ? 'bg-orange-50 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 border-orange-400 dark:border-orange-600 shadow-2xs'
-                      : 'bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
-                  }`}
-                >
-                  {preset.name.split(' ').slice(0, 3).join(' ')}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <input
-                type="text"
-                value={venueName}
-                onChange={(e) => setVenueName(e.target.value)}
-                placeholder="Venue or Park Name"
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
-              />
-              <input
-                type="text"
-                value={venueAddress}
-                onChange={(e) => setVenueAddress(e.target.value)}
-                placeholder="Cross Street / Neighborhood"
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
-              />
+            {/* Meetup Location Text Field (auto-updates with pin, directly editable) */}
+            <div className="space-y-1.5">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={venueName}
+                  onChange={(e) => {
+                    setVenueName(e.target.value);
+                    setVenueAddress(e.target.value);
+                  }}
+                  placeholder="Meetup location (e.g. Park entrance, Main square, Cafe name)"
+                  className="w-full min-h-[46px] pl-10 pr-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white placeholder:text-stone-400 focus:outline-none focus:border-orange-600 shadow-2xs"
+                />
+                <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400 px-1">
+                <span>Auto-updates when you tap map or drag pin</span>
+                <span className="font-mono text-[10px]">
+                  {lat.toFixed(4)}, {lng.toFixed(4)}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* 4. Start Time & 5. Max Player Cap */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                4. Start Time
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                  4. Start Time
+                </label>
+                {isExactTime && (
+                  <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full truncate max-w-[140px]">
+                    {startTime}
+                  </span>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-2">
                 {START_TIME_OPTIONS.map((opt) => (
                   <button
                     key={opt}
                     type="button"
-                    onClick={() => setStartTime(opt)}
-                    className={`min-h-[44px] py-2.5 px-3 rounded-xl text-xs font-extrabold border transition-all ${
-                      startTime === opt
+                    onClick={() => {
+                      setIsExactTime(false);
+                      setStartTime(opt);
+                    }}
+                    className={`min-h-[42px] py-2 px-2.5 rounded-xl text-xs font-extrabold border transition-all ${
+                      !isExactTime && startTime === opt
                         ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                         : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
                     }`}
@@ -630,6 +695,65 @@ export function CreateLobbyModal({
                     {opt}
                   </button>
                 ))}
+              </div>
+
+              {/* Exact Date & Time Picker */}
+              <div className="mt-2.5 p-3 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={handleSelectExactTimeOption}
+                    className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 hover:text-orange-600 text-left cursor-pointer"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                    <span>Exact Date & Time</span>
+                  </button>
+                  {isExactTime ? (
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-orange-600 text-white">
+                      Active
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSelectExactTimeOption}
+                      className="text-[10px] font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
+                    >
+                      Set Exact
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium block mb-1">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={exactDate}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => handleExactDateChange(e.target.value)}
+                      className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium block mb-1">
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      value={exactTime}
+                      onChange={(e) => handleExactTimeChange(e.target.value)}
+                      className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    />
+                  </div>
+                </div>
+
+                {isExactTime && (
+                  <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400">
+                    Scheduled: <span className="font-bold">{startTime}</span>
+                  </p>
+                )}
               </div>
             </div>
 

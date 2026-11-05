@@ -26,7 +26,7 @@ function getStartTimeBadge(startTime: StartTimeOption): string {
     case 'Later today':
       return 'Later today';
     default:
-      return 'Live Now';
+      return typeof startTime === 'string' && startTime.trim() ? startTime : 'Live Now';
   }
 }
 
