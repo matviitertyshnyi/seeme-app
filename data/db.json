@@ -1,6 +1,51 @@
 {
   "personas": [
     {
+      "id": "user-ffd938ce-e1bb-4f27-8619-d7b5837c33a0",
+      "email": "pwtest_1793933132788@example.com",
+      "password": "mypassword123",
+      "name": "Password Protected Tester",
+      "age": 25,
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80",
+      "skillBadge": "New Member",
+      "tagline": "New on Leave The Room! Excited to connect for spontaneous games and meetups.",
+      "neighborhood": "Greenwich Village",
+      "onboarded": true,
+      "verified": false,
+      "verificationStatus": "UNVERIFIED",
+      "role": "USER",
+      "isBanned": false,
+      "authProvider": "email",
+      "favoriteActivities": [
+        "Coffee"
+      ],
+      "reliabilityScore": 95,
+      "meetupsAttended": 0,
+      "hoursPlayed": 0,
+      "ratingAvg": 5,
+      "ratingCount": 0,
+      "streakWeeks": 1,
+      "bannedUserIds": [],
+      "regularPartnerIds": [],
+      "beacon": {
+        "active": true,
+        "categories": [
+          "Coffee"
+        ],
+        "radiusKm": 5,
+        "note": "Ready to play today",
+        "updatedAt": "2026-11-06T02:45:32.789Z"
+      },
+      "settings": {
+        "iosAndroidPush": true,
+        "soundEffects": true,
+        "hapticFeedback": true,
+        "distanceUnit": "km",
+        "profileVisible": true,
+        "showReliabilityScore": true
+      }
+    },
+    {
       "id": "user-google-67f4dedf-0a4c-4743-8dfc-b28bfd154503",
       "email": "i.am.matvii.tertyshnyi@gmail.com",
       "name": "Matvii Tertyshnyi",
@@ -88,6 +133,16 @@
   "lobbies": [],
   "messages": [],
   "ratings": [],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "notif-5a459488-5d57-4f93-97ed-3acdfdb7f159",
+      "userId": "user-ffd938ce-e1bb-4f27-8619-d7b5837c33a0",
+      "type": "SYSTEM",
+      "title": "Welcome to Leave The Room!",
+      "body": "Your account is created! You can request profile verification anytime from your profile tab.",
+      "read": false,
+      "createdAt": "2026-11-06T02:45:32.789Z"
+    }
+  ],
   "directMessages": []
 }
