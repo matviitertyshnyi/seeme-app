@@ -766,7 +766,7 @@ export async function runSecurityAdversarialSuite() {
     profileSelfLeaks.join('; ')
   );
 
-  // 4.5 GET /api/users/profile (as self, no query param — active session)
+  // 4.5 GET /api/users/profile (as self, no query param: active session)
   const reqGetProfileNoParam = new NextRequest('http://localhost:3000/api/users/profile', {
     headers: { 'x-user-id': protectedUserId },
   });

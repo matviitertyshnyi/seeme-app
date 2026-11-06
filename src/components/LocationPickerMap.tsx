@@ -41,7 +41,7 @@ export default function LocationPickerMap({
       className: 'custom-pin-marker',
       html: `
         <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);">
-          <div style="background:#EA580C;color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:0.02em;box-shadow:0 4px 14px rgba(234,88,12,0.45);border:2px solid white;white-space:nowrap;display:flex;align-items:center;gap:4px;">
+          <div style="background:#EA580C;color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:0.02em;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;white-space:nowrap;display:flex;align-items:center;gap:4px;">
             <span>Meetup Spot</span>
           </div>
           <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #EA580C;"></div>

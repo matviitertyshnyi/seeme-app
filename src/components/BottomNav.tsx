@@ -155,7 +155,7 @@ export function BottomNav({
             type="button"
             onClick={onOpenHostModal}
             aria-label="Host a Meetup"
-            className="relative -top-1.5 w-11 h-11 rounded-full bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center shadow-[0_4px_16px_rgba(234,88,12,0.45)] hover:scale-105 active:scale-95 transition-all border-2 border-white dark:border-[#141210] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 cursor-pointer"
+            className="relative -top-1.5 w-11 h-11 rounded-full bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all border-2 border-white dark:border-[#141210] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 cursor-pointer"
           >
             <Plus className="w-5 h-5 stroke-[2.8]" />
           </button>

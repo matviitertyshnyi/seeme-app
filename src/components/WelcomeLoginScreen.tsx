@@ -95,7 +95,7 @@ export function WelcomeLoginScreen({
             </div>
           </div>
 
-          {/* Social Auth Providers (Google & Apple Only — No Guest Mode) */}
+          {/* Social Auth Providers (Google & Apple Only: No Guest Mode) */}
           <div className="space-y-3 pt-2">
             {/* Google Sign-In */}
             <button

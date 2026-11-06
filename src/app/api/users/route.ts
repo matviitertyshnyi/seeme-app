@@ -25,12 +25,11 @@ export async function GET(req: NextRequest) {
   const db = await readDb();
   if (Array.isArray(db.personas)) {
     db.personas.forEach((p) => {
-      const isVlad = Boolean(p.name && p.name.includes('Vlad'));
       const isPlaceholder =
         !p.avatar ||
         p.avatar.includes('unsplash.com') ||
         p.avatar.startsWith('data:image/svg+xml');
-      if (isVlad || isPlaceholder) {
+      if (isPlaceholder) {
         p.photoVerified = false;
       }
     });
@@ -573,7 +572,6 @@ export async function POST(req: NextRequest) {
         persona.photoVerified = Boolean(body.photoVerified);
         if (
           persona.photoVerified &&
-          !persona.name?.includes('Vlad') &&
           persona.avatar &&
           !persona.avatar.includes('unsplash.com') &&
           !persona.avatar.startsWith('data:image/svg+xml')
@@ -581,7 +579,6 @@ export async function POST(req: NextRequest) {
           persona.verified = true;
           persona.verificationStatus = 'VERIFIED';
         } else if (
-          persona.name?.includes('Vlad') ||
           !persona.avatar ||
           persona.avatar.includes('unsplash.com') ||
           persona.avatar.startsWith('data:image/svg+xml')

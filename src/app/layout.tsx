@@ -11,7 +11,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://leavetheroom.tech'),
   title: {
-    default: 'Leave The Room — Real-World Local Meetups',
+    default: 'Leave The Room - Real-World Local Meetups',
     template: '%s | Leave The Room',
   },
   description:
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: 'Leave The Room',
   },
   openGraph: {
-    title: 'Leave The Room — Real-World Local Meetups',
+    title: 'Leave The Room - Real-World Local Meetups',
     description:
       'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
     url: 'https://leavetheroom.tech',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Leave The Room — Real-World Local Meetups',
+    title: 'Leave The Room - Real-World Local Meetups',
     description:
       'Stop sitting inside. Find 1-3 people nearby right now for sports, chess, outdoor games, coffee, and spontaneous in-person meetups.',
   },

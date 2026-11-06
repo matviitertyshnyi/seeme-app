@@ -251,7 +251,7 @@ export function RoomDetailModal({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${lobby.title} — Leave The Room`,
+          title: `${lobby.title} - Leave The Room`,
           text: `Join our ${lobby.category} meetup at ${lobby.venueName}!`,
           url: shareUrl,
         });
@@ -742,7 +742,7 @@ export function RoomDetailModal({
               </div>
             )}
 
-            {/* CARD 3: People — Single Clean List */}
+            {/* CARD 3: People - Single Clean List */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">

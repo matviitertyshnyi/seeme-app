@@ -125,7 +125,7 @@ export async function runFullE2ESuite(): Promise<{
   const allPassed = failedChecks === 0;
 
   console.log('\n================================================================================');
-  console.log('LEAVE THE ROOM — FINAL E2E TEST SUITE EXECUTION REPORT');
+  console.log('LEAVE THE ROOM - FINAL E2E TEST SUITE EXECUTION REPORT');
   console.log('================================================================================');
   console.log('Tier Breakdown:');
   console.log('--------------------------------------------------------------------------------');

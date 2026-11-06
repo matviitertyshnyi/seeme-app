@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Calendar,
   Sparkles,
+  Check,
 } from 'lucide-react';
 import { getDefaultCoverForCategory, VIBEY_BACKGROUNDS } from '@/lib/geo';
 
@@ -497,40 +498,82 @@ export function CreateLobbyModal({
             )}
 
             {/* Vibe Background Selector Strip */}
-            <div className="pt-2 space-y-2">
+            <div className="pt-2 space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                  Vibe Background
+                  Vibe Background Cover
                 </label>
                 <span className="text-[11px] font-semibold text-stone-500">
-                  Pick atmospheric digital art
+                  Pick atmospheric lo-fi cloud art
                 </span>
               </div>
+
+              {/* Active Cover Preview Card */}
+              {selectedCoverImage && (
+                <div className="relative w-full h-24 sm:h-28 rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-xs group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={selectedCoverImage}
+                    alt="Selected vibe cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-bold text-white border border-white/20">
+                        {isCustomActivity ? customActivityInput.trim() || 'Custom' : category}
+                      </span>
+                      <span className="text-xs font-bold text-white/95 truncate">
+                        {title.trim() || `Casual ${category} Meetup`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Thumbnail Strip */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
                 {VIBEY_BACKGROUNDS.map((bg, idx) => {
                   const isSelected = selectedCoverImage === bg;
+                  const vibeLabels = [
+                    'Sunset Peach',
+                    'Electric Coral',
+                    'Golden Hour',
+                    'Dusty Rose',
+                    'Crimson Amber',
+                    'Dawn Pastel',
+                    'Café Dusk',
+                    'Midnight Beats',
+                    'Cotton Candy',
+                  ];
+                  const label = vibeLabels[idx] || `Vibe ${idx + 1}`;
                   return (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setSelectedCoverImage(bg)}
-                      aria-label={`Select vibe background ${idx + 1}`}
-                      className={`relative shrink-0 w-20 h-12 rounded-xl overflow-hidden border-2 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
+                      title={label}
+                      aria-label={`Select ${label} vibe background`}
+                      className={`relative shrink-0 w-20 h-13 rounded-xl overflow-hidden border-2 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
                         isSelected
-                          ? 'border-orange-600 ring-2 ring-orange-500/40 scale-105 shadow-md'
-                          : 'border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 opacity-70 hover:opacity-100'
+                          ? 'border-orange-600 ring-2 ring-orange-500/40 scale-105 shadow-xs'
+                          : 'border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 opacity-75 hover:opacity-100'
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={bg}
-                        alt={`Vibe ${idx + 1}`}
+                        alt={label}
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent py-0.5 px-1 text-center">
+                        <span className="text-[9px] font-bold text-white/90 truncate block">
+                          {label}
+                        </span>
+                      </div>
                       {isSelected && (
-                        <div className="absolute inset-0 bg-orange-600/20 flex items-center justify-center">
-                          <div className="w-2.5 h-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
+                        <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-orange-600 ring-1 ring-white flex items-center justify-center">
+                          <Check className="w-2 h-2 text-white stroke-[3]" />
                         </div>
                       )}
                     </button>

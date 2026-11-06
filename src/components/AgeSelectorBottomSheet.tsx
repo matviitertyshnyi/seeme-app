@@ -201,7 +201,7 @@ export function AgeSelectorBottomSheet({
             onClick={selectAllAges}
             className={`w-full min-h-[50px] p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
               isAllAgesSelected
-                ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 shadow-xs dark:shadow-[0_0_14px_rgba(234,88,12,0.2)] ring-1 ring-orange-500/40'
+                ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 shadow-xs ring-1 ring-orange-500/40'
                 : 'bg-white dark:bg-[#201D1A] border-stone-200/80 dark:border-stone-800/80 hover:bg-stone-100/70 dark:hover:bg-stone-800/60'
             }`}
           >
@@ -219,7 +219,7 @@ export function AgeSelectorBottomSheet({
             <div
               className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ml-3 transition-colors ${
                 isAllAgesSelected
-                  ? 'bg-orange-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.4)]'
+                  ? 'bg-orange-600 text-white shadow-xs'
                   : 'border-2 border-stone-300 dark:border-stone-600'
               }`}
             >
@@ -238,7 +238,7 @@ export function AgeSelectorBottomSheet({
                   aria-pressed={isSelected}
                   className={`min-h-[54px] p-3 rounded-2xl border text-left flex items-center justify-between transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
                     isSelected
-                      ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 text-orange-950 dark:text-orange-100 shadow-xs dark:shadow-[0_0_12px_rgba(249,115,22,0.22)] ring-1 ring-orange-500/50'
+                      ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500 text-orange-950 dark:text-orange-100 shadow-xs ring-1 ring-orange-500/50'
                       : 'bg-white dark:bg-[#201D1A] border-stone-200/80 dark:border-stone-800/80 hover:bg-stone-100/70 dark:hover:bg-stone-800/60 text-stone-800 dark:text-stone-200'
                   }`}
                 >
@@ -258,7 +258,7 @@ export function AgeSelectorBottomSheet({
                   <div
                     className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                       isSelected
-                        ? 'bg-orange-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.4)]'
+                        ? 'bg-orange-600 text-white shadow-xs'
                         : 'border-2 border-stone-300 dark:border-stone-600'
                     }`}
                   >
@@ -282,7 +282,7 @@ export function AgeSelectorBottomSheet({
           <button
             type="button"
             onClick={handleApply}
-            className="min-h-[44px] flex-1 rounded-xl bg-orange-600 hover:bg-orange-500 active:scale-[0.98] text-white text-xs font-bold shadow-[0_2px_14px_rgba(234,88,12,0.38)] border border-orange-400/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+            className="min-h-[44px] flex-1 rounded-xl bg-orange-600 hover:bg-orange-500 active:scale-[0.98] text-white text-xs font-bold shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             {stagedRanges.length === 0
               ? 'Show All Meetups'

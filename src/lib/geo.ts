@@ -731,7 +731,7 @@ export const VIBEY_BACKGROUNDS: string[] = [
     </svg>
   `),
 
-  // 6: Coffee (Cozy Lo-Fi Café Dusk — Warm Caramel, Cinnamon Rose & Twilight Violet Clouds)
+  // 6: Coffee (Cozy Lo-Fi Café Dusk: Warm Caramel, Cinnamon Rose & Twilight Violet Clouds)
   toSvgDataUrl(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
       <defs>
@@ -819,7 +819,7 @@ export const VIBEY_BACKGROUNDS: string[] = [
     </svg>
   `),
 
-  // 7: Co-work / Study / Video Games (Midnight Lo-Fi Beats — Deep Indigo, Cyan-Violet Aurora & Soft Night Clouds)
+  // 7: Co-work / Study / Video Games (Midnight Lo-Fi Beats: Deep Indigo, Cyan-Violet Aurora & Soft Night Clouds)
   toSvgDataUrl(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
       <defs>

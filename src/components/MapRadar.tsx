@@ -167,7 +167,7 @@ export default function MapRadar({
       html: `
         <div style="position:relative;display:flex;align-items:center;justify-content:center;width:40px;height:40px;">
           <span style="position:absolute;width:36px;height:36px;border-radius:9999px;background:rgba(234,88,12,0.15);border:1.5px solid rgba(234,88,12,0.3);"></span>
-          <div style="position:relative;z-index:2;padding:2px 7px;border-radius:9999px;background:#EA580C;color:#FFFFFF;font-size:9px;font-weight:700;letter-spacing:0.04em;border:2px solid #FFFFFF;box-shadow:0 4px 12px rgba(234,88,12,0.3);">
+          <div style="position:relative;z-index:2;padding:2px 7px;border-radius:9999px;background:#EA580C;color:#FFFFFF;font-size:9px;font-weight:700;letter-spacing:0.04em;border:2px solid #FFFFFF;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
             YOU
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function MapRadar({
       const borderHex = isSelected ? '#EA580C' : '#E7E5E4';
 
       const bgStyle = isSelected
-        ? 'background:#EA580C;color:#FFFFFF;border:2px solid #FFFFFF;box-shadow:0 8px 24px rgba(234,88,12,0.35);transform:scale(1.05);'
+        ? 'background:#EA580C;color:#FFFFFF;border:2px solid #FFFFFF;box-shadow:0 4px 12px rgba(0,0,0,0.25);transform:scale(1.05);'
         : 'background:#FFFFFF;color:#1C1917;border:1.5px solid #E7E5E4;box-shadow:0 4px 14px rgba(0,0,0,0.12);';
 
       const pillIcon = L.divIcon({
