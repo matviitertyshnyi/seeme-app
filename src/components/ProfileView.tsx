@@ -299,7 +299,7 @@ export function ProfileView({
                     <button
                       type="button"
                       onClick={onOpenCitySelector}
-                      className="min-h-[26px] max-w-full px-2.5 py-1 rounded-lg bg-stone-100/90 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 border border-stone-200/90 dark:border-stone-700/80 text-[11px] font-semibold text-stone-700 dark:text-stone-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs group"
+                      className="min-h-[26px] max-w-full px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200/90 dark:border-stone-700 text-[11px] font-semibold text-stone-700 dark:text-stone-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs group"
                       title="Tap to change your city"
                     >
                       <MapPin className="w-3 h-3 text-orange-600 dark:text-orange-400 shrink-0" />

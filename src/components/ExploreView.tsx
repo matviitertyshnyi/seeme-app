@@ -206,7 +206,7 @@ export function ExploreView({
             <button
               type="button"
               onClick={onOpenCitySelector || onNearMeGps}
-              className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-lg bg-white dark:bg-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-850 dark:text-stone-200 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 cursor-pointer shadow-2xs"
+              className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 cursor-pointer shadow-2xs"
               title="Tap to select country, city or GPS location"
             >
               <MapPin className="w-3 h-3 text-orange-600 dark:text-orange-400 shrink-0" />
