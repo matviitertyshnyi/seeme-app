@@ -194,7 +194,7 @@ const toSvgDataUrl = (svg: string) => `data:image/svg+xml;utf8,${encodeURICompon
  * soft billowy cloud banks, glowing celestial orbs, and deep dark bases for optimal text legibility.
  */
 export const VIBEY_BACKGROUNDS: string[] = [
-  // 0: Chess (Twilight Violet & Warm Sunset Peach Clouds)
+  // 0: Sunset Clouds (Lo-Fi Atmospheric Peach & Violet Clouds)
   toSvgDataUrl(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
       <defs>
@@ -286,716 +286,359 @@ export const VIBEY_BACKGROUNDS: string[] = [
     </svg>
   `),
 
-  // 1: Ping Pong (Electric Dusk Coral & Periwinkle Clouds)
+  // 1: Cozy Café (Warm Walnut, Glowing Pendant Lamp & Steaming Cup)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
-        <linearGradient id="c1-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#161b33" />
-          <stop offset="40%" stop-color="#353a66" />
-          <stop offset="70%" stop-color="#c85a7c" />
-          <stop offset="100%" stop-color="#14121f" />
+        <linearGradient id="c1-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1e130c" />
+          <stop offset="50%" stop-color="#140c07" />
+          <stop offset="100%" stop-color="#0a0604" />
         </linearGradient>
-        <linearGradient id="c1-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#e8799e" stop-opacity="0.85" />
-          <stop offset="50%" stop-color="#64487b" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#241e3d" />
-        </linearGradient>
-        <linearGradient id="c1-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f492b3" />
-          <stop offset="50%" stop-color="#7e497a" />
-          <stop offset="100%" stop-color="#221830" />
-        </linearGradient>
-        <linearGradient id="c1-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#5a315e" />
-          <stop offset="45%" stop-color="#27182f" />
-          <stop offset="100%" stop-color="#12101b" />
-        </linearGradient>
-        <linearGradient id="c1-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#14121f" stop-opacity="0" />
-          <stop offset="50%" stop-color="#14121f" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#100f1a" />
-        </linearGradient>
-        <radialGradient id="c1-sun-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fecdd3" stop-opacity="0.85" />
-          <stop offset="45%" stop-color="#fb7185" stop-opacity="0.3" />
-          <stop offset="100%" stop-color="#353a66" stop-opacity="0" />
+        <radialGradient id="c1-lamp-glow" cx="50%" cy="10%" r="55%">
+          <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.85" />
+          <stop offset="25%" stop-color="#ea580c" stop-opacity="0.4" />
+          <stop offset="70%" stop-color="#78350f" stop-opacity="0.1" />
+          <stop offset="100%" stop-color="#1e130c" stop-opacity="0" />
         </radialGradient>
-        <radialGradient id="c1-aurora" cx="50%" cy="50%" r="55%">
-          <stop offset="0%" stop-color="#f472b6" stop-opacity="0.35" />
-          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.18" />
-          <stop offset="100%" stop-color="#161b33" stop-opacity="0" />
+        <radialGradient id="c1-bokeh1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
         </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+        <radialGradient id="c1-bokeh2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ea580c" stop-opacity="0.35" />
+          <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+        </radialGradient>
       </defs>
-      <rect width="800" height="450" fill="url(#c1-sky)" />
-      <ellipse cx="400" cy="210" rx="380" ry="130" fill="url(#c1-aurora)" filter="url(#blur-lg)" />
-      <g fill="#ffffff">
-        <circle cx="95" cy="50" r="1.5" opacity="0.5" />
-        <circle cx="170" cy="75" r="1.3" opacity="0.45" />
-        <circle cx="260" cy="45" r="1.6" opacity="0.6" />
-        <circle cx="340" cy="80" r="1.2" opacity="0.35" />
-        <circle cx="480" cy="35" r="1.8" opacity="0.65" />
-        <circle cx="570" cy="65" r="1.3" opacity="0.4" />
-        <circle cx="690" cy="45" r="1.5" opacity="0.5" />
-        <circle cx="730" cy="85" r="1.2" opacity="0.4" />
-      </g>
-      <circle cx="370" cy="205" r="60" fill="url(#c1-sun-glow)" filter="url(#blur-sm)" />
-      <circle cx="370" cy="205" r="28" fill="#fff1f2" opacity="0.9" />
-      <g fill="url(#c1-cloud-back)">
-        <circle cx="160" cy="240" r="70" />
-        <circle cx="250" cy="225" r="85" />
-        <circle cx="350" cy="235" r="75" />
-        <circle cx="510" cy="230" r="80" />
-        <circle cx="600" cy="220" r="85" />
-        <circle cx="680" cy="240" r="70" />
-        <path d="M-20,245 C80,220 180,225 260,230 C350,215 440,220 530,230 C620,215 710,225 820,245 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c1-cloud-mid)">
-        <circle cx="90" cy="285" r="75" />
-        <circle cx="190" cy="270" r="85" />
-        <circle cx="300" cy="285" r="75" />
-        <circle cx="420" cy="265" r="95" />
-        <circle cx="530" cy="280" r="85" />
-        <circle cx="640" cy="270" r="90" />
-        <circle cx="740" cy="285" r="75" />
-        <path d="M-20,295 C70,265 170,260 270,280 C360,255 470,260 560,275 C650,255 740,265 820,290 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c1-cloud-fore)">
-        <circle cx="120" cy="355" r="85" />
-        <circle cx="240" cy="340" r="100" />
-        <circle cx="360" cy="350" r="90" />
-        <circle cx="490" cy="335" r="105" />
-        <circle cx="610" cy="345" r="95" />
-        <circle cx="720" cy="340" r="95" />
-        <path d="M-20,355 C90,330 190,325 310,350 C410,325 520,325 630,345 C720,330 780,340 820,355 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="315" width="800" height="135" fill="url(#c1-bottom-dark)" />
+      <rect width="800" height="450" fill="url(#c1-bg)" />
+      <circle cx="400" cy="110" r="320" fill="url(#c1-lamp-glow)" />
+      <!-- Warm Bokeh Circles -->
+      <circle cx="160" cy="180" r="70" fill="url(#c1-bokeh1)" />
+      <circle cx="650" cy="220" r="90" fill="url(#c1-bokeh2)" />
+      <circle cx="280" cy="120" r="45" fill="url(#c1-bokeh2)" />
+      <circle cx="560" cy="140" r="55" fill="url(#c1-bokeh1)" />
+      <!-- Hanging Pendant Wire & Lamp -->
+      <line x1="400" y1="0" x2="400" y2="85" stroke="#78350f" stroke-width="2.5" />
+      <path d="M375,85 L425,85 L438,110 L362,110 Z" fill="#29180f" stroke="#ea580c" stroke-width="1.5" />
+      <ellipse cx="400" cy="110" rx="38" ry="8" fill="#fde68a" />
+      <circle cx="400" cy="114" r="12" fill="#fff" opacity="0.9" />
+      <!-- Café Counter Silhouette -->
+      <path d="M0,320 L800,320 L800,450 L0,450 Z" fill="#140a05" />
+      <line x1="0" y1="320" x2="800" y2="320" stroke="#b45309" stroke-width="3" opacity="0.6" />
+      <!-- Ceramic Cup & Saucer Silhouette -->
+      <ellipse cx="400" cy="326" rx="42" ry="8" fill="#29180f" />
+      <path d="M376,285 C376,316 424,316 424,285 Z" fill="#29180f" stroke="#b45309" stroke-width="2" />
+      <path d="M424,292 C434,292 434,306 424,306" fill="none" stroke="#b45309" stroke-width="2.5" stroke-linecap="round" />
+      <!-- Steam Wisps -->
+      <path d="M392,275 Q386,255 394,240 Q400,225 396,210" fill="none" stroke="#fde68a" stroke-width="2" opacity="0.5" stroke-linecap="round" />
+      <path d="M404,275 Q412,255 406,238 Q400,222 406,206" fill="none" stroke="#fed7aa" stroke-width="2" opacity="0.55" stroke-linecap="round" />
     </svg>
   `),
 
-  // 2: Tennis / Pickleball (Lo-Fi Golden Hour & Sage Twilight Clouds)
+  // 2: Night City (Twilight Indigo Skyline with Warm Lit Windows & Crescent Moon)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
         <linearGradient id="c2-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#132226" />
-          <stop offset="36%" stop-color="#264649" />
-          <stop offset="68%" stop-color="#d4845a" />
-          <stop offset="100%" stop-color="#101819" />
+          <stop offset="0%" stop-color="#0a0d18" />
+          <stop offset="40%" stop-color="#14182e" />
+          <stop offset="75%" stop-color="#241e3d" />
+          <stop offset="100%" stop-color="#0f111a" />
         </linearGradient>
-        <linearGradient id="c2-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f0a579" stop-opacity="0.88" />
-          <stop offset="50%" stop-color="#556c60" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#192829" />
-        </linearGradient>
-        <linearGradient id="c2-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f5b88a" />
-          <stop offset="45%" stop-color="#6e6d5e" />
-          <stop offset="100%" stop-color="#162223" />
-        </linearGradient>
-        <linearGradient id="c2-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#464e47" />
-          <stop offset="40%" stop-color="#202b2a" />
-          <stop offset="100%" stop-color="#0e1516" />
-        </linearGradient>
-        <linearGradient id="c2-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#101819" stop-opacity="0" />
-          <stop offset="50%" stop-color="#101819" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#0c1314" />
-        </linearGradient>
-        <radialGradient id="c2-sun-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.85" />
-          <stop offset="50%" stop-color="#f97316" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="#264649" stop-opacity="0" />
+        <radialGradient id="c2-moon-aura" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8" />
+          <stop offset="35%" stop-color="#f59e0b" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#0a0d18" stop-opacity="0" />
         </radialGradient>
-        <radialGradient id="c2-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#fb923c" stop-opacity="0.38" />
-          <stop offset="55%" stop-color="#2dd4bf" stop-opacity="0.14" />
-          <stop offset="100%" stop-color="#132226" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
       <rect width="800" height="450" fill="url(#c2-sky)" />
-      <ellipse cx="440" cy="220" rx="370" ry="135" fill="url(#c2-aurora)" filter="url(#blur-lg)" />
+      <!-- Distant Stars -->
       <g fill="#ffffff">
-        <circle cx="120" cy="60" r="1.4" opacity="0.45" />
-        <circle cx="210" cy="35" r="1.6" opacity="0.6" />
-        <circle cx="290" cy="85" r="1.2" opacity="0.35" />
-        <circle cx="430" cy="45" r="1.8" opacity="0.65" />
-        <circle cx="530" cy="70" r="1.3" opacity="0.4" />
-        <circle cx="650" cy="40" r="1.5" opacity="0.55" />
-        <circle cx="720" cy="80" r="1.2" opacity="0.4" />
+        <circle cx="85" cy="45" r="1.3" opacity="0.6" />
+        <circle cx="160" cy="70" r="1.5" opacity="0.45" />
+        <circle cx="280" cy="35" r="1.2" opacity="0.7" />
+        <circle cx="410" cy="60" r="1.6" opacity="0.5" />
+        <circle cx="510" cy="30" r="1.4" opacity="0.65" />
+        <circle cx="720" cy="50" r="1.5" opacity="0.75" />
       </g>
-      <circle cx="450" cy="195" r="55" fill="url(#c2-sun-glow)" filter="url(#blur-sm)" />
-      <circle cx="450" cy="195" r="26" fill="#fff7ed" opacity="0.9" />
-      <g fill="url(#c2-cloud-back)">
-        <circle cx="150" cy="245" r="65" />
-        <circle cx="240" cy="230" r="80" />
-        <circle cx="340" cy="240" r="70" />
-        <circle cx="500" cy="230" r="80" />
-        <circle cx="590" cy="225" r="85" />
-        <circle cx="680" cy="245" r="70" />
-        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      <!-- Crescent Moon -->
+      <circle cx="640" cy="75" r="42" fill="url(#c2-moon-aura)" />
+      <circle cx="640" cy="75" r="18" fill="#fef9c3" />
+      <circle cx="646" cy="71" r="15" fill="#111528" />
+      <!-- Background Buildings Layer -->
+      <path d="M40,240 L80,240 L80,450 L40,450 Z M130,210 L180,210 L180,450 L130,450 Z M260,230 L310,230 L310,450 L260,450 Z M390,195 L440,195 L440,450 L390,450 Z M520,220 L580,220 L580,450 L520,450 Z M670,235 L730,235 L730,450 L670,450 Z" fill="#141726" />
+      <!-- Foreground Skyline Silhouette -->
+      <path d="M0,280 L40,280 L40,450 L0,450 Z M70,250 L125,250 L125,450 L70,450 Z M170,220 L240,220 L240,450 L170,450 Z M280,265 L350,265 L350,450 L280,450 Z M375,180 L425,180 L425,450 L375,450 Z M460,240 L530,240 L530,450 L460,450 Z M560,205 L625,205 L625,450 L560,450 Z M650,260 L710,260 L710,450 L650,450 Z M740,230 L800,230 L800,450 L740,450 Z" fill="#0c0e17" />
+      <!-- Lit Window Grid Specks (Amber & Pale Gold) -->
+      <g fill="#f59e0b" opacity="0.85">
+        <rect x="85" y="270" width="6" height="7" rx="1" />
+        <rect x="102" y="270" width="6" height="7" rx="1" />
+        <rect x="85" y="295" width="6" height="7" rx="1" />
+        <rect x="185" y="240" width="6" height="8" rx="1" />
+        <rect x="205" y="240" width="6" height="8" rx="1" />
+        <rect x="220" y="260" width="6" height="8" rx="1" fill="#fef08a" />
+        <rect x="185" y="280" width="6" height="8" rx="1" />
+        <rect x="390" y="200" width="6" height="9" rx="1" fill="#fef08a" />
+        <rect x="405" y="200" width="6" height="9" rx="1" />
+        <rect x="390" y="225" width="6" height="9" rx="1" />
+        <rect x="480" y="260" width="7" height="8" rx="1" />
+        <rect x="500" y="260" width="7" height="8" rx="1" fill="#fef08a" />
+        <rect x="580" y="225" width="7" height="8" rx="1" />
+        <rect x="600" y="245" width="7" height="8" rx="1" fill="#fef08a" />
+        <rect x="580" y="270" width="7" height="8" rx="1" />
+        <rect x="760" y="250" width="6" height="7" rx="1" />
       </g>
-      <g fill="url(#c2-cloud-mid)">
-        <circle cx="90" cy="285" r="70" />
-        <circle cx="180" cy="275" r="85" />
-        <circle cx="290" cy="290" r="75" />
-        <circle cx="400" cy="270" r="90" />
-        <circle cx="510" cy="285" r="80" />
-        <circle cx="630" cy="275" r="85" />
-        <circle cx="730" cy="290" r="75" />
-        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c2-cloud-fore)">
-        <circle cx="110" cy="355" r="85" />
-        <circle cx="230" cy="340" r="100" />
-        <circle cx="350" cy="355" r="85" />
-        <circle cx="470" cy="340" r="100" />
-        <circle cx="590" cy="350" r="90" />
-        <circle cx="710" cy="345" r="95" />
-        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c2-bottom-dark)" />
+      <!-- Base Horizon Glow Gradient -->
+      <rect y="360" width="800" height="90" fill="url(#c2-sky)" opacity="0.6" />
     </svg>
   `),
 
-  // 3: Board Games / Card Games (Dreamy Lavender & Dusty Rose Nightfall Clouds)
+  // 3: Sports Court (Emerald Court Ground with Regulation Lines & Net)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
-        <linearGradient id="c3-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#181224" />
-          <stop offset="38%" stop-color="#3d2652" />
-          <stop offset="70%" stop-color="#9e4770" />
-          <stop offset="100%" stop-color="#140f1c" />
+        <linearGradient id="c3-court" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#041f15" />
+          <stop offset="45%" stop-color="#0b3827" />
+          <stop offset="100%" stop-color="#04140e" />
         </linearGradient>
-        <linearGradient id="c3-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#d88ca5" stop-opacity="0.88" />
-          <stop offset="50%" stop-color="#693c6f" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#241733" />
+        <linearGradient id="c3-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ea580c" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#f97316" stop-opacity="0.8" />
         </linearGradient>
-        <linearGradient id="c3-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#e8a2b8" />
-          <stop offset="45%" stop-color="#7e4175" />
-          <stop offset="100%" stop-color="#1f142b" />
-        </linearGradient>
-        <linearGradient id="c3-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#552752" />
-          <stop offset="40%" stop-color="#27152c" />
-          <stop offset="100%" stop-color="#110c17" />
-        </linearGradient>
-        <linearGradient id="c3-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#140f1c" stop-opacity="0" />
-          <stop offset="50%" stop-color="#140f1c" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#0f0b15" />
-        </linearGradient>
-        <radialGradient id="c3-moon-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#f5d0fe" stop-opacity="0.85" />
-          <stop offset="45%" stop-color="#c084fc" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="#3d2652" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="c3-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#f472b6" stop-opacity="0.35" />
-          <stop offset="55%" stop-color="#a855f7" stop-opacity="0.16" />
-          <stop offset="100%" stop-color="#181224" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
-      <rect width="800" height="450" fill="url(#c3-sky)" />
-      <ellipse cx="400" cy="215" rx="360" ry="135" fill="url(#c3-aurora)" filter="url(#blur-lg)" />
-      <g fill="#ffffff">
-        <circle cx="100" cy="45" r="1.4" opacity="0.5" />
-        <circle cx="180" cy="70" r="1.2" opacity="0.4" />
-        <circle cx="310" cy="40" r="1.7" opacity="0.65" />
-        <circle cx="420" cy="75" r="1.3" opacity="0.4" />
-        <circle cx="510" cy="45" r="1.8" opacity="0.6" />
-        <circle cx="620" cy="65" r="1.2" opacity="0.4" />
-        <circle cx="710" cy="35" r="1.6" opacity="0.55" />
-        <circle cx="760" cy="80" r="1.2" opacity="0.4" />
-      </g>
-      <circle cx="210" cy="85" r="46" fill="url(#c3-moon-glow)" filter="url(#blur-sm)" />
-      <g transform="translate(210, 85)">
-        <circle cx="0" cy="0" r="21" fill="#faf5ff" opacity="0.92" />
-        <circle cx="-7" cy="-4" r="18" fill="#241735" />
-      </g>
-      <g fill="url(#c3-cloud-back)">
-        <circle cx="130" cy="240" r="65" />
-        <circle cx="220" cy="225" r="80" />
-        <circle cx="320" cy="235" r="70" />
-        <circle cx="480" cy="230" r="80" />
-        <circle cx="570" cy="220" r="85" />
-        <circle cx="670" cy="240" r="70" />
-        <path d="M-20,245 C70,220 160,220 240,230 C330,215 430,220 520,230 C610,215 710,225 820,245 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c3-cloud-mid)">
-        <circle cx="80" cy="285" r="70" />
-        <circle cx="170" cy="270" r="85" />
-        <circle cx="280" cy="285" r="75" />
-        <circle cx="390" cy="265" r="95" />
-        <circle cx="500" cy="280" r="85" />
-        <circle cx="620" cy="270" r="90" />
-        <circle cx="730" cy="285" r="75" />
-        <path d="M-20,295 C70,265 160,260 260,280 C350,255 450,260 550,275 C640,255 730,265 820,290 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c3-cloud-fore)">
-        <circle cx="110" cy="355" r="85" />
-        <circle cx="230" cy="340" r="100" />
-        <circle cx="350" cy="355" r="90" />
-        <circle cx="480" cy="335" r="105" />
-        <circle cx="600" cy="345" r="95" />
-        <circle cx="710" cy="340" r="95" />
-        <path d="M-20,355 C80,330 190,325 300,350 C400,325 510,325 620,345 C710,330 770,340 820,355 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c3-bottom-dark)" />
+      <rect width="800" height="450" fill="url(#c3-court)" />
+      <!-- Perspective Court Perimeter Lines -->
+      <polygon points="120,400 680,400 580,120 220,120" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0.4" />
+      <!-- Service Box Lines -->
+      <line x1="180" y1="260" x2="620" y2="260" stroke="#34d399" stroke-width="2" opacity="0.45" />
+      <line x1="400" y1="120" x2="400" y2="400" stroke="#34d399" stroke-width="2" opacity="0.4" />
+      <line x1="265" y1="120" x2="200" y2="400" stroke="#34d399" stroke-width="1.5" opacity="0.3" />
+      <line x1="535" y1="120" x2="600" y2="400" stroke="#34d399" stroke-width="1.5" opacity="0.3" />
+      <!-- Center Net Mesh Graphic -->
+      <polygon points="180,258 620,258 620,285 180,285" fill="#05281b" stroke="#ffffff" stroke-width="1.5" opacity="0.75" />
+      <line x1="175" y1="258" x2="625" y2="258" stroke="#ffffff" stroke-width="3" opacity="0.9" />
+      <line x1="175" y1="252" x2="175" y2="290" stroke="#ea580c" stroke-width="3.5" stroke-linecap="round" />
+      <line x1="625" y1="252" x2="625" y2="290" stroke="#ea580c" stroke-width="3.5" stroke-linecap="round" />
+      <!-- Dynamic Accent Flare -->
+      <circle cx="400" cy="258" r="80" fill="#34d399" opacity="0.08" />
+      <circle cx="400" cy="258" r="4" fill="#ffffff" opacity="0.9" />
     </svg>
   `),
 
-  // 4: Basketball (Sunset Crimson, Amber & Deep Indigo Clouds)
+  // 4: Pine Forest (Teal Aurora Sky, Mountain Ridge & Pine Trees)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
-        <linearGradient id="c4-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#19121c" />
-          <stop offset="36%" stop-color="#4f1d35" />
-          <stop offset="68%" stop-color="#d96b38" />
-          <stop offset="100%" stop-color="#150f17" />
+        <linearGradient id="c4-aurora-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#041214" />
+          <stop offset="40%" stop-color="#082b2b" />
+          <stop offset="70%" stop-color="#0d4239" />
+          <stop offset="100%" stop-color="#051412" />
         </linearGradient>
-        <linearGradient id="c4-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f5945c" stop-opacity="0.9" />
-          <stop offset="50%" stop-color="#7c2847" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#281525" />
-        </linearGradient>
-        <linearGradient id="c4-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#fba76d" />
-          <stop offset="45%" stop-color="#903051" />
-          <stop offset="100%" stop-color="#231222" />
-        </linearGradient>
-        <linearGradient id="c4-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#641e3d" />
-          <stop offset="40%" stop-color="#2a1020" />
-          <stop offset="100%" stop-color="#130d14" />
-        </linearGradient>
-        <linearGradient id="c4-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#150f17" stop-opacity="0" />
-          <stop offset="50%" stop-color="#150f17" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#100b12" />
-        </linearGradient>
-        <radialGradient id="c4-sun-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fde047" stop-opacity="0.85" />
-          <stop offset="45%" stop-color="#ea580c" stop-opacity="0.3" />
-          <stop offset="100%" stop-color="#4f1d35" stop-opacity="0" />
+        <radialGradient id="c4-glow" cx="50%" cy="30%" r="50%">
+          <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.35" />
+          <stop offset="60%" stop-color="#0f766e" stop-opacity="0.1" />
+          <stop offset="100%" stop-color="#041214" stop-opacity="0" />
         </radialGradient>
-        <radialGradient id="c4-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#f97316" stop-opacity="0.4" />
-          <stop offset="55%" stop-color="#dc2626" stop-opacity="0.18" />
-          <stop offset="100%" stop-color="#19121c" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
-      <rect width="800" height="450" fill="url(#c4-sky)" />
-      <ellipse cx="480" cy="210" rx="370" ry="130" fill="url(#c4-aurora)" filter="url(#blur-lg)" />
+      <rect width="800" height="450" fill="url(#c4-aurora-sky)" />
+      <ellipse cx="400" cy="140" rx="360" ry="90" fill="url(#c4-glow)" />
+      <!-- Night Stars -->
       <g fill="#ffffff">
-        <circle cx="110" cy="50" r="1.5" opacity="0.5" />
-        <circle cx="190" cy="80" r="1.2" opacity="0.4" />
-        <circle cx="280" cy="35" r="1.6" opacity="0.6" />
-        <circle cx="410" cy="65" r="1.3" opacity="0.35" />
-        <circle cx="540" cy="40" r="1.8" opacity="0.65" />
-        <circle cx="660" cy="60" r="1.4" opacity="0.45" />
-        <circle cx="730" cy="40" r="1.2" opacity="0.4" />
+        <circle cx="120" cy="40" r="1.2" opacity="0.6" />
+        <circle cx="210" cy="70" r="1.5" opacity="0.5" />
+        <circle cx="340" cy="35" r="1.3" opacity="0.75" />
+        <circle cx="480" cy="55" r="1.4" opacity="0.4" />
+        <circle cx="620" cy="40" r="1.6" opacity="0.7" />
+        <circle cx="730" cy="65" r="1.2" opacity="0.5" />
       </g>
-      <circle cx="500" cy="200" r="58" fill="url(#c4-sun-glow)" filter="url(#blur-sm)" />
-      <circle cx="500" cy="200" r="27" fill="#fffbeb" opacity="0.9" />
-      <g fill="url(#c4-cloud-back)">
-        <circle cx="150" cy="240" r="70" />
-        <circle cx="240" cy="225" r="85" />
-        <circle cx="340" cy="235" r="75" />
-        <circle cx="500" cy="225" r="85" />
-        <circle cx="600" cy="220" r="85" />
-        <circle cx="690" cy="240" r="70" />
-        <path d="M-20,245 C80,220 170,220 250,230 C340,215 440,220 530,230 C620,215 720,225 820,245 L820,450 L-20,450 Z" />
+      <!-- Mountain Ridges -->
+      <polygon points="0,280 180,180 340,250 490,165 640,240 800,190 800,450 0,450" fill="#08201d" />
+      <polygon points="0,310 130,240 290,290 420,230 570,300 710,245 800,280 800,450 0,450" fill="#051715" />
+      <!-- Layered Pine Trees Silhouettes -->
+      <g fill="#020c0a">
+        <!-- Tree 1 -->
+        <polygon points="60,260 45,340 75,340" />
+        <polygon points="60,235 48,290 72,290" />
+        <polygon points="60,210 52,255 68,255" />
+        <!-- Tree 2 -->
+        <polygon points="140,250 120,350 160,350" />
+        <polygon points="140,220 125,290 155,290" />
+        <polygon points="140,195 130,245 150,245" />
+        <!-- Tree 3 -->
+        <polygon points="250,270 235,360 265,360" />
+        <polygon points="250,240 238,300 262,300" />
+        <!-- Tree 4 (Center tall) -->
+        <polygon points="380,230 355,350 405,350" />
+        <polygon points="380,195 362,280 398,280" />
+        <polygon points="380,165 370,225 390,225" />
+        <!-- Tree 5 -->
+        <polygon points="510,255 490,360 530,360" />
+        <polygon points="510,225 496,295 524,295" />
+        <!-- Tree 6 -->
+        <polygon points="640,240 615,350 665,350" />
+        <polygon points="640,205 624,275 656,275" />
+        <polygon points="640,180 630,230 650,230" />
+        <!-- Tree 7 -->
+        <polygon points="730,260 712,350 748,350" />
+        <polygon points="730,230 718,290 742,290" />
       </g>
-      <g fill="url(#c4-cloud-mid)">
-        <circle cx="90" cy="285" r="70" />
-        <circle cx="180" cy="270" r="85" />
-        <circle cx="290" cy="285" r="75" />
-        <circle cx="410" cy="265" r="95" />
-        <circle cx="520" cy="280" r="85" />
-        <circle cx="630" cy="270" r="90" />
-        <circle cx="730" cy="285" r="75" />
-        <path d="M-20,295 C70,265 170,260 270,280 C360,255 460,260 550,275 C640,255 730,265 820,290 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c4-cloud-fore)">
-        <circle cx="120" cy="355" r="85" />
-        <circle cx="240" cy="340" r="100" />
-        <circle cx="360" cy="355" r="90" />
-        <circle cx="480" cy="335" r="105" />
-        <circle cx="600" cy="345" r="95" />
-        <circle cx="720" cy="340" r="95" />
-        <path d="M-20,355 C90,330 190,325 310,350 C410,325 520,325 630,345 C720,330 780,340 820,355 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c4-bottom-dark)" />
+      <!-- Base Silhouette Fill -->
+      <rect y="340" width="800" height="110" fill="#020c0a" />
     </svg>
   `),
 
-  // 5: Run Club / Park Walk (Early Dawn Pastel Sky & Misty Horizon Clouds)
+  // 5: Modern Mesh (Tactile Dark Obsidian with Radiant Plum & Amber Spheres)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
-        <linearGradient id="c5-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#151c2e" />
-          <stop offset="38%" stop-color="#383b66" />
-          <stop offset="68%" stop-color="#cf7663" />
-          <stop offset="100%" stop-color="#121622" />
-        </linearGradient>
-        <linearGradient id="c5-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#e89885" stop-opacity="0.88" />
-          <stop offset="50%" stop-color="#675578" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#22233b" />
-        </linearGradient>
-        <linearGradient id="c5-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f5ae9c" />
-          <stop offset="45%" stop-color="#745c7b" />
-          <stop offset="100%" stop-color="#1e1e32" />
-        </linearGradient>
-        <linearGradient id="c5-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#4e3f5c" />
-          <stop offset="40%" stop-color="#241e30" />
-          <stop offset="100%" stop-color="#10141d" />
-        </linearGradient>
-        <linearGradient id="c5-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#121622" stop-opacity="0" />
-          <stop offset="50%" stop-color="#121622" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#0e111a" />
-        </linearGradient>
-        <radialGradient id="c5-dawn-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fde68a" stop-opacity="0.8" />
-          <stop offset="45%" stop-color="#f43f5e" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="#383b66" stop-opacity="0" />
+        <radialGradient id="c5-orb1" cx="30%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#c2410c" stop-opacity="0.8" />
+          <stop offset="45%" stop-color="#ea580c" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="#0c0a09" stop-opacity="0" />
         </radialGradient>
-        <radialGradient id="c5-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#fb7185" stop-opacity="0.35" />
-          <stop offset="55%" stop-color="#38bdf8" stop-opacity="0.14" />
-          <stop offset="100%" stop-color="#151c2e" stop-opacity="0" />
+        <radialGradient id="c5-orb2" cx="70%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#7e22ce" stop-opacity="0.75" />
+          <stop offset="50%" stop-color="#3b0764" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#0c0a09" stop-opacity="0" />
         </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+        <radialGradient id="c5-orb3" cx="50%" cy="85%" r="50%">
+          <stop offset="0%" stop-color="#d97706" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#0c0a09" stop-opacity="0" />
+        </radialGradient>
       </defs>
-      <rect width="800" height="450" fill="url(#c5-sky)" />
-      <ellipse cx="400" cy="220" rx="380" ry="135" fill="url(#c5-aurora)" filter="url(#blur-lg)" />
-      <g fill="#ffffff">
-        <circle cx="105" cy="55" r="1.5" opacity="0.55" />
-        <circle cx="185" cy="35" r="1.3" opacity="0.4" />
-        <circle cx="270" cy="75" r="1.6" opacity="0.6" />
-        <circle cx="410" cy="45" r="1.8" opacity="0.65" />
-        <circle cx="530" cy="65" r="1.2" opacity="0.35" />
-        <circle cx="640" cy="35" r="1.6" opacity="0.55" />
-        <circle cx="730" cy="70" r="1.3" opacity="0.4" />
+      <rect width="800" height="450" fill="#0c0a09" />
+      <circle cx="260" cy="180" r="280" fill="url(#c5-orb1)" />
+      <circle cx="560" cy="200" r="300" fill="url(#c5-orb2)" />
+      <circle cx="400" cy="360" r="240" fill="url(#c5-orb3)" />
+      <!-- Subtle Ambient Noise / Micro-grid -->
+      <g stroke="#ffffff" stroke-width="0.8" opacity="0.04">
+        <line x1="0" y1="150" x2="800" y2="150" />
+        <line x1="0" y1="300" x2="800" y2="300" />
+        <line x1="266" y1="0" x2="266" y2="450" />
+        <line x1="533" y1="0" x2="533" y2="450" />
       </g>
-      <circle cx="390" cy="205" r="56" fill="url(#c5-dawn-glow)" filter="url(#blur-sm)" />
-      <circle cx="390" cy="205" r="26" fill="#fffbeb" opacity="0.88" />
-      <g fill="url(#c5-cloud-back)">
-        <circle cx="140" cy="245" r="65" />
-        <circle cx="230" cy="230" r="80" />
-        <circle cx="330" cy="240" r="70" />
-        <circle cx="490" cy="230" r="80" />
-        <circle cx="580" cy="225" r="85" />
-        <circle cx="680" cy="240" r="70" />
-        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c5-cloud-mid)">
-        <circle cx="90" cy="285" r="70" />
-        <circle cx="180" cy="275" r="85" />
-        <circle cx="290" cy="290" r="75" />
-        <circle cx="400" cy="270" r="90" />
-        <circle cx="510" cy="285" r="80" />
-        <circle cx="630" cy="275" r="85" />
-        <circle cx="730" cy="290" r="75" />
-        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c5-cloud-fore)">
-        <circle cx="110" cy="355" r="85" />
-        <circle cx="230" cy="340" r="100" />
-        <circle cx="350" cy="355" r="85" />
-        <circle cx="470" cy="340" r="100" />
-        <circle cx="590" cy="350" r="90" />
-        <circle cx="710" cy="345" r="95" />
-        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c5-bottom-dark)" />
     </svg>
   `),
 
-  // 6: Coffee (Cozy Lo-Fi Café Dusk: Warm Caramel, Cinnamon Rose & Twilight Violet Clouds)
+  // 6: Cyber Horizon (Retro Synth Sun & Perspective Grid Lines)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
         <linearGradient id="c6-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#1c141d" />
-          <stop offset="38%" stop-color="#4a2839" />
-          <stop offset="68%" stop-color="#c97a53" />
-          <stop offset="100%" stop-color="#161017" />
+          <stop offset="0%" stop-color="#0a0518" />
+          <stop offset="55%" stop-color="#1f0a38" />
+          <stop offset="85%" stop-color="#4c1d42" />
+          <stop offset="100%" stop-color="#12051f" />
         </linearGradient>
-        <linearGradient id="c6-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#e29b7a" stop-opacity="0.9" />
-          <stop offset="50%" stop-color="#734354" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#2a1924" />
+        <linearGradient id="c6-sun" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fde047" />
+          <stop offset="50%" stop-color="#f97316" />
+          <stop offset="100%" stop-color="#e11d48" />
         </linearGradient>
-        <linearGradient id="c6-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f0ae8c" />
-          <stop offset="45%" stop-color="#8a4d62" />
-          <stop offset="100%" stop-color="#22141f" />
-        </linearGradient>
-        <linearGradient id="c6-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#5a2d3e" />
-          <stop offset="40%" stop-color="#291421" />
-          <stop offset="100%" stop-color="#130d13" />
-        </linearGradient>
-        <linearGradient id="c6-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#161017" stop-opacity="0" />
-          <stop offset="50%" stop-color="#161017" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#110b12" />
-        </linearGradient>
-        <radialGradient id="c6-sun-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fde68a" stop-opacity="0.85" />
-          <stop offset="45%" stop-color="#f97316" stop-opacity="0.3" />
-          <stop offset="100%" stop-color="#4a2839" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="c6-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.38" />
-          <stop offset="55%" stop-color="#e11d48" stop-opacity="0.16" />
-          <stop offset="100%" stop-color="#1c141d" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
       <rect width="800" height="450" fill="url(#c6-sky)" />
-      <ellipse cx="420" cy="210" rx="370" ry="135" fill="url(#c6-aurora)" filter="url(#blur-lg)" />
-      <g fill="#ffffff">
-        <circle cx="115" cy="50" r="1.4" opacity="0.5" />
-        <circle cx="195" cy="80" r="1.2" opacity="0.4" />
-        <circle cx="295" cy="35" r="1.6" opacity="0.6" />
-        <circle cx="425" cy="70" r="1.3" opacity="0.35" />
-        <circle cx="535" cy="45" r="1.8" opacity="0.65" />
-        <circle cx="655" cy="65" r="1.3" opacity="0.4" />
-        <circle cx="735" cy="35" r="1.5" opacity="0.55" />
+      <!-- Sliced Retro Sun -->
+      <g transform="translate(400, 230)">
+        <circle cx="0" cy="0" r="110" fill="url(#c6-sun)" />
+        <!-- Horizontal Laser Slice Cuts -->
+        <rect x="-120" y="8" width="240" height="4" fill="#1f0a38" />
+        <rect x="-120" y="24" width="240" height="6" fill="#1f0a38" />
+        <rect x="-120" y="44" width="240" height="8" fill="#1f0a38" />
+        <rect x="-120" y="68" width="240" height="10" fill="#1f0a38" />
+        <rect x="-120" y="94" width="240" height="14" fill="#1f0a38" />
       </g>
-      <circle cx="410" cy="190" r="56" fill="url(#c6-sun-glow)" filter="url(#blur-sm)" />
-      <circle cx="410" cy="190" r="27" fill="#fffbeb" opacity="0.9" />
-      <g fill="url(#c6-cloud-back)">
-        <circle cx="140" cy="245" r="65" />
-        <circle cx="230" cy="230" r="80" />
-        <circle cx="330" cy="240" r="70" />
-        <circle cx="490" cy="230" r="80" />
-        <circle cx="580" cy="225" r="85" />
-        <circle cx="680" cy="240" r="70" />
-        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      <!-- Horizon Floor Fill -->
+      <rect y="230" width="800" height="220" fill="#0d0417" opacity="0.95" />
+      <line x1="0" y1="230" x2="800" y2="230" stroke="#f97316" stroke-width="2.5" opacity="0.85" />
+      <!-- Perspective Grid Receding to Horizon Center -->
+      <g stroke="#ec4899" stroke-width="1.2" opacity="0.45">
+        <line x1="400" y1="230" x2="-100" y2="450" />
+        <line x1="400" y1="230" x2="80" y2="450" />
+        <line x1="400" y1="230" x2="240" y2="450" />
+        <line x1="400" y1="230" x2="350" y2="450" />
+        <line x1="400" y1="230" x2="400" y2="450" stroke-width="1.5" />
+        <line x1="400" y1="230" x2="450" y2="450" />
+        <line x1="400" y1="230" x2="560" y2="450" />
+        <line x1="400" y1="230" x2="720" y2="450" />
+        <line x1="400" y1="230" x2="900" y2="450" />
+        <!-- Horizontal Grid Steps -->
+        <line x1="0" y1="242" x2="800" y2="242" stroke-width="0.8" />
+        <line x1="0" y1="258" x2="800" y2="258" stroke-width="0.9" />
+        <line x1="0" y1="280" x2="800" y2="280" stroke-width="1" />
+        <line x1="0" y1="312" x2="800" y2="312" stroke-width="1.2" />
+        <line x1="0" y1="358" x2="800" y2="358" stroke-width="1.5" />
+        <line x1="0" y1="418" x2="800" y2="418" stroke-width="1.8" />
       </g>
-      <g fill="url(#c6-cloud-mid)">
-        <circle cx="90" cy="285" r="70" />
-        <circle cx="180" cy="275" r="85" />
-        <circle cx="290" cy="290" r="75" />
-        <circle cx="400" cy="270" r="90" />
-        <circle cx="510" cy="285" r="80" />
-        <circle cx="630" cy="275" r="85" />
-        <circle cx="730" cy="290" r="75" />
-        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c6-cloud-fore)">
-        <circle cx="110" cy="355" r="85" />
-        <circle cx="230" cy="340" r="100" />
-        <circle cx="350" cy="355" r="85" />
-        <circle cx="470" cy="340" r="100" />
-        <circle cx="590" cy="350" r="90" />
-        <circle cx="710" cy="345" r="95" />
-        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c6-bottom-dark)" />
     </svg>
   `),
 
-  // 7: Co-work / Study / Video Games (Midnight Lo-Fi Beats: Deep Indigo, Cyan-Violet Aurora & Soft Night Clouds)
+  // 7: Minimal Arches (Bauhaus / Nordic Architectural Archways with Wall Wash)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
-        <linearGradient id="c7-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#111629" />
-          <stop offset="38%" stop-color="#282c54" />
-          <stop offset="68%" stop-color="#6c3b6e" />
-          <stop offset="100%" stop-color="#0e111d" />
+        <linearGradient id="c7-wall" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1f1d1a" />
+          <stop offset="60%" stop-color="#151412" />
+          <stop offset="100%" stop-color="#0c0b0a" />
         </linearGradient>
-        <linearGradient id="c7-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#937ec8" stop-opacity="0.88" />
-          <stop offset="50%" stop-color="#463768" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#1b1c36" />
-        </linearGradient>
-        <linearGradient id="c7-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#a78bfa" />
-          <stop offset="45%" stop-color="#553a70" />
-          <stop offset="100%" stop-color="#18182d" />
-        </linearGradient>
-        <linearGradient id="c7-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#3d2c56" />
-          <stop offset="40%" stop-color="#1c1a2e" />
-          <stop offset="100%" stop-color="#0c0f18" />
-        </linearGradient>
-        <linearGradient id="c7-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#0e111d" stop-opacity="0" />
-          <stop offset="50%" stop-color="#0e111d" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#0a0c16" />
-        </linearGradient>
-        <radialGradient id="c7-moon-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.85" />
-          <stop offset="45%" stop-color="#818cf8" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="#282c54" stop-opacity="0" />
+        <radialGradient id="c7-light" cx="50%" cy="10%" r="65%">
+          <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.65" />
+          <stop offset="40%" stop-color="#ea580c" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#151412" stop-opacity="0" />
         </radialGradient>
-        <radialGradient id="c7-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35" />
-          <stop offset="50%" stop-color="#818cf8" stop-opacity="0.2" />
-          <stop offset="100%" stop-color="#111629" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
-      <rect width="800" height="450" fill="url(#c7-sky)" />
-      <ellipse cx="420" cy="210" rx="380" ry="135" fill="url(#c7-aurora)" filter="url(#blur-lg)" />
-      <g fill="#ffffff">
-        <circle cx="90" cy="45" r="1.4" opacity="0.5" />
-        <circle cx="170" cy="75" r="1.2" opacity="0.4" />
-        <circle cx="260" cy="35" r="1.7" opacity="0.65" />
-        <circle cx="360" cy="70" r="1.3" opacity="0.35" />
-        <circle cx="480" cy="40" r="1.8" opacity="0.6" />
-        <circle cx="550" cy="80" r="1.2" opacity="0.4" />
-        <circle cx="680" cy="40" r="1.5" opacity="0.55" />
-        <circle cx="750" cy="70" r="1.3" opacity="0.4" />
-      </g>
-      <circle cx="620" cy="90" r="45" fill="url(#c7-moon-glow)" filter="url(#blur-sm)" />
-      <g transform="translate(620, 90)">
-        <circle cx="0" cy="0" r="21" fill="#f0f9ff" opacity="0.92" />
-        <circle cx="7" cy="-5" r="18" fill="#181c34" />
-      </g>
-      <g fill="url(#c7-cloud-back)">
-        <circle cx="140" cy="245" r="65" />
-        <circle cx="230" cy="230" r="80" />
-        <circle cx="330" cy="240" r="70" />
-        <circle cx="490" cy="230" r="80" />
-        <circle cx="580" cy="225" r="85" />
-        <circle cx="680" cy="240" r="70" />
-        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c7-cloud-mid)">
-        <circle cx="90" cy="285" r="70" />
-        <circle cx="180" cy="275" r="85" />
-        <circle cx="290" cy="290" r="75" />
-        <circle cx="400" cy="270" r="90" />
-        <circle cx="510" cy="285" r="80" />
-        <circle cx="630" cy="275" r="85" />
-        <circle cx="730" cy="290" r="75" />
-        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c7-cloud-fore)">
-        <circle cx="110" cy="355" r="85" />
-        <circle cx="230" cy="340" r="100" />
-        <circle cx="350" cy="355" r="85" />
-        <circle cx="470" cy="340" r="100" />
-        <circle cx="590" cy="350" r="90" />
-        <circle cx="710" cy="345" r="95" />
-        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c7-bottom-dark)" />
+      <rect width="800" height="450" fill="url(#c7-wall)" />
+      <circle cx="400" cy="80" r="340" fill="url(#c7-light)" />
+      <!-- Repeating Bauhaus Geometric Archways -->
+      <!-- Arch 1 (Outer) -->
+      <path d="M180,450 L180,240 A220,220 0 0,1 620,240 L620,450 Z" fill="#171513" stroke="#292524" stroke-width="2" />
+      <!-- Arch 2 (Mid) -->
+      <path d="M250,450 L250,250 A150,150 0 0,1 550,250 L550,450 Z" fill="#13110f" stroke="#38322e" stroke-width="2" />
+      <!-- Arch 3 (Inner focal) -->
+      <path d="M320,450 L320,260 A80,80 0 0,1 480,260 L480,450 Z" fill="#0b0a08" stroke="#ea580c" stroke-width="2" />
+      <!-- Minimalist Sphere on Pedestal -->
+      <circle cx="400" cy="300" r="32" fill="#faf8f5" opacity="0.92" />
+      <ellipse cx="400" cy="342" rx="36" ry="6" fill="#000000" opacity="0.6" />
+      <!-- Warm Ambient Spotlight Floor Line -->
+      <line x1="100" y1="420" x2="700" y2="420" stroke="#ea580c" stroke-width="1.5" opacity="0.5" />
     </svg>
   `),
 
-  // 8: Spontaneous / Default (Velvet Sunset & Cotton-Candy Dusk Clouds)
+  // 8: Obsidian Stone (Faceted Charcoal Geometry with Radiant Orange Edge)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lr-cover">
       <defs>
-        <linearGradient id="c8-sky" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#171426" />
-          <stop offset="38%" stop-color="#45274d" />
-          <stop offset="68%" stop-color="#c96f53" />
-          <stop offset="100%" stop-color="#14101d" />
+        <linearGradient id="c8-facet1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#242220" />
+          <stop offset="100%" stop-color="#141210" />
         </linearGradient>
-        <linearGradient id="c8-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#e89283" stop-opacity="0.88" />
-          <stop offset="50%" stop-color="#724164" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#26172e" />
+        <linearGradient id="c8-facet2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1c1a17" />
+          <stop offset="100%" stop-color="#0a0908" />
         </linearGradient>
-        <linearGradient id="c8-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#f6a492" />
-          <stop offset="45%" stop-color="#82476d" />
-          <stop offset="100%" stop-color="#211227" />
+        <linearGradient id="c8-facet3" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#181614" />
+          <stop offset="100%" stop-color="#100e0d" />
         </linearGradient>
-        <linearGradient id="c8-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#58294e" />
-          <stop offset="40%" stop-color="#261327" />
-          <stop offset="100%" stop-color="#120e18" />
+        <linearGradient id="c8-orange-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f97316" />
+          <stop offset="50%" stop-color="#ea580c" />
+          <stop offset="100%" stop-color="#9a3412" />
         </linearGradient>
-        <linearGradient id="c8-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#14101d" stop-opacity="0" />
-          <stop offset="50%" stop-color="#14101d" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#0f0b16" />
-        </linearGradient>
-        <radialGradient id="c8-sun-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.85" />
-          <stop offset="45%" stop-color="#f43f5e" stop-opacity="0.3" />
-          <stop offset="100%" stop-color="#45274d" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="c8-aurora" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#fb7185" stop-opacity="0.38" />
-          <stop offset="55%" stop-color="#c084fc" stop-opacity="0.16" />
-          <stop offset="100%" stop-color="#171426" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
-        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
-      <rect width="800" height="450" fill="url(#c8-sky)" />
-      <ellipse cx="400" cy="215" rx="380" ry="135" fill="url(#c8-aurora)" filter="url(#blur-lg)" />
-      <g fill="#ffffff">
-        <circle cx="110" cy="50" r="1.5" opacity="0.5" />
-        <circle cx="190" cy="80" r="1.2" opacity="0.4" />
-        <circle cx="280" cy="35" r="1.6" opacity="0.6" />
-        <circle cx="410" cy="70" r="1.3" opacity="0.35" />
-        <circle cx="520" cy="45" r="1.8" opacity="0.65" />
-        <circle cx="640" cy="65" r="1.3" opacity="0.4" />
-        <circle cx="730" cy="35" r="1.5" opacity="0.55" />
-      </g>
-      <circle cx="380" cy="205" r="56" fill="url(#c8-sun-glow)" filter="url(#blur-sm)" />
-      <circle cx="380" cy="205" r="27" fill="#fff7ed" opacity="0.9" />
-      <g fill="url(#c8-cloud-back)">
-        <circle cx="140" cy="245" r="65" />
-        <circle cx="230" cy="230" r="80" />
-        <circle cx="330" cy="240" r="70" />
-        <circle cx="490" cy="230" r="80" />
-        <circle cx="580" cy="225" r="85" />
-        <circle cx="680" cy="240" r="70" />
-        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c8-cloud-mid)">
-        <circle cx="90" cy="285" r="70" />
-        <circle cx="180" cy="275" r="85" />
-        <circle cx="290" cy="290" r="75" />
-        <circle cx="400" cy="270" r="90" />
-        <circle cx="510" cy="285" r="80" />
-        <circle cx="630" cy="275" r="85" />
-        <circle cx="730" cy="290" r="75" />
-        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
-      </g>
-      <g fill="url(#c8-cloud-fore)">
-        <circle cx="110" cy="355" r="85" />
-        <circle cx="230" cy="340" r="100" />
-        <circle cx="350" cy="355" r="85" />
-        <circle cx="470" cy="340" r="100" />
-        <circle cx="590" cy="350" r="90" />
-        <circle cx="710" cy="345" r="95" />
-        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
-      </g>
-      <rect y="310" width="800" height="140" fill="url(#c8-bottom-dark)" />
+      <rect width="800" height="450" fill="#0d0c0a" />
+      <!-- Faceted Polygon Planes -->
+      <polygon points="0,0 420,0 280,240 0,160" fill="url(#c8-facet1)" stroke="#292524" stroke-width="1.2" />
+      <polygon points="420,0 800,0 800,210 520,260 280,240" fill="url(#c8-facet2)" stroke="#292524" stroke-width="1.2" />
+      <polygon points="0,160 280,240 380,450 0,450" fill="url(#c8-facet2)" stroke="#292524" stroke-width="1.2" />
+      <polygon points="280,240 520,260 480,450 380,450" fill="url(#c8-facet3)" stroke="#292524" stroke-width="1.2" />
+      <polygon points="520,260 800,210 800,450 480,450" fill="url(#c8-facet1)" stroke="#292524" stroke-width="1.2" />
+      <!-- Radiant Orange Accent Edge -->
+      <line x1="280" y1="240" x2="520" y2="260" stroke="url(#c8-orange-edge)" stroke-width="3" stroke-linecap="round" />
+      <circle cx="280" cy="240" r="5" fill="#ea580c" />
+      <circle cx="520" cy="260" r="4" fill="#f97316" />
     </svg>
   `),
 ];
@@ -1004,24 +647,30 @@ export function getDefaultCoverForCategory(category: ActivityCategory): string {
   switch (category) {
     case 'Chess':
       return VIBEY_BACKGROUNDS[0];
-    case 'Ping Pong':
+    case 'Coffee':
       return VIBEY_BACKGROUNDS[1];
-    case 'Tennis':
-    case 'Pickleball':
+    case 'Drinks':
+    case 'Night Out':
       return VIBEY_BACKGROUNDS[2];
-    case 'Board Games':
-    case 'Card Games':
-      return VIBEY_BACKGROUNDS[3];
+    case 'Tennis':
+    case 'Ping Pong':
+    case 'Pickleball':
     case 'Basketball':
-      return VIBEY_BACKGROUNDS[4];
+      return VIBEY_BACKGROUNDS[3];
     case 'Run Club':
     case 'Park Walk':
-      return VIBEY_BACKGROUNDS[5];
-    case 'Coffee':
-      return VIBEY_BACKGROUNDS[6];
+    case 'Hiking':
+      return VIBEY_BACKGROUNDS[4];
     case 'Co-work':
     case 'Study Session':
+      return VIBEY_BACKGROUNDS[5];
     case 'Video Games':
+    case 'Gaming':
+      return VIBEY_BACKGROUNDS[6];
+    case 'Museum':
+    case 'Art Walk':
+    case 'Board Games':
+    case 'Card Games':
       return VIBEY_BACKGROUNDS[7];
     default:
       return VIBEY_BACKGROUNDS[8];
@@ -1038,7 +687,9 @@ export function resolveCoverImage(
   if (
     !coverImage ||
     coverImage.includes('unsplash.com') ||
-    (coverImage.startsWith('data:image/svg+xml') && !coverImage.includes('lofi-cloudy'))
+    (coverImage.startsWith('data:image/svg+xml') &&
+      !coverImage.includes('lofi-cloudy') &&
+      !coverImage.includes('lr-cover'))
   ) {
     return getDefaultCoverForCategory(category);
   }
@@ -1046,8 +697,7 @@ export function resolveCoverImage(
 }
 
 /**
- * Parses an age range string (such as "18–24", "20s & 30s", "30+", "All Ages (18+)")
- * into a numeric closed interval [minAge, maxAge].
+ * Parses an age range string into [minAge, maxAge].
  */
 export function parseAgeRangeToInterval(rangeStr?: string): [number, number] {
   if (!rangeStr || rangeStr.includes('All Ages') || rangeStr.includes('No preference') || rangeStr === 'Any') {

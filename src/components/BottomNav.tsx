@@ -4,7 +4,7 @@ import React from 'react';
 import {
   Compass,
   Map as MapIcon,
-  MessageCircle,
+  CalendarDays,
   User,
   Plus,
 } from 'lucide-react';
@@ -61,7 +61,7 @@ export function BottomNav({
     {
       key: 'MY_MEETUPS',
       label: getTranslation(language, 'nav_meetups') || 'My Meetups',
-      icon: MessageCircle,
+      icon: CalendarDays,
       badge:
         !isSignedOut && meetupsCount > 0 ? (
           <span

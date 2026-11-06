@@ -9,15 +9,14 @@ import {
   Users,
   Zap,
   ShieldCheck,
-  Compass,
   Navigation,
   UserPlus,
   Award,
   ChevronDown,
   Calendar,
-  Sparkles,
   Check,
 } from 'lucide-react';
+import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import { getDefaultCoverForCategory, VIBEY_BACKGROUNDS } from '@/lib/geo';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
@@ -58,12 +57,6 @@ interface CreateLobbyModalProps {
   userLng: number;
   onCreated: (newLobby: Lobby) => void;
 }
-
-const START_TIME_OPTIONS: StartTimeOption[] = [
-  'Now',
-  'In 30 mins',
-  'In 1 hour',
-];
 
 const PLAYER_CAPS = [2, 3, 4, 5, 6, 8];
 
@@ -134,19 +127,24 @@ export function CreateLobbyModal({
   const [venueAddress, setVenueAddress] = useState('Meetup Location');
   const [lat, setLat] = useState<number>(userLat || 50.4501);
   const [lng, setLng] = useState<number>(userLng || 30.5234);
-  const [startTime, setStartTime] = useState<StartTimeOption>(
-    initialStartTime || 'Now'
-  );
-  const [isExactTime, setIsExactTime] = useState<boolean>(false);
   const [exactDate, setExactDate] = useState<string>(() => {
     const d = new Date();
     return d.toISOString().split('T')[0];
   });
   const [exactTime, setExactTime] = useState<string>(() => {
     const d = new Date();
-    d.setHours(d.getHours() + 1);
+    d.setMinutes(d.getMinutes() + 15);
     const hours = String(d.getHours()).padStart(2, '0');
-    return `${hours}:00`;
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${mins}`;
+  });
+  const [startTime, setStartTime] = useState<string>(() => {
+    const d = new Date();
+    const dateStr = d.toISOString().split('T')[0];
+    d.setMinutes(d.getMinutes() + 15);
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return formatExactTime(dateStr, `${hours}:${mins}`);
   });
   const geocodeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -218,11 +216,23 @@ export function CreateLobbyModal({
       setSelectedGroup(getActivityGroup(activeCat));
       setIsCustomActivity(false);
       setCustomActivityInput('');
-      if (initialStartTime) {
+      if (
+        initialStartTime &&
+        initialStartTime !== 'Now' &&
+        initialStartTime !== 'In 30 mins' &&
+        initialStartTime !== 'In 1 hour'
+      ) {
         setStartTime(initialStartTime);
-        setIsExactTime(
-          !['Now', 'In 30 mins', 'In 1 hour'].includes(initialStartTime)
-        );
+      } else {
+        const d = new Date();
+        const dateStr = d.toISOString().split('T')[0];
+        d.setMinutes(d.getMinutes() + 15);
+        const hours = String(d.getHours()).padStart(2, '0');
+        const mins = String(d.getMinutes()).padStart(2, '0');
+        const timeStr = `${hours}:${mins}`;
+        setExactDate(dateStr);
+        setExactTime(timeStr);
+        setStartTime(formatExactTime(dateStr, timeStr));
       }
       if (userLat && userLng) {
         setLat(userLat);
@@ -257,20 +267,13 @@ export function CreateLobbyModal({
     }
   };
 
-  const handleSelectExactTimeOption = () => {
-    setIsExactTime(true);
-    setStartTime(formatExactTime(exactDate, exactTime));
-  };
-
   const handleExactDateChange = (newDate: string) => {
     setExactDate(newDate);
-    setIsExactTime(true);
     setStartTime(formatExactTime(newDate, exactTime));
   };
 
   const handleExactTimeChange = (newTime: string) => {
     setExactTime(newTime);
-    setIsExactTime(true);
     setStartTime(formatExactTime(exactDate, newTime));
   };
 
@@ -364,9 +367,7 @@ export function CreateLobbyModal({
       >
         <div className="px-5 sm:px-6 py-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-sm">
-              <Compass className="w-5 h-5" />
-            </div>
+            <OpenDoorLogo className="w-10 h-10 shrink-0" size={40} />
             <div>
               <h2
                 id="create-meetup-title"
@@ -497,15 +498,14 @@ export function CreateLobbyModal({
               </div>
             )}
 
-            {/* Vibe Background Selector Strip */}
+            {/* Cover Selection Strip */}
             <div className="pt-2 space-y-2.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                  Vibe Background Cover
+                <label className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                  Cover Photo
                 </label>
-                <span className="text-[11px] font-semibold text-stone-500">
-                  Pick atmospheric lo-fi cloud art
+                <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                  Choose a style
                 </span>
               </div>
 
@@ -515,7 +515,7 @@ export function CreateLobbyModal({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={selectedCoverImage}
-                    alt="Selected vibe cover"
+                    alt="Selected cover"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end p-3">
@@ -535,25 +535,25 @@ export function CreateLobbyModal({
               <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
                 {VIBEY_BACKGROUNDS.map((bg, idx) => {
                   const isSelected = selectedCoverImage === bg;
-                  const vibeLabels = [
-                    'Sunset Peach',
-                    'Electric Coral',
-                    'Golden Hour',
-                    'Dusty Rose',
-                    'Crimson Amber',
-                    'Dawn Pastel',
-                    'Café Dusk',
-                    'Midnight Beats',
-                    'Cotton Candy',
+                  const coverLabels = [
+                    'Sunset Clouds',
+                    'Cozy Café',
+                    'Night City',
+                    'Sports Court',
+                    'Pine Forest',
+                    'Modern Mesh',
+                    'Cyber Horizon',
+                    'Minimal Arches',
+                    'Obsidian Stone',
                   ];
-                  const label = vibeLabels[idx] || `Vibe ${idx + 1}`;
+                  const label = coverLabels[idx] || `Cover ${idx + 1}`;
                   return (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setSelectedCoverImage(bg)}
                       title={label}
-                      aria-label={`Select ${label} vibe background`}
+                      aria-label={`Select ${label} cover`}
                       className={`relative shrink-0 w-20 h-13 rounded-xl overflow-hidden border-2 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
                         isSelected
                           ? 'border-orange-600 ring-2 ring-orange-500/40 scale-105 shadow-xs'
@@ -688,70 +688,23 @@ export function CreateLobbyModal({
             </div>
           </div>
 
-          {/* 4. Start Time & 5. Max Player Cap */}
+          {/* 4. Date & Time & 5. Max Player Cap */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                <label className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                  4. Start Time
+                  <span>4. Date & Time</span>
                 </label>
-                {isExactTime && (
-                  <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full truncate max-w-[140px]">
-                    {startTime}
-                  </span>
-                )}
+                <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full truncate max-w-[140px]">
+                  {startTime}
+                </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {START_TIME_OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => {
-                      setIsExactTime(false);
-                      setStartTime(opt);
-                    }}
-                    className={`min-h-[42px] py-2 px-2.5 rounded-xl text-xs font-extrabold border transition-all ${
-                      !isExactTime && startTime === opt
-                        ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
-                        : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-
-              {/* Exact Date & Time Picker */}
-              <div className="mt-2.5 p-3 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={handleSelectExactTimeOption}
-                    className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 hover:text-orange-600 text-left cursor-pointer"
-                  >
-                    <Calendar className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                    <span>Exact Date & Time</span>
-                  </button>
-                  {isExactTime ? (
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-orange-600 text-white">
-                      Active
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSelectExactTimeOption}
-                      className="text-[10px] font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
-                    >
-                      Set Exact
-                    </button>
-                  )}
-                </div>
-
+              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 space-y-2.5">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium block mb-1">
+                    <label className="text-[10px] text-stone-500 dark:text-stone-400 font-semibold block mb-1">
                       Date
                     </label>
                     <input
@@ -759,27 +712,26 @@ export function CreateLobbyModal({
                       value={exactDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => handleExactDateChange(e.target.value)}
-                      className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
+                      className="w-full min-h-[40px] px-3 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600 shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium block mb-1">
+                    <label className="text-[10px] text-stone-500 dark:text-stone-400 font-semibold block mb-1">
                       Time
                     </label>
                     <input
                       type="time"
                       value={exactTime}
                       onChange={(e) => handleExactTimeChange(e.target.value)}
-                      className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
+                      className="w-full min-h-[40px] px-3 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600 shadow-2xs"
                     />
                   </div>
                 </div>
 
-                {isExactTime && (
-                  <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400">
-                    Scheduled: <span className="font-bold">{startTime}</span>
-                  </p>
-                )}
+                <div className="flex items-center justify-between text-[11px] pt-1 border-t border-stone-200/60 dark:border-stone-700/60">
+                  <span className="text-stone-500 dark:text-stone-400">Scheduled:</span>
+                  <span className="font-bold text-stone-900 dark:text-white">{startTime}</span>
+                </div>
               </div>
             </div>
 
