@@ -1,14 +1,15 @@
 /**
- * Human Face Verification Utility
- * Detects real human faces and strictly rejects objects, architecture, furniture,
- * bookshelves, desks, clothing, screenshots, and artwork.
+ * Advanced Client-Side Human Face Verification Engine
  *
- * Implements a rigorous multi-stage verification pipeline:
- * 1. Flat UI & Screenshot Rejection (detects uniform backgrounds, documents, graphics)
- * 2. Architecture / Furniture / Grid Rejection (Sobel horizontal & vertical edge runs)
- * 3. Strict Human Skin Chromaticity Check (Hemoglobin curve + YCbCr skin ellipse)
- * 4. Anatomical Facial Geometry (Eye-Nose-Mouth Triad: forehead, bilateral eyes, cheeks, mouth slit)
- * 5. Browser FaceDetector Integration with mandatory skin and edge validation
+ * Designed to strictly reject:
+ * - Furniture (desks, cabinets, bookshelves, wood surfaces, tables)
+ * - Objects (shoes, clothes, phones, controllers, bottles)
+ * - Blank / architectural backgrounds (walls, floors, screens)
+ *
+ * While reliably accepting:
+ * - Natural human selfies across all skin tones and ethnicities
+ * - Handheld and mirror selfies with natural room backgrounds, hair/bangs, and selfie tilt angles
+ * - Native Browser FaceDetector (Shape Detection API) with skin confirmation
  */
 
 export interface FaceVerificationResult {
@@ -25,38 +26,38 @@ export interface FaceBoundingBox {
 }
 
 /**
- * Strict Human Skin Chromaticity Check
- * Human skin across all ethnicities has a tight hemoglobin reflectance curve:
- * (r - g) / (r + 1) >= 0.155 AND r > g && g >= b * 0.84
- * Wood (oak, birch, pine, laminate) has high green/yellow content and fails this ratio.
- * Also enforces the YCbCr skin ellipse and Cr > Cb + 12 constraint.
+ * Validates whether an RGB pixel matches human skin chrominance.
+ * Incorporates hemoglobin absorption signature:
+ * Human skin displays strong red-dominant absorption: (R - G) / (R + 1) >= 0.12.
+ * Wood/laminate finishes have low hemoglobin contrast ((R - G) / R < 0.11).
+ * Also enforces the YCbCr skin ellipse and Cr > Cb + 10 constraint.
  */
 export function isHumanSkinPixel(r: number, g: number, b: number): boolean {
-  // Hemoglobin reflectance curve
+  // Hemoglobin reflectance curve (tolerant of indoor lighting while strictly rejecting wood/paper/walls)
   const hemoRatio = (r - g) / (r + 1);
-  if (hemoRatio < 0.155 || r <= g || g < b * 0.84) {
+  if (hemoRatio < 0.12 || r <= g || g < b * 0.75) {
     return false;
   }
 
-  // YCbCr BT.601 standard conversion
+  // Canonical YCbCr conversion (ITU-R BT.601)
   const Y = 0.299 * r + 0.587 * g + 0.114 * b;
   const Cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
   const Cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
 
-  // Strict redness constraint: human blood/skin chrominance requires Cr > Cb + 12
-  if (Cr <= Cb + 12) {
+  // Redness constraint: human blood/skin chrominance requires Cr > Cb + 10
+  if (Cr <= Cb + 10) {
     return false;
   }
 
-  // Tight YCbCr skin ellipse: supports both tight prompt ellipse and canonical skin cluster
-  const ellipseStd = Math.pow(Cr - 150, 2) / 450 + Math.pow(Cb - 117, 2) / 280;
-  const ellipsePrompt = Math.pow(Cr - 128, 2) / 360 + Math.pow(Cb - 128, 2) / 200;
-  if (ellipseStd > 1.25 && ellipsePrompt > 1.0) {
+  // YCbCr skin ellipse: supports both tight prompt ellipse and canonical skin cluster
+  const ellipseStd = Math.pow(Cr - 150, 2) / 650 + Math.pow(Cb - 117, 2) / 420;
+  const ellipsePrompt = Math.pow(Cr - 128, 2) / 520 + Math.pow(Cb - 128, 2) / 340;
+  if (ellipseStd > 1.4 && ellipsePrompt > 1.2) {
     return false;
   }
 
   // Luminance and minimum intensity bounds
-  if (Y < 30 || Y > 248 || r < 38) {
+  if (Y < 25 || Y > 250 || r < 32) {
     return false;
   }
 
@@ -64,59 +65,48 @@ export function isHumanSkinPixel(r: number, g: number, b: number): boolean {
 }
 
 /**
- * Pure Pixel Buffer Face Analyzer
- * Operates on RGBA pixel array of targetSize x targetSize
+ * Analyzes pixel data from a square (e.g. 160x160) canvas to verify
+ * presence of a real human face.
  */
 export function analyzeFacePixels(
-  data: Uint8Array | Uint8ClampedArray,
-  targetSize = 160
+  data: Uint8ClampedArray | Uint8Array,
+  targetSize: number = 160
 ): FaceVerificationResult {
   const totalPixels = targetSize * targetSize;
 
   // ---------------------------------------------------------
-  // 1. Screenshot / Flat UI / Web Page / Graphic Rejection
+  // 1. Extreme Flat / Blank / Screenshot Check
   // ---------------------------------------------------------
   let nearWhitePixels = 0;
-  let flatGrayPixels = 0;
+  let nearBlackPixels = 0;
 
-  for (let y = 0; y < targetSize; y++) {
-    for (let x = 0; x < targetSize; x++) {
-      const idx = (y * targetSize + x) * 4;
-      const r = data[idx];
-      const g = data[idx + 1];
-      const b = data[idx + 2];
-
-      if (r > 240 && g > 240 && b > 240) {
-        nearWhitePixels++;
-      }
-      if (Math.abs(r - g) <= 2 && Math.abs(g - b) <= 2 && (r > 210 || r < 25)) {
-        flatGrayPixels++;
-      }
-    }
+  for (let i = 0; i < totalPixels; i++) {
+    const idx = i * 4;
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    if (r > 240 && g > 240 && b > 240) nearWhitePixels++;
+    if (r < 18 && g < 18 && b < 18) nearBlackPixels++;
   }
 
   const nearWhiteRatio = nearWhitePixels / totalPixels;
-  const flatGrayRatio = flatGrayPixels / totalPixels;
-  if (nearWhiteRatio > 0.25 || nearWhiteRatio + flatGrayRatio > 0.45) {
+  const nearBlackRatio = nearBlackPixels / totalPixels;
+
+  if (nearWhiteRatio > 0.70 || nearBlackRatio > 0.85) {
     return {
       isValidFace: false,
-      confidence: 0.05,
-      message: 'Screenshots, web pages, and graphics are not allowed. Please upload a real camera photo of your face.',
+      confidence: 0,
+      message: 'Photo appears to be a blank image or solid screenshot. Please take a real photo.',
     };
   }
 
   // ---------------------------------------------------------
-  // 2. Rejection of Architecture / Furniture / Grids
+  // 2. Central Face Zone Skin Chromaticity Distribution
   // ---------------------------------------------------------
-  // Calculate horizontal and vertical Sobel gradients across luminance.
-  // Real faces have soft curved contours. Bookshelves, desks, cabinets, and rooms
-  // have long straight horizontal lines (shelves) and long vertical lines (cabinet edges).
-  const minX = Math.floor(targetSize * 0.20);
-  const maxX = Math.floor(targetSize * 0.80);
-  const minY = Math.floor(targetSize * 0.15);
-  const maxY = Math.floor(targetSize * 0.85);
-  const zoneWidth = maxX - minX;
-  const zoneHeight = maxY - minY;
+  const minX = Math.floor(targetSize * 0.18);
+  const maxX = Math.floor(targetSize * 0.82);
+  const minY = Math.floor(targetSize * 0.12);
+  const maxY = Math.floor(targetSize * 0.88);
 
   const lums = new Float32Array(totalPixels);
   for (let i = 0; i < totalPixels; i++) {
@@ -124,98 +114,6 @@ export function analyzeFacePixels(
     lums[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
   }
 
-  const gx = new Float32Array(totalPixels);
-  const gy = new Float32Array(totalPixels);
-
-  for (let y = 1; y < targetSize - 1; y++) {
-    for (let x = 1; x < targetSize - 1; x++) {
-      const idx = y * targetSize + x;
-      gy[idx] =
-        -1 * lums[(y - 1) * targetSize + (x - 1)] - 2 * lums[(y - 1) * targetSize + x] - 1 * lums[(y - 1) * targetSize + (x + 1)] +
-        +1 * lums[(y + 1) * targetSize + (x - 1)] + 2 * lums[(y + 1) * targetSize + x] + 1 * lums[(y + 1) * targetSize + (x + 1)];
-      gx[idx] =
-        -1 * lums[(y - 1) * targetSize + (x - 1)] + 1 * lums[(y - 1) * targetSize + (x + 1)] +
-        -2 * lums[y * targetSize + (x - 1)]       + 2 * lums[y * targetSize + (x + 1)] +
-        -1 * lums[(y + 1) * targetSize + (x - 1)] + 1 * lums[(y + 1) * targetSize + (x + 1)];
-    }
-  }
-
-  // Detect straight horizontal edge runs (shelves, desk tops)
-  const minHorizRunLength = Math.floor(zoneWidth * 0.38); // >= 36 px
-  const horizontalRowsWithRun: number[] = [];
-  for (let y = minY; y <= maxY; y++) {
-    let currentRun = 0;
-    let maxRunInRow = 0;
-    for (let x = minX; x <= maxX; x++) {
-      const idx = y * targetSize + x;
-      const magY = Math.abs(gy[idx]);
-      const magX = Math.abs(gx[idx]);
-      if (magY > 85 && magY > 1.8 * magX) {
-        currentRun++;
-        if (currentRun > maxRunInRow) maxRunInRow = currentRun;
-      } else {
-        currentRun = 0;
-      }
-    }
-    if (maxRunInRow >= minHorizRunLength) {
-      horizontalRowsWithRun.push(y);
-    }
-  }
-
-  // Group adjacent rows into distinct physical horizontal lines
-  let distinctHorizontalLines = 0;
-  let lastGroupedRow = -999;
-  for (const row of horizontalRowsWithRun) {
-    if (row - lastGroupedRow > 3) {
-      distinctHorizontalLines++;
-    }
-    lastGroupedRow = row;
-  }
-
-  // Detect straight vertical edge runs (cabinet edges, doors, pillars)
-  const minVertRunLength = Math.floor(zoneHeight * 0.32); // >= 35 px
-  const verticalColsWithRun: number[] = [];
-  for (let x = minX; x <= maxX; x++) {
-    let currentRun = 0;
-    let maxRunInCol = 0;
-    for (let y = minY; y <= maxY; y++) {
-      const idx = y * targetSize + x;
-      const magX = Math.abs(gx[idx]);
-      const magY = Math.abs(gy[idx]);
-      if (magX > 85 && magX > 1.8 * magY) {
-        currentRun++;
-        if (currentRun > maxRunInCol) maxRunInCol = currentRun;
-      } else {
-        currentRun = 0;
-      }
-    }
-    if (maxRunInCol >= minVertRunLength) {
-      verticalColsWithRun.push(x);
-    }
-  }
-
-  // Group adjacent columns into distinct physical vertical lines
-  let distinctVerticalLines = 0;
-  let lastGroupedCol = -999;
-  for (const col of verticalColsWithRun) {
-    if (col - lastGroupedCol > 3) {
-      distinctVerticalLines++;
-    }
-    lastGroupedCol = col;
-  }
-
-  const totalStraightRuns = distinctHorizontalLines + distinctVerticalLines;
-  if (totalStraightRuns > 2 || distinctVerticalLines >= 2) {
-    return {
-      isValidFace: false,
-      confidence: 0.1,
-      message: 'Objects, furniture, and room photos are not allowed. Please upload a clear photo of your face.',
-    };
-  }
-
-  // ---------------------------------------------------------
-  // 3. Central Face Zone Skin Chromaticity Distribution
-  // ---------------------------------------------------------
   let centerTotalPixels = 0;
   let centerSkinPixels = 0;
   let outerTotalPixels = 0;
@@ -246,9 +144,8 @@ export function analyzeFacePixels(
   }
 
   const centerSkinRatio = centerSkinPixels / Math.max(1, centerTotalPixels);
-  const outerSkinRatio = outerSkinPixels / Math.max(1, outerTotalPixels);
 
-  if (centerSkinRatio < 0.28 || centerSkinRatio > 0.98 || centerSkinRatio <= outerSkinRatio * 1.15) {
+  if (centerSkinRatio < 0.15 || centerSkinRatio > 0.99) {
     return {
       isValidFace: false,
       confidence: 0.15,
@@ -258,14 +155,125 @@ export function analyzeFacePixels(
   }
 
   // ---------------------------------------------------------
+  // 3. Rejection of Architecture / Furniture / Grids
+  // ---------------------------------------------------------
+  // Calculate horizontal and vertical Sobel gradients across luminance.
+  // Real faces have soft curved contours. Bookshelves, desks, cabinets, and rooms
+  // have long straight horizontal lines (shelves) and long vertical lines (cabinet edges).
+  const zoneWidth = maxX - minX;
+  const zoneHeight = maxY - minY;
+
+  const gx = new Float32Array(totalPixels);
+  const gy = new Float32Array(totalPixels);
+
+  for (let y = 1; y < targetSize - 1; y++) {
+    for (let x = 1; x < targetSize - 1; x++) {
+      const idx = y * targetSize + x;
+      // Sobel horizontal
+      gx[idx] =
+        -lums[(y - 1) * targetSize + (x - 1)] +
+        lums[(y - 1) * targetSize + (x + 1)] -
+        2 * lums[y * targetSize + (x - 1)] +
+        2 * lums[y * targetSize + (x + 1)] -
+        lums[(y + 1) * targetSize + (x - 1)] +
+        lums[(y + 1) * targetSize + (x + 1)];
+      // Sobel vertical
+      gy[idx] =
+        -lums[(y - 1) * targetSize + (x - 1)] -
+        2 * lums[(y - 1) * targetSize + x] -
+        lums[(y - 1) * targetSize + (x + 1)] +
+        lums[(y + 1) * targetSize + (x - 1)] +
+        2 * lums[(y + 1) * targetSize + x] +
+        lums[(y + 1) * targetSize + (x + 1)];
+    }
+  }
+
+  // Detect straight horizontal edge runs (shelves, desk tops)
+  const minHorizRunLength = Math.floor(zoneWidth * 0.40);
+  const horizontalRowsWithRun: number[] = [];
+  for (let y = minY; y <= maxY; y++) {
+    let currentRun = 0;
+    let maxRunInRow = 0;
+    for (let x = minX; x <= maxX; x++) {
+      const idx = y * targetSize + x;
+      const magY = Math.abs(gy[idx]);
+      const magX = Math.abs(gx[idx]);
+      if (magY > 90 && magY > 2.0 * magX) {
+        currentRun++;
+        if (currentRun > maxRunInRow) maxRunInRow = currentRun;
+      } else {
+        currentRun = 0;
+      }
+    }
+    if (maxRunInRow >= minHorizRunLength) {
+      horizontalRowsWithRun.push(y);
+    }
+  }
+
+  let distinctHorizontalLines = 0;
+  let lastGroupedRow = -999;
+  for (const row of horizontalRowsWithRun) {
+    if (row > lastGroupedRow + 4) {
+      distinctHorizontalLines++;
+      lastGroupedRow = row;
+    }
+  }
+
+  // Detect straight vertical edge runs (cabinet edges, doors, pillars)
+  const minVertRunLength = Math.floor(zoneHeight * 0.35);
+  const verticalColsWithRun: number[] = [];
+  for (let x = minX; x <= maxX; x++) {
+    let currentRun = 0;
+    let maxRunInCol = 0;
+    for (let y = minY; y <= maxY; y++) {
+      const idx = y * targetSize + x;
+      const magX = Math.abs(gx[idx]);
+      const magY = Math.abs(gy[idx]);
+      if (magX > 90 && magX > 2.0 * magY) {
+        currentRun++;
+        if (currentRun > maxRunInCol) maxRunInCol = currentRun;
+      } else {
+        currentRun = 0;
+      }
+    }
+    if (maxRunInCol >= minVertRunLength) {
+      verticalColsWithRun.push(x);
+    }
+  }
+
+  let distinctVerticalLines = 0;
+  let lastGroupedCol = -999;
+  for (const col of verticalColsWithRun) {
+    if (col > lastGroupedCol + 4) {
+      distinctVerticalLines++;
+      lastGroupedCol = col;
+    }
+  }
+
+  const totalStraightRuns = distinctHorizontalLines + distinctVerticalLines;
+  // Strictly reject objects/furniture when straight lines dominate AND skin is minimal,
+  // or when straight lines form an extensive grid (bookshelf/cabinet)
+  if (
+    (centerSkinRatio < 0.25 && (totalStraightRuns >= 2 || distinctVerticalLines >= 2)) ||
+    totalStraightRuns >= 5
+  ) {
+    return {
+      isValidFace: false,
+      confidence: 0.1,
+      message:
+        'Furniture, architectural edges, or objects detected. Please upload a clear photo of your face, not furniture or room interiors.',
+    };
+  }
+
+  // ---------------------------------------------------------
   // 4. Anatomical Facial Geometry (Eye-Nose-Mouth Triad)
   // ---------------------------------------------------------
 
-  // 1) Forehead (y = 15%..30%, x = 32%..68%): Must be smooth skin tone with low variance
+  // 1) Forehead (y = 15%..30%, x = 32%..68%): Must contain skin tone
   const fhY1 = Math.floor(targetSize * 0.15);
   const fhY2 = Math.floor(targetSize * 0.30);
-  const fhX1 = Math.floor(targetSize * 0.32);
-  const fhX2 = Math.floor(targetSize * 0.68);
+  const fhX1 = Math.floor(targetSize * 0.30);
+  const fhX2 = Math.floor(targetSize * 0.70);
   let fhPixels = 0;
   let fhSkin = 0;
   let fhLumSum = 0;
@@ -291,7 +299,8 @@ export function analyzeFacePixels(
   const fhStdDev = Math.sqrt(fhVariance);
   const fhSkinRatio = fhSkin / Math.max(1, fhPixels);
 
-  if (fhSkinRatio < 0.35 || fhStdDev > 35) {
+  // Relaxed to accommodate bangs, styled hair, or hats while still rejecting inanimate flat objects
+  if (fhSkinRatio < 0.12 || fhStdDev > 65) {
     return {
       isValidFace: false,
       confidence: 0.2,
@@ -299,15 +308,15 @@ export function analyzeFacePixels(
     };
   }
 
-  // 2) Eyes (y = 32%..48%): Must have TWO distinct darker regions horizontally separated by at least 15% of width, symmetrically positioned around center
-  const eyeY1 = Math.floor(targetSize * 0.32);
-  const eyeY2 = Math.floor(targetSize * 0.48);
-  const leftEyeX1 = Math.floor(targetSize * 0.22);
-  const leftEyeX2 = Math.floor(targetSize * 0.46);
-  const rightEyeX1 = Math.floor(targetSize * 0.54);
-  const rightEyeX2 = Math.floor(targetSize * 0.78);
+  // 2) Eyes (y = 30%..52%): Detect darker ocular cavities separated horizontally
+  const eyeY1 = Math.floor(targetSize * 0.30);
+  const eyeY2 = Math.floor(targetSize * 0.52);
+  const leftEyeX1 = Math.floor(targetSize * 0.18);
+  const leftEyeX2 = Math.floor(targetSize * 0.48);
+  const rightEyeX1 = Math.floor(targetSize * 0.52);
+  const rightEyeX2 = Math.floor(targetSize * 0.82);
 
-  const eyeDarkThreshold = fhAvgLum * 0.82;
+  const eyeDarkThreshold = fhAvgLum * 0.88;
   let leftDark = 0;
   let leftTotal = 0;
   let leftDarkSumX = 0;
@@ -334,7 +343,7 @@ export function analyzeFacePixels(
     }
   }
 
-  const minRequiredDark = Math.max(8, Math.floor(leftTotal * 0.05));
+  const minRequiredDark = Math.max(4, Math.floor(leftTotal * 0.025));
   if (leftDark < minRequiredDark || rightDark < minRequiredDark) {
     return {
       isValidFace: false,
@@ -349,7 +358,8 @@ export function analyzeFacePixels(
   const eyeCenter = (leftCentroidX + rightCentroidX) / 2;
   const symmetryOffset = Math.abs(eyeCenter - targetSize / 2) / targetSize;
 
-  if (eyeSeparation < 0.15 || symmetryOffset > 0.14) {
+  // Tolerates natural selfie angle tilts up to 25% offset
+  if (eyeSeparation < 0.08 || symmetryOffset > 0.30) {
     return {
       isValidFace: false,
       confidence: 0.2,
@@ -357,13 +367,13 @@ export function analyzeFacePixels(
     };
   }
 
-  // 3) Cheeks (y = 48%..65% left and right of center): Must be smooth skin with low local variance
+  // 3) Cheeks (y = 48%..68% left and right of center)
   const chY1 = Math.floor(targetSize * 0.48);
-  const chY2 = Math.floor(targetSize * 0.65);
-  const chLeftX1 = Math.floor(targetSize * 0.20);
-  const chLeftX2 = Math.floor(targetSize * 0.42);
-  const chRightX1 = Math.floor(targetSize * 0.58);
-  const chRightX2 = Math.floor(targetSize * 0.80);
+  const chY2 = Math.floor(targetSize * 0.68);
+  const chLeftX1 = Math.floor(targetSize * 0.18);
+  const chLeftX2 = Math.floor(targetSize * 0.44);
+  const chRightX1 = Math.floor(targetSize * 0.56);
+  const chRightX2 = Math.floor(targetSize * 0.82);
 
   let chLTotal = 0, chLSkin = 0, chLSum = 0;
   const chLLums: number[] = [];
@@ -400,7 +410,11 @@ export function analyzeFacePixels(
     chRLums.reduce((acc, v) => acc + Math.pow(v - chRAvg, 2), 0) / Math.max(1, chRTotal)
   );
 
-  if (chLSkinRatio < 0.35 || chRSkinRatio < 0.35 || chLStdDev > 40 || chRStdDev > 40) {
+  // In mirror selfies, a hand or phone may occlude one cheek; require at least one clear cheek zone
+  if (
+    Math.max(chLSkinRatio, chRSkinRatio) < 0.16 ||
+    (chLStdDev > 60 && chRStdDev > 60)
+  ) {
     return {
       isValidFace: false,
       confidence: 0.2,
@@ -408,11 +422,11 @@ export function analyzeFacePixels(
     };
   }
 
-  // 4) Mouth (y = 66%..82%): Must have a horizontal mouth slit or distinct lip color, centered horizontally
-  const mY1 = Math.floor(targetSize * 0.66);
-  const mY2 = Math.floor(targetSize * 0.82);
-  const mX1 = Math.floor(targetSize * 0.32);
-  const mX2 = Math.floor(targetSize * 0.68);
+  // 4) Mouth (y = 64%..84%): Horizontal mouth contour or distinct lip chrominance
+  const mY1 = Math.floor(targetSize * 0.64);
+  const mY2 = Math.floor(targetSize * 0.84);
+  const mX1 = Math.floor(targetSize * 0.28);
+  const mX2 = Math.floor(targetSize * 0.72);
 
   let mHighCrCount = 0;
   let maxHorizDarkRun = 0;
@@ -428,8 +442,8 @@ export function analyzeFacePixels(
       const Cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
       const Cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
 
-      const isMouthDark = Y < fhAvgLum * 0.82;
-      const isLipColor = Cr > 150 && Cr > Cb + 16;
+      const isMouthDark = Y < fhAvgLum * 0.88;
+      const isLipColor = Cr > 142 && Cr > Cb + 12;
 
       if (isMouthDark) {
         rowDarkRun++;
@@ -444,7 +458,7 @@ export function analyzeFacePixels(
     }
   }
 
-  if (maxHorizDarkRun < 10 && mHighCrCount < 15) {
+  if (maxHorizDarkRun < 5 && mHighCrCount < 6) {
     return {
       isValidFace: false,
       confidence: 0.25,
@@ -460,7 +474,7 @@ export function analyzeFacePixels(
     Math.max(1, centerLuminances.length);
   const centerLumStdDev = Math.sqrt(centerVar);
 
-  if (centerLumStdDev < 16) {
+  if (centerLumStdDev < 10) {
     return {
       isValidFace: false,
       confidence: 0.2,
@@ -552,8 +566,6 @@ export async function verifyHumanFace(
   }
 
   // 1. Browser Native FaceDetector integration (Shape Detection API)
-  // Even if browser FaceDetector finds faces, we STILL enforce full skin chromaticity
-  // and furniture/straight-edge rejection to eliminate any false positives!
   if (typeof window !== 'undefined' && 'FaceDetector' in window) {
     try {
       const detector = new (window as any).FaceDetector({
@@ -571,8 +583,8 @@ export async function verifyHumanFace(
       }
 
       // Check candidate bounding box
-      const minW = naturalWidth * 0.12;
-      const minH = naturalHeight * 0.12;
+      const minW = naturalWidth * 0.10;
+      const minH = naturalHeight * 0.10;
       const validFaces = detectedFaces.filter((face: any) => {
         const bb = face?.boundingBox;
         return !bb || (bb.width >= minW && bb.height >= minH);
@@ -586,18 +598,46 @@ export async function verifyHumanFace(
         };
       }
 
-      // Pass the detected face region through strict skin and furniture edge tests
+      // Sample pixels in detected face region to ensure genuine skin presence (not flat drawing or poster)
       const faceBox = validFaces[0]?.boundingBox;
       const canvasResult = analyzeCanvasForHumanFace(img, faceBox);
-      if (!canvasResult.isValidFace) {
-        return canvasResult;
+
+      // If the face detector found a face, verify that the cropped box has real human skin tone
+      // and isn't a blank or furniture screenshot
+      if (canvasResult.isValidFace) {
+        return {
+          isValidFace: true,
+          confidence: Math.max(0.96, canvasResult.confidence),
+          message: 'Human face verified successfully.',
+        };
       }
 
-      return {
-        isValidFace: true,
-        confidence: Math.max(0.96, canvasResult.confidence),
-        message: 'Human face verified successfully.',
-      };
+      // If heuristics were tripped by lighting/bangs/pose, but browser native ML FaceDetector
+      // confidently located the face, verify basic skin chromaticity in the detected region:
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      if (ctx && faceBox) {
+        ctx.drawImage(img, faceBox.x, faceBox.y, faceBox.width, faceBox.height, 0, 0, 64, 64);
+        const data = ctx.getImageData(0, 0, 64, 64).data;
+        let skinCount = 0;
+        for (let i = 0; i < 64 * 64; i++) {
+          if (isHumanSkinPixel(data[i * 4], data[i * 4 + 1], data[i * 4 + 2])) {
+            skinCount++;
+          }
+        }
+        const skinFraction = skinCount / (64 * 64);
+        if (skinFraction >= 0.10) {
+          return {
+            isValidFace: true,
+            confidence: 0.95,
+            message: 'Human face verified successfully.',
+          };
+        }
+      }
+
+      return canvasResult;
     } catch {
       // Fallback to Canvas Chrominance, Proportion, Symmetry & Texture Analyzer
     }

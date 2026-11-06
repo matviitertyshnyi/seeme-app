@@ -235,15 +235,15 @@ export default function LeaveTheRoomHomePage() {
     if (isSignedOut) {
       return GUEST_FALLBACK_USER;
     }
-    if (sessionUser) {
-      return sessionUser;
-    }
-    const found = personas.find((p) => p.id === activePersonaId);
+    const found = personas.find((p) => p.id === (sessionUser?.id || activePersonaId));
     if (found && found.id !== 'guest') {
       return found;
     }
+    if (sessionUser) {
+      return sessionUser;
+    }
     return personas[0] || GUEST_FALLBACK_USER;
-  }, [isSignedOut, sessionUser, personas, activePersonaId, GUEST_FALLBACK_USER]);
+  }, [isSignedOut, personas, activePersonaId, sessionUser, GUEST_FALLBACK_USER]);
 
   const hasPromptedOnboarding = useRef(false);
   useEffect(() => {
@@ -589,6 +589,7 @@ export default function LeaveTheRoomHomePage() {
     }
     const targetPersona = personas.find((p) => p.id === userId);
     if (targetPersona) {
+      setSessionUser(targetPersona);
       showToast(`Logged in as ${targetPersona.name}`);
     }
   };
@@ -596,6 +597,7 @@ export default function LeaveTheRoomHomePage() {
   const handleSignOut = () => {
     setIsSignedOut(true);
     setIsGuestMode(false);
+    setSessionUser(null);
     if (typeof window !== 'undefined') {
       localStorage.setItem('leavetheroom_session_user_id', 'signed_out');
       localStorage.setItem('seeme_session_user_id', 'signed_out');
@@ -1061,6 +1063,9 @@ export default function LeaveTheRoomHomePage() {
     if (!isSignedOut && activeUser?.id) {
       setPersonas((prev) =>
         prev.map((p) => (p.id === activeUser.id ? { ...p, neighborhood: city.label } : p))
+      );
+      setSessionUser((prev) =>
+        prev && prev.id === activeUser.id ? { ...prev, neighborhood: city.label } : prev
       );
       try {
         await fetch('/api/users', {
@@ -1810,6 +1815,8 @@ export default function LeaveTheRoomHomePage() {
         }}
         onUserCreatedOrUpdated={(persona, allPersonas, msg) => {
           setPersonas(allPersonas);
+          setSessionUser(persona);
+          setActivePersonaId(persona.id);
           handleSwitchUser(persona.id);
           triggerSensoryFeedback('SUCCESS', persona.settings);
           showToast(msg);

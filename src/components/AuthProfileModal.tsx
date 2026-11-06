@@ -192,7 +192,7 @@ export function AuthProfileModal({
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -200,54 +200,78 @@ export function AuthProfileModal({
     setFaceError(null);
     setEditError(null);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = async () => {
-        const canvas = document.createElement('canvas');
-        const size = 320;
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          setFaceChecking(false);
-          return;
-        }
-
-        // Center-crop
-        const minDim = Math.min(img.width, img.height);
-        const sx = (img.width - minDim) / 2;
-        const sy = (img.height - minDim) / 2;
-
-        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-
-        // Run Human Face Verification to reject shoes / screenshots / non-human images
+    try {
+      let imageSource: ImageBitmap | HTMLImageElement;
+      if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
         try {
-          const result = await verifyHumanFace(dataUrl);
-          if (!result.isValidFace) {
-            setFaceError(result.message);
-            setIsFaceVerified(false);
-            setFaceChecking(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            if (cameraInputRef.current) cameraInputRef.current.value = '';
-            return;
-          }
-          setAvatar(dataUrl);
-          setIsFaceVerified(true);
-          setFaceError(null);
+          imageSource = await createImageBitmap(file, { imageOrientation: 'from-image' });
         } catch {
-          setFaceError('Could not verify human face in photo. Please upload a clear portrait.');
-          setIsFaceVerified(false);
-        } finally {
-          setFaceChecking(false);
+          imageSource = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const img = new Image();
+              img.onload = () => resolve(img);
+              img.onerror = reject;
+              if (typeof event.target?.result === 'string') {
+                img.src = event.target.result;
+              }
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
         }
-      };
-      if (typeof event.target?.result === 'string') {
-        img.src = event.target.result;
+      } else {
+        imageSource = await new Promise<HTMLImageElement>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            if (typeof event.target?.result === 'string') {
+              img.src = event.target.result;
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
       }
-    };
-    reader.readAsDataURL(file);
+
+      const canvas = document.createElement('canvas');
+      const size = 320;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setFaceChecking(false);
+        return;
+      }
+
+      const imgW = (imageSource as any).width || size;
+      const imgH = (imageSource as any).height || size;
+      const minDim = Math.min(imgW, imgH);
+      const sx = (imgW - minDim) / 2;
+      const sy = (imgH - minDim) / 2;
+
+      ctx.drawImage(imageSource, sx, sy, minDim, minDim, 0, 0, size, size);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+      const result = await verifyHumanFace(dataUrl);
+      if (!result.isValidFace) {
+        setFaceError(result.message);
+        setIsFaceVerified(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        if (cameraInputRef.current) cameraInputRef.current.value = '';
+        return;
+      }
+      setAvatar(dataUrl);
+      setIsFaceVerified(true);
+      setFaceError(null);
+    } catch {
+      setFaceError('Could not verify human face in photo. Please upload a clear portrait.');
+      setIsFaceVerified(false);
+    } finally {
+      setFaceChecking(false);
+    }
   };
 
   const handleSelectCityPreset = (preset: CityPreset) => {
@@ -462,6 +486,9 @@ export function AuthProfileModal({
                           type="file"
                           accept="image/*"
                           className="hidden"
+                          onClick={(e) => {
+                            (e.target as HTMLInputElement).value = '';
+                          }}
                           onChange={handlePhotoUpload}
                         />
                       </label>
@@ -476,6 +503,9 @@ export function AuthProfileModal({
                           accept="image/*"
                           capture="user"
                           className="hidden"
+                          onClick={(e) => {
+                            (e.target as HTMLInputElement).value = '';
+                          }}
                           onChange={handlePhotoUpload}
                         />
                       </label>
