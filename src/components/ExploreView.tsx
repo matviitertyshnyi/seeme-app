@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users } from 'lucide-react';
+import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users, MapPin } from 'lucide-react';
 import { LobbyWithDistance, RoomStatus, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
@@ -202,24 +202,24 @@ export function ExploreView({
 
         {/* Subrow: Location & Radius | Age Selector | Live Now */}
         <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80 overflow-visible relative">
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={onOpenCitySelector || onNearMeGps}
-              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-stone-950 dark:hover:text-white transition-colors inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs shrink-0 cursor-pointer"
+              className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-lg bg-white dark:bg-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-850 dark:text-stone-200 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 cursor-pointer shadow-2xs"
               title="Tap to select country, city or GPS location"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="truncate max-w-[115px] sm:max-w-none">{locationName}</span>
+              <MapPin className="w-3 h-3 text-orange-600 dark:text-orange-400 shrink-0" />
+              <span className="truncate max-w-[95px] sm:max-w-none">{locationName}</span>
+              <ChevronDown className="w-2.5 h-2.5 text-stone-400 shrink-0" />
             </button>
-            <span className="text-stone-300 dark:text-stone-700 shrink-0">·</span>
 
             {/* Inline Roll-down Radius Dropdown */}
             <div className="relative shrink-0" ref={radiusDropdownRef}>
               <button
                 type="button"
                 onClick={() => setOpenDropdown((prev) => (prev === 'RADIUS' ? null : 'RADIUS'))}
-                className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 cursor-pointer dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+                className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 cursor-pointer shadow-2xs"
               >
                 <span>{formatRadiusUnit(radiusKm)}</span>
                 <ChevronDown
@@ -356,23 +356,6 @@ export function ExploreView({
                 </div>
               )}
             </div>
-
-            <button
-              type="button"
-              onClick={onToggleStatusFilter}
-              className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 cursor-pointer ${
-                statusFilter === 'LIVE'
-                  ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 shadow-2xs'
-                  : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                  statusFilter === 'LIVE' ? 'bg-emerald-400' : 'bg-emerald-500'
-                }`}
-              />
-              <span>{currentLang === 'uk' ? 'Наживо' : 'Live'}</span>
-            </button>
 
             {onToggleSavedOnly && (
               <button
@@ -550,7 +533,7 @@ export function ExploreView({
                     </span>
                   </h2>
                   <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Tap to check in or open chat
+                    Tap to check in or see details
                   </p>
                 </div>
               </div>

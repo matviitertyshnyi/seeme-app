@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
-import { resolveCoverImage } from '@/lib/geo';
+import { resolveCoverImage, formatEventCreationDate } from '@/lib/geo';
 
 interface LobbyCardProps {
   lobby: LobbyWithDistance;
@@ -172,7 +172,7 @@ export function LobbyCard({
               )}
             </span>
             <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium block truncate">
-              Host · {lobby.participants.length} of {lobby.maxParticipants} joined
+              Host · {lobby.participants.length} of {lobby.maxParticipants} joined{lobby.createdAt ? ` · ${formatEventCreationDate(lobby.createdAt)}` : ''}
             </span>
           </div>
         </div>
@@ -187,8 +187,7 @@ export function LobbyCard({
               }}
               className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-stone-900 dark:bg-stone-100 hover:opacity-90 text-white dark:text-stone-950 text-xs font-semibold inline-flex items-center gap-1.5 transition active:scale-[0.98]"
             >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>{isHost && lobby.pendingRequests.length > 0 ? `${t('pending_approval')} (${lobby.pendingRequests.length})` : t('open_chat')}</span>
+              <span>{isHost && lobby.pendingRequests.length > 0 ? `${t('pending_approval')} (${lobby.pendingRequests.length})` : (t('see_details') || 'See Details')}</span>
             </button>
           ) : hasPendingRequest ? (
             <button

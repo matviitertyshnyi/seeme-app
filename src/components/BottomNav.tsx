@@ -129,9 +129,6 @@ export function BottomNav({
         )}
         <span className="leading-tight text-[11px] truncate max-w-[64px]">{item.label}</span>
         {item.badge}
-        {isActive && (
-          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-stone-900 dark:bg-white" />
-        )}
       </button>
     );
   };

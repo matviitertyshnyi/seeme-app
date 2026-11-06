@@ -51,6 +51,31 @@ export function formatDistanceLabel(distanceKm: number): string {
   return `${distanceKm.toFixed(1)} km away`;
 }
 
+/**
+ * Formats event creation date for clean visible display.
+ */
+export function formatEventCreationDate(dateStr?: string): string {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    const isToday =
+      d.getDate() === now.getDate() &&
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear();
+
+    const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (isToday) {
+      return `Created today at ${timeStr}`;
+    }
+    const monthStr = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return `Created ${monthStr} at ${timeStr}`;
+  } catch {
+    return '';
+  }
+}
+
 export function deriveRoomStatus(lobby: Lobby): RoomStatus {
   if (lobby.roomStatus === 'FINISHED') {
     return 'FINISHED';

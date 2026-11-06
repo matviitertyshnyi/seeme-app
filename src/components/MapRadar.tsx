@@ -14,7 +14,7 @@ import {
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SeatBubbles } from '@/components/SeatBubbles';
 import { StatusBadge } from '@/components/StatusBadge';
-import { resolveCoverImage } from '@/lib/geo';
+import { resolveCoverImage, formatEventCreationDate } from '@/lib/geo';
 
 function escapeHtml(str: string): string {
   return str
@@ -380,6 +380,11 @@ export default function MapRadar({
                   <Navigation className="w-3 h-3 text-stone-400" />
                   {selectedPreviewLobby.distanceLabel}
                 </span>
+                {selectedPreviewLobby.createdAt && (
+                  <span className="text-[10px] text-stone-400 dark:text-stone-500 truncate">
+                    · {formatEventCreationDate(selectedPreviewLobby.createdAt)}
+                  </span>
+                )}
               </div>
 
               <h4 className="mt-1 text-sm font-bold text-stone-900 dark:text-white truncate hover:text-stone-700 dark:hover:text-stone-300">
@@ -429,8 +434,7 @@ export default function MapRadar({
                   }}
                   className="min-h-[40px] px-4 py-2 rounded-xl bg-stone-900 dark:bg-white text-white dark:text-stone-950 text-xs font-semibold hover:opacity-90 inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  Open Chat
+                  See Details
                 </button>
               ) : (
                 <button

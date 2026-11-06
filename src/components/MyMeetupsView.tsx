@@ -369,8 +369,7 @@ export function MyMeetupsView({
                       onClick={() => onSelectLobby(room.id)}
                       className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-[0.98]"
                     >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      <span>Open Chat</span>
+                      <span>See Details</span>
                     </button>
                   </div>
                 </article>

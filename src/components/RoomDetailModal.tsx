@@ -33,7 +33,7 @@ import {
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { StatusBadge } from '@/components/StatusBadge';
 import { triggerSensoryFeedback } from '@/lib/sound';
-import { resolveCoverImage } from '@/lib/geo';
+import { resolveCoverImage, formatEventCreationDate } from '@/lib/geo';
 import dynamic from 'next/dynamic';
 
 const EventSpotMap = dynamic(() => import('@/components/EventSpotMap'), {
@@ -518,11 +518,14 @@ export function RoomDetailModal({
 
           {/* Bottom Row: Category overline, Title */}
           <div className="absolute bottom-3.5 left-4 right-4 text-white">
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-300 mb-0.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-300 mb-0.5 flex-wrap">
               <CategoryIcon category={lobby.category} className="w-3.5 h-3.5 text-stone-300" />
               <span>{lobby.category}</span>
               {lobby.joinMode === 'APPROVAL_REQUIRED' && (
                 <span className="text-stone-400">· Approval Required</span>
+              )}
+              {lobby.createdAt && (
+                <span className="text-stone-400">· {formatEventCreationDate(lobby.createdAt)}</span>
               )}
             </div>
             <h2

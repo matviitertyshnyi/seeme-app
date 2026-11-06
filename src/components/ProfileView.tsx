@@ -295,17 +295,19 @@ export function ProfileView({
                     </h1>
                   </div>
 
-                  <div className="mt-0.5">
+                  <div className="mt-1.5 flex items-center">
                     <button
                       type="button"
                       onClick={onOpenCitySelector}
-                      className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 inline-flex items-center gap-1 group cursor-pointer"
+                      className="min-h-[26px] max-w-full px-2.5 py-1 rounded-lg bg-stone-100/90 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 border border-stone-200/90 dark:border-stone-700/80 text-[11px] font-semibold text-stone-700 dark:text-stone-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs group"
                       title="Tap to change your city"
                     >
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span>{activeUser.neighborhood || 'Select your city'}</span>
-                      <span className="text-[10px] text-stone-400 dark:text-stone-500 font-normal group-hover:text-stone-600 dark:group-hover:text-stone-300">
-                        · Change
+                      <MapPin className="w-3 h-3 text-orange-600 dark:text-orange-400 shrink-0" />
+                      <span className="truncate max-w-[125px] sm:max-w-[200px]">
+                        {activeUser.neighborhood || 'Select your city'}
+                      </span>
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500 font-medium group-hover:text-stone-600 dark:group-hover:text-stone-300 shrink-0">
+                        Change
                       </span>
                     </button>
                   </div>
