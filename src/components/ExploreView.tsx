@@ -137,18 +137,24 @@ export function ExploreView({
   }, [isSignedOut, searchQuery, personas, activeUser.id]);
 
   const displayAvailable = React.useMemo(() => {
+    // When signed out, all meetups are available to explore/join
+    const base = isSignedOut
+      ? [...availableToJoinLobbies, ...joinedFilteredLobbies]
+      : availableToJoinLobbies;
     if (showSavedOnly && savedLobbyIds) {
-      return availableToJoinLobbies.filter((l) => savedLobbyIds.includes(l.id));
+      return base.filter((l) => savedLobbyIds.includes(l.id));
     }
-    return availableToJoinLobbies;
-  }, [showSavedOnly, savedLobbyIds, availableToJoinLobbies]);
+    return base;
+  }, [isSignedOut, showSavedOnly, savedLobbyIds, availableToJoinLobbies, joinedFilteredLobbies]);
 
   const displayJoined = React.useMemo(() => {
+    // When signed out, visitor is not in any meetups
+    if (isSignedOut) return [];
     if (showSavedOnly && savedLobbyIds) {
       return joinedFilteredLobbies.filter((l) => savedLobbyIds.includes(l.id));
     }
     return joinedFilteredLobbies;
-  }, [showSavedOnly, savedLobbyIds, joinedFilteredLobbies]);
+  }, [isSignedOut, showSavedOnly, savedLobbyIds, joinedFilteredLobbies]);
 
   const effectiveTotalCount =
     showSavedOnly && savedLobbyIds
@@ -200,9 +206,15 @@ export function ExploreView({
                 : selectedBroadCategory}
             </span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200">
-              {selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories'
-                ? activityCounts[selectedCategory] ?? 0
-                : categoryCounts[selectedBroadCategory] ?? totalLobbiesCount}
+              {(() => {
+                if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') {
+                  return activityCounts[selectedCategory] ?? categoryCounts[selectedCategory] ?? 0;
+                }
+                if (selectedBroadCategory && selectedBroadCategory !== 'All Categories') {
+                  return categoryCounts[selectedBroadCategory] ?? 0;
+                }
+                return categoryCounts['All Categories'] ?? totalLobbiesCount;
+              })()}
             </span>
             <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
           </button>
@@ -530,7 +542,7 @@ export function ExploreView({
           )}
 
           {/* SECTION B: MEETUPS YOU ARE IN */}
-          {displayJoined.length > 0 && (
+          {!isSignedOut && displayJoined.length > 0 && (
             <section className="space-y-3 pt-3 border-t border-stone-200/80 dark:border-stone-800/80">
               <div className="flex items-center justify-between px-0.5">
                 <div>

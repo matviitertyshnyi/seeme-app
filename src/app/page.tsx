@@ -231,14 +231,19 @@ export default function LeaveTheRoomHomePage() {
     },
   }), []);
 
-  const activeUser = useMemo(
-    () =>
-      personas.find((p) => p.id === activePersonaId) ||
-      (sessionUser && sessionUser.id === activePersonaId ? sessionUser : null) ||
-      personas[0] ||
-      GUEST_FALLBACK_USER,
-    [personas, activePersonaId, sessionUser, GUEST_FALLBACK_USER]
-  );
+  const activeUser = useMemo(() => {
+    if (isSignedOut) {
+      return GUEST_FALLBACK_USER;
+    }
+    if (sessionUser) {
+      return sessionUser;
+    }
+    const found = personas.find((p) => p.id === activePersonaId);
+    if (found && found.id !== 'guest') {
+      return found;
+    }
+    return personas[0] || GUEST_FALLBACK_USER;
+  }, [isSignedOut, sessionUser, personas, activePersonaId, GUEST_FALLBACK_USER]);
 
   const hasPromptedOnboarding = useRef(false);
   useEffect(() => {
@@ -645,27 +650,37 @@ export default function LeaveTheRoomHomePage() {
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
-      'All Categories': lobbiesWithDistance.length,
+      'All Categories': 0,
       'Sports & Fitness': 0,
       'Gaming & Strategy': 0,
       'Social & Hangout': 0,
       'Co-Working': 0,
     };
     lobbiesWithDistance.forEach((lobby) => {
-      const broad = getBroadCategory(lobby.category);
-      if (counts[broad] !== undefined) {
-        counts[broad]++;
+      if (lobby.distanceKm <= radiusKm) {
+        counts['All Categories']++;
+        const broad = getBroadCategory(lobby.category);
+        if (counts[broad] !== undefined) {
+          counts[broad]++;
+        }
       }
     });
     return counts;
-  }, [lobbiesWithDistance]);
+  }, [lobbiesWithDistance, radiusKm]);
 
   const activityCounts: Record<string, number> = useMemo(() => {
-    const counts: Record<string, number> = {};
+    const counts: Record<string, number> = {
+      'Sports & Fitness': 0,
+      'Gaming & Strategy': 0,
+      'Social & Hangout': 0,
+      'Co-Working': 0,
+    };
     lobbiesWithDistance.forEach((lobby) => {
       if (lobby.distanceKm <= radiusKm) {
         const cat = lobby.category;
         counts[cat] = (counts[cat] || 0) + 1;
+        const broad = getBroadCategory(cat);
+        counts[broad] = (counts[broad] || 0) + 1;
       }
     });
     return counts;
@@ -759,30 +774,35 @@ export default function LeaveTheRoomHomePage() {
     activeUser.id,
   ]);
 
-  const joinedFilteredLobbies = useMemo(
-    () =>
-      filteredLobbies.filter((lobby) =>
-        lobby.participants.some((p) => p.id === activeUser.id)
-      ),
-    [filteredLobbies, activeUser.id]
-  );
+  const joinedFilteredLobbies = useMemo(() => {
+    if (isSignedOut || !activeUser || !activeUser.id || activeUser.id === 'guest') {
+      return [];
+    }
+    return filteredLobbies.filter((lobby) =>
+      lobby.participants.some((p) => p.id === activeUser.id)
+    );
+  }, [isSignedOut, filteredLobbies, activeUser?.id]);
 
-  const availableToJoinLobbies = useMemo(
-    () =>
-      filteredLobbies.filter(
-        (lobby) => !lobby.participants.some((p) => p.id === activeUser.id)
-      ),
-    [filteredLobbies, activeUser.id]
-  );
+  const availableToJoinLobbies = useMemo(() => {
+    if (isSignedOut || !activeUser || !activeUser.id || activeUser.id === 'guest') {
+      return filteredLobbies;
+    }
+    return filteredLobbies.filter(
+      (lobby) => !lobby.participants.some((p) => p.id === activeUser.id)
+    );
+  }, [isSignedOut, filteredLobbies, activeUser?.id]);
 
   const myActiveRooms: LobbyWithDistance[] = useMemo(() => {
+    if (isSignedOut || !activeUser || !activeUser.id || activeUser.id === 'guest') {
+      return [];
+    }
     return lobbiesWithDistance.filter(
       (lobby) =>
         lobby.hostId === activeUser.id ||
         lobby.participants.some((p) => p.id === activeUser.id) ||
         lobby.pendingRequests.some((r) => r.user.id === activeUser.id)
     );
-  }, [lobbiesWithDistance, activeUser.id]);
+  }, [isSignedOut, lobbiesWithDistance, activeUser?.id]);
 
   const nearestOpenMeetup = useMemo(() => {
     return availableToJoinLobbies.find(
