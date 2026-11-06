@@ -356,20 +356,23 @@ export function MyMeetupsView({
                     </p>
                   </div>
 
-                  <div className="flex gap-2 pt-1">
+                  <div className="pt-1">
                     <button
                       type="button"
                       onClick={() => onSelectLobby(room.id)}
-                      className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700/60 transition active:scale-[0.98]"
+                      className={`w-full min-h-[42px] py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-[0.98] ${
+                        isRoomHost
+                          ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-sm'
+                          : 'bg-stone-900 dark:bg-stone-100 hover:opacity-90 text-white dark:text-stone-950 shadow-sm'
+                      }`}
                     >
-                      {isRoomHost ? 'Manage Players' : 'Meetup Details'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onSelectLobby(room.id)}
-                      className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-[0.98]"
-                    >
-                      <span>See Details</span>
+                      <span>
+                        {isRoomHost
+                          ? room.pendingRequests && room.pendingRequests.length > 0
+                            ? `Manage Meetup (${room.pendingRequests.length} pending)`
+                            : 'Manage Meetup'
+                          : 'See Details'}
+                      </span>
                     </button>
                   </div>
                 </article>

@@ -187,7 +187,13 @@ export function LobbyCard({
               }}
               className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-stone-900 dark:bg-stone-100 hover:opacity-90 text-white dark:text-stone-950 text-xs font-semibold inline-flex items-center gap-1.5 transition active:scale-[0.98]"
             >
-              <span>{isHost && lobby.pendingRequests.length > 0 ? `${t('pending_approval')} (${lobby.pendingRequests.length})` : (t('see_details') || 'See Details')}</span>
+              <span>
+                {isHost && lobby.pendingRequests.length > 0
+                  ? `${t('pending_approval')} (${lobby.pendingRequests.length})`
+                  : isHost
+                  ? 'Manage Meetup'
+                  : (t('see_details') || 'See Details')}
+              </span>
             </button>
           ) : hasPendingRequest ? (
             <button

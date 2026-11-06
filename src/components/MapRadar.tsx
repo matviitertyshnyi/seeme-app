@@ -434,7 +434,7 @@ export default function MapRadar({
                   }}
                   className="min-h-[40px] px-4 py-2 rounded-xl bg-stone-900 dark:bg-white text-white dark:text-stone-950 text-xs font-semibold hover:opacity-90 inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  See Details
+                  {selectedPreviewLobby.hostId === activeUser.id ? 'Manage Meetup' : 'See Details'}
                 </button>
               ) : (
                 <button
