@@ -16,6 +16,7 @@ import {
   Utensils,
   GlassWater,
   Compass,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { ActivityCategory, ActivityGroup } from '@/types/lobby';
 
@@ -157,6 +158,9 @@ export function CategoryIcon({
       return <Laptop className={className} />;
     case 'Study Session':
       return <BookOpen className={className} />;
+    case 'Filter by Type':
+    case 'Filter':
+      return <SlidersHorizontal className={className} />;
     case 'All Rooms':
     case 'All Categories':
     case 'All Activities':

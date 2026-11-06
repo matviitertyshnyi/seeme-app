@@ -6,6 +6,8 @@ import {
   Plus,
   Map as MapIcon,
   ChevronDown,
+  Compass,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import {
@@ -1486,65 +1488,87 @@ export default function LeaveTheRoomHomePage() {
 
         {activeNav === 'MAP' && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-2 pb-0.5">
+            <div className="flex items-center gap-2 pb-0.5 overflow-x-auto no-scrollbar">
+              {/* Button 1: All Activities - shows all activities */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('All');
+                  setSelectedBroadCategory('All Categories');
+                  triggerSensoryFeedback('TAP', activeUser.settings);
+                }}
+                className={`min-h-[38px] inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shrink-0 ${
+                  (!selectedCategory || selectedCategory === 'All') && selectedBroadCategory === 'All Categories'
+                    ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 border-stone-900 dark:border-white shadow-2xs'
+                    : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700/80'
+                }`}
+                title="Show all activities"
+              >
+                <Compass className="w-3.5 h-3.5 shrink-0" />
+                <span>All Activities</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    (!selectedCategory || selectedCategory === 'All') && selectedBroadCategory === 'All Categories'
+                      ? 'bg-stone-800 text-stone-200 dark:bg-stone-200 dark:text-stone-800'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                  }`}
+                >
+                  {lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length}
+                </span>
+              </button>
+
+              {/* Button 2: Filter by Type - lets you choose */}
               <button
                 type="button"
                 onClick={() => setIsCategorySheetOpen(true)}
-                className={`min-h-[40px] inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-2xs ${
-                  selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
+                className={`min-h-[38px] inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shrink-0 shadow-2xs ${
+                  (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') ||
+                  selectedBroadCategory !== 'All Categories'
                     ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
-                    : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700/80'
+                    : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700/80'
                 }`}
-                title="Filter by Activity"
+                title="Filter by Activity Type"
               >
                 <CategoryIcon
                   category={
-                    selectedCategory && selectedCategory !== 'All'
+                    selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories'
                       ? selectedCategory
                       : selectedBroadCategory !== 'All Categories'
                       ? selectedBroadCategory
-                      : 'All Rooms'
+                      : 'Filter by Type'
                   }
-                  className={`w-4 h-4 shrink-0 ${
-                    selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') ||
+                    selectedBroadCategory !== 'All Categories'
                       ? 'text-white'
                       : 'text-orange-600 dark:text-orange-400'
                   }`}
                 />
                 <span>
-                  {selectedCategory && selectedCategory !== 'All'
-                    ? selectedCategory
-                    : selectedBroadCategory !== 'All Categories'
-                    ? selectedBroadCategory
-                    : 'All Activities'}
+                  {(selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') ||
+                  selectedBroadCategory !== 'All Categories'
+                    ? selectedCategory && selectedCategory !== 'All'
+                      ? selectedCategory
+                      : selectedBroadCategory
+                    : 'Filter by Type'}
                 </span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
-                      ? 'bg-white/20 text-white'
-                      : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200'
+                {((selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') ||
+                  selectedBroadCategory !== 'All Categories') && (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-white/20 text-white">
+                    {selectedCategory && selectedCategory !== 'All'
+                      ? activityCounts[selectedCategory] ?? 0
+                      : categoryCounts[selectedBroadCategory] ?? 0}
+                  </span>
+                )}
+                <ChevronDown
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') ||
+                    selectedBroadCategory !== 'All Categories'
+                      ? 'text-white/80'
+                      : 'text-stone-400'
                   }`}
-                >
-                  {selectedCategory && selectedCategory !== 'All'
-                    ? activityCounts[selectedCategory] ?? 0
-                    : categoryCounts[selectedBroadCategory] ??
-                      lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                />
               </button>
-
-              {(selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories') && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedCategory('All');
-                    setSelectedBroadCategory('All Categories');
-                  }}
-                  className="min-h-[34px] px-3 py-1 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 text-xs font-semibold border border-stone-200 dark:border-stone-700/80 transition-colors cursor-pointer"
-                >
-                  Reset Filter
-                </button>
-              )}
             </div>
 
             <MapRadar
