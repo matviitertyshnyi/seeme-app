@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
+import { getDefaultCoverForCategory } from '@/lib/geo';
 
 interface LobbyCardProps {
   lobby: LobbyWithDistance;
@@ -56,6 +57,11 @@ export function LobbyCard({
     lobby.participants.find((p) => p.id === lobby.hostId) ||
     lobby.participants[0];
 
+  const coverSrc =
+    !lobby.coverImage || lobby.coverImage.includes('unsplash.com')
+      ? getDefaultCoverForCategory(lobby.category)
+      : lobby.coverImage;
+
   const otherCount = Math.max(0, lobby.participants.length - 1);
 
   return (
@@ -74,7 +80,7 @@ export function LobbyCard({
     >
       <div className="relative h-44 sm:h-48 w-full bg-stone-900 overflow-hidden">
         <img
-          src={lobby.coverImage}
+          src={coverSrc}
           alt={lobby.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -191,7 +197,7 @@ export function LobbyCard({
                   alt={hostPerson.name}
                   className="w-8 h-8 rounded-full border-2 border-white dark:border-stone-800 object-cover bg-stone-100 dark:bg-stone-800"
                 />
-                {((hostPerson as any).photoVerified || (hostPerson as any).verified) && (
+                {Boolean((hostPerson as any)?.photoVerified) && (
                   <span
                     title="Verified Member"
                     className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-1 ring-white dark:ring-stone-900 shadow-2xs z-10"
@@ -210,7 +216,9 @@ export function LobbyCard({
           <div className="text-left min-w-0">
             <span className="block text-xs font-semibold text-stone-900 dark:text-stone-100 leading-tight truncate flex items-center gap-1">
               <span>{hostPerson?.name?.split(' ')[0] || 'Member'}</span>
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              {Boolean((hostPerson as any)?.photoVerified) && (
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              )}
               <span className="text-[10px] font-normal text-stone-400">
                 {isHost ? '(You)' : '(Host)'}
               </span>

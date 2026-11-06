@@ -84,7 +84,7 @@ export function SeatBubbles({
                 alt={person.name}
                 className="w-full h-full rounded-full object-cover border-2 border-white dark:border-stone-900 bg-stone-100 dark:bg-stone-800"
               />
-              {((person as any).photoVerified || (person as any).verified) && !isHost && (
+              {Boolean((person as any).photoVerified) && !isHost && (
                 <span
                   aria-label="Verified Human Member"
                   title="Verified Member"
@@ -125,7 +125,9 @@ export function SeatBubbles({
                 }`}
               >
                 <span>{person.name.split(' ')[0]}</span>
-                <ShieldCheck className="w-2.5 h-2.5 text-emerald-500 shrink-0 inline ml-0.5" />
+                {Boolean((person as any).photoVerified) && (
+                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-500 shrink-0 inline ml-0.5" />
+                )}
               </span>
             )}
           </div>

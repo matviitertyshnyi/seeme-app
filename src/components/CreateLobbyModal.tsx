@@ -15,7 +15,9 @@ import {
   Award,
   ChevronDown,
   Calendar,
+  Sparkles,
 } from 'lucide-react';
+import { getDefaultCoverForCategory, VIBEY_BACKGROUNDS } from '@/lib/geo';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
@@ -114,6 +116,9 @@ export function CreateLobbyModal({
 }: CreateLobbyModalProps) {
   const initialCat = initialCategory || 'Coffee';
   const [category, setCategory] = useState<ActivityCategory>(initialCat);
+  const [selectedCoverImage, setSelectedCoverImage] = useState<string>(() =>
+    getDefaultCoverForCategory(initialCat)
+  );
   const [selectedGroup, setSelectedGroup] = useState<ActivityGroup>(
     getActivityGroup(initialCat)
   );
@@ -208,6 +213,7 @@ export function CreateLobbyModal({
       const activeCat =
         initialCategory || initialCoHost?.favoriteActivities?.[0] || 'Coffee';
       setCategory(activeCat);
+      setSelectedCoverImage(getDefaultCoverForCategory(activeCat));
       setSelectedGroup(getActivityGroup(activeCat));
       setIsCustomActivity(false);
       setCustomActivityInput('');
@@ -297,6 +303,7 @@ export function CreateLobbyModal({
         body: JSON.stringify({
           category: activeCategoryName,
           title: finalTitle,
+          coverImage: selectedCoverImage,
           equipmentNote: finalNote,
           spotClue: spotClue.trim() || undefined,
           skillCompatibility,
@@ -432,6 +439,7 @@ export function CreateLobbyModal({
                       const presets = GROUPED_ACTIVITIES[grp];
                       if (!presets.includes(category)) {
                         setCategory(presets[0]);
+                        setSelectedCoverImage(getDefaultCoverForCategory(presets[0]));
                       }
                     }}
                     className={`min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold transition-all border ${
@@ -467,7 +475,10 @@ export function CreateLobbyModal({
                     <button
                       key={act}
                       type="button"
-                      onClick={() => setCategory(act)}
+                      onClick={() => {
+                        setCategory(act);
+                        setSelectedCoverImage(getDefaultCoverForCategory(act));
+                      }}
                       className={`min-h-[44px] flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
                         isSelected
                           ? 'bg-stone-900 dark:bg-orange-600 text-white border-stone-900 dark:border-orange-600 shadow-sm'
@@ -486,6 +497,49 @@ export function CreateLobbyModal({
                 })}
               </div>
             )}
+
+            {/* Vibe Background Selector Strip */}
+            <div className="pt-2 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                  Vibe Background
+                </label>
+                <span className="text-[11px] font-semibold text-stone-500">
+                  Pick atmospheric digital art
+                </span>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
+                {VIBEY_BACKGROUNDS.map((bg, idx) => {
+                  const isSelected = selectedCoverImage === bg;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedCoverImage(bg)}
+                      aria-label={`Select vibe background ${idx + 1}`}
+                      className={`relative shrink-0 w-20 h-12 rounded-xl overflow-hidden border-2 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
+                        isSelected
+                          ? 'border-orange-600 ring-2 ring-orange-500/40 scale-105 shadow-md'
+                          : 'border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={bg}
+                        alt={`Vibe ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-orange-600/20 flex items-center justify-center">
+                          <div className="w-2.5 h-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* 2. Meetup Title & Notes */}

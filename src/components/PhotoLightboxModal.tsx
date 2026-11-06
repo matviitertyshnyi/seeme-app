@@ -37,7 +37,7 @@ export function PhotoLightboxModal({
 
   if (!isOpen || !imageUrl) return null;
 
-  const isHumanVerified = Boolean(photoVerified || verified);
+  const isHumanVerified = Boolean(photoVerified);
 
   return (
     <div
@@ -84,7 +84,9 @@ export function PhotoLightboxModal({
             <span className="font-bold truncate text-stone-100">
               {name || 'Player'}{age ? `, ${age}` : ''}
             </span>
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" aria-label="Verified Human" />
+            {isHumanVerified && (
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" aria-label="Verified Human Photo" />
+            )}
           </div>
 
           {isHumanVerified && (

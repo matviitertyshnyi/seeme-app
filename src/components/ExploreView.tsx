@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck } from 'lucide-react';
+import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users } from 'lucide-react';
 import { LobbyWithDistance, RoomStatus, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
 import { AGE_PRESETS } from '@/components/AgeSelectorBottomSheet';
+import { getUserTag, matchesUserSearch } from '@/lib/user-handle';
 
 export interface ExploreViewProps {
   searchQuery: string;
@@ -20,14 +21,18 @@ export interface ExploreViewProps {
   radiusKm: number;
   formatRadiusUnit: (km: number) => string;
   onOpenRadiusSheet: () => void;
+  onSelectRadius?: (km: number) => void;
   selectedAgeFilters: string[];
   onOpenAgeSheet: () => void;
+  onToggleAgeFilter?: (ageId: string) => void;
+  onClearAgeFilters?: () => void;
   statusFilter: 'ALL' | RoomStatus;
   onToggleStatusFilter: () => void;
   filteredLobbiesCount: number;
   availableToJoinLobbies: LobbyWithDistance[];
   joinedFilteredLobbies: LobbyWithDistance[];
   activeUser: UserPersona;
+  isSignedOut?: boolean;
   onSelectLobby: (lobbyId: string) => void;
   onQuickJoin: (lobby: LobbyWithDistance, e: React.MouseEvent) => void;
   joiningLobbyId: string | null;
@@ -57,14 +62,18 @@ export function ExploreView({
   radiusKm,
   formatRadiusUnit,
   onOpenRadiusSheet,
+  onSelectRadius,
   selectedAgeFilters,
   onOpenAgeSheet,
+  onToggleAgeFilter,
+  onClearAgeFilters,
   statusFilter,
   onToggleStatusFilter,
   filteredLobbiesCount,
   availableToJoinLobbies,
   joinedFilteredLobbies,
   activeUser,
+  isSignedOut = false,
   onSelectLobby,
   onQuickJoin,
   joiningLobbyId,
@@ -83,19 +92,45 @@ export function ExploreView({
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
   const locationName = userLocationLabel.split(',')[0];
 
-  const peopleDownToMeet = React.useMemo(() => {
-    if (!personas || personas.length === 0) return [];
-    const others = personas.filter((p) => p.id !== activeUser.id);
-    const filtered = others.filter(
-      (p) =>
-        p.beacon?.active ||
-        p.verified ||
-        (activeUser.neighborhood &&
-          p.neighborhood &&
-          p.neighborhood.toLowerCase() === activeUser.neighborhood.toLowerCase())
-    );
-    return filtered.length > 0 ? filtered : others;
-  }, [personas, activeUser.id, activeUser.neighborhood]);
+  const [openDropdown, setOpenDropdown] = React.useState<'RADIUS' | 'AGE' | null>(null);
+  const radiusDropdownRef = React.useRef<HTMLDivElement | null>(null);
+  const ageDropdownRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    if (!openDropdown) return;
+    const handleDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        openDropdown === 'RADIUS' &&
+        radiusDropdownRef.current &&
+        !radiusDropdownRef.current.contains(target)
+      ) {
+        setOpenDropdown(null);
+      } else if (
+        openDropdown === 'AGE' &&
+        ageDropdownRef.current &&
+        !ageDropdownRef.current.contains(target)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenDropdown(null);
+    };
+    document.addEventListener('mousedown', handleDown);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleDown);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [openDropdown]);
+
+  // People are ONLY shown when there's an explicit search query of at least 2 chars (and not signed out)
+  const matchingPeople = React.useMemo(() => {
+    if (isSignedOut) return [];
+    if (searchQuery.trim().length < 2 || !personas || personas.length === 0) return [];
+    return personas.filter((p) => p.id !== activeUser.id && matchesUserSearch(p, searchQuery));
+  }, [isSignedOut, searchQuery, personas, activeUser.id]);
 
   const displayAvailable = React.useMemo(() => {
     if (showSavedOnly && savedLobbyIds) {
@@ -120,7 +155,7 @@ export function ExploreView({
     <div className="space-y-4">
       <section
         aria-label="Meetup Discovery Filters"
-        className="bg-white dark:bg-[#1C1917] rounded-2xl p-2.5 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
+        className="bg-white dark:bg-[#1C1917] rounded-2xl p-2.5 sm:p-3.5 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5 relative overflow-visible"
       >
         {/* Row 1: Search Bar (Left) + Activity Type Filter (Right) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -132,7 +167,7 @@ export function ExploreView({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={t('search_placeholder') || 'Search meetups...'}
+              placeholder="Search meetups, activities, or member name / #ID..."
               className="w-full min-h-[40px] pl-9 pr-8 py-2 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
             />
             {searchQuery && (
@@ -151,7 +186,7 @@ export function ExploreView({
             type="button"
             onClick={onOpenCategorySheet}
             aria-label="Filter by activity type"
-            className="min-h-[40px] px-2.5 sm:px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+            className="min-h-[40px] px-2.5 sm:px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] cursor-pointer"
           >
             <span className="truncate max-w-[105px] sm:max-w-none">
               {selectedBroadCategory === 'All Categories'
@@ -166,7 +201,7 @@ export function ExploreView({
         </div>
 
         {/* Subrow: Location & Radius | Age Selector | Live Now */}
-        <div className="flex items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80 overflow-x-auto no-scrollbar">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 pt-1.5 border-t border-stone-100 dark:border-stone-800/80 overflow-visible relative">
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             <button
               type="button"
@@ -178,44 +213,154 @@ export function ExploreView({
               <span className="truncate max-w-[115px] sm:max-w-none">{locationName}</span>
             </button>
             <span className="text-stone-300 dark:text-stone-700 shrink-0">·</span>
-            <button
-              type="button"
-              onClick={onOpenRadiusSheet}
-              className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
-            >
-              <span>{formatRadiusUnit(radiusKm)}</span>
-              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-stone-400" />
-            </button>
+
+            {/* Inline Roll-down Radius Dropdown */}
+            <div className="relative shrink-0" ref={radiusDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setOpenDropdown((prev) => (prev === 'RADIUS' ? null : 'RADIUS'))}
+                className="min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold transition-colors text-[11px] sm:text-xs shrink-0 cursor-pointer dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+              >
+                <span>{formatRadiusUnit(radiusKm)}</span>
+                <ChevronDown
+                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-stone-400 transition-transform duration-200 ${
+                    openDropdown === 'RADIUS' ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              {openDropdown === 'RADIUS' && (
+                <div className="absolute left-0 top-full mt-1.5 w-52 z-50 bg-white dark:bg-[#1C1917] border border-stone-200 dark:border-stone-700/90 rounded-2xl shadow-xl p-1.5 space-y-0.5">
+                  {[
+                    { km: 2, desc: 'Walking distance' },
+                    { km: 5, desc: 'Nearby neighborhood' },
+                    { km: 15, desc: 'Across town' },
+                    { km: 50, desc: 'Full metro area' },
+                  ].map((opt) => {
+                    const isSelected = radiusKm === opt.km;
+                    return (
+                      <button
+                        key={opt.km}
+                        type="button"
+                        onClick={() => {
+                          if (onSelectRadius) {
+                            onSelectRadius(opt.km);
+                          } else {
+                            onOpenRadiusSheet();
+                          }
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
+                          isSelected
+                            ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium'
+                        }`}
+                      >
+                        <div>
+                          <div className="font-semibold">{formatRadiusUnit(opt.km)}</div>
+                          <div className="text-[10px] text-stone-400 dark:text-stone-500">{opt.desc}</div>
+                        </div>
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <button
-              type="button"
-              onClick={onOpenAgeSheet}
-              className={`min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all shrink-0 ${
-                selectedAgeFilters.length > 0
-                  ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
-                  : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
-              }`}
-            >
-              <span className="text-stone-400 text-[10px] sm:text-[11px] font-normal">
-                {currentLang === 'uk' ? 'Вік:' : 'Age:'}
-              </span>
-              <span>
-                {selectedAgeFilters.length === 0
-                  ? (currentLang === 'uk' ? 'Всі' : 'All')
-                  : selectedAgeFilters.length === 1
-                  ? AGE_PRESETS.find((p) => p.id === selectedAgeFilters[0])?.label ||
-                    selectedAgeFilters[0]
-                  : `${selectedAgeFilters.length} selected`}
-              </span>
-              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-stone-400" />
-            </button>
+            {/* Inline Roll-down Age Dropdown */}
+            <div className="relative shrink-0" ref={ageDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setOpenDropdown((prev) => (prev === 'AGE' ? null : 'AGE'))}
+                className={`min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                  selectedAgeFilters.length > 0
+                    ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
+                }`}
+              >
+                <span className="text-stone-400 text-[10px] sm:text-[11px] font-normal">
+                  {currentLang === 'uk' ? 'Вік:' : 'Age:'}
+                </span>
+                <span>
+                  {selectedAgeFilters.length === 0
+                    ? (currentLang === 'uk' ? 'Всі' : 'All')
+                    : selectedAgeFilters.length === 1
+                    ? AGE_PRESETS.find((p) => p.id === selectedAgeFilters[0])?.label ||
+                      selectedAgeFilters[0]
+                    : `${selectedAgeFilters.length} selected`}
+                </span>
+                <ChevronDown
+                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-stone-400 transition-transform duration-200 ${
+                    openDropdown === 'AGE' ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              {openDropdown === 'AGE' && (
+                <div className="absolute right-0 sm:left-0 top-full mt-1.5 w-56 z-50 bg-white dark:bg-[#1C1917] border border-stone-200 dark:border-stone-700/90 rounded-2xl shadow-xl p-1.5 space-y-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onClearAgeFilters) {
+                        onClearAgeFilters();
+                      }
+                      setOpenDropdown(null);
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
+                      selectedAgeFilters.length === 0
+                        ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold'
+                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium'
+                    }`}
+                  >
+                    <span>All Ages (18+)</span>
+                    {selectedAgeFilters.length === 0 && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
+                    )}
+                  </button>
+
+                  {AGE_PRESETS.map((preset) => {
+                    const isChecked = selectedAgeFilters.includes(preset.id);
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          if (onToggleAgeFilter) {
+                            onToggleAgeFilter(preset.id);
+                          } else {
+                            onOpenAgeSheet();
+                          }
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
+                          isChecked
+                            ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium'
+                        }`}
+                      >
+                        <span className="truncate pr-2">{preset.label}</span>
+                        <span
+                          className={`w-4 h-4 rounded-md border flex items-center justify-center text-[10px] shrink-0 ${
+                            isChecked
+                              ? 'bg-orange-600 border-orange-600 text-white font-bold'
+                              : 'border-stone-300 dark:border-stone-600'
+                          }`}
+                        >
+                          {isChecked ? '✓' : ''}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             <button
               type="button"
               onClick={onToggleStatusFilter}
-              className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 ${
+              className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 cursor-pointer ${
                 statusFilter === 'LIVE'
                   ? 'bg-emerald-600 text-white shadow-2xs'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -234,7 +379,7 @@ export function ExploreView({
                 type="button"
                 onClick={onToggleSavedOnly}
                 aria-label="Filter to saved meetups"
-                className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 ${
+                className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 cursor-pointer ${
                   showSavedOnly
                     ? 'bg-orange-600 text-white shadow-2xs'
                     : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -248,79 +393,62 @@ export function ExploreView({
         </div>
       </section>
 
-      {/* "People Down to Meet" Horizontal Strip (Yubo/Badoo style) */}
-      {peopleDownToMeet.length > 0 && (
+      {/* Matching People Search Results (Only shown on explicit search >= 2 chars for signed-in users) */}
+      {!isSignedOut && matchingPeople.length > 0 && (
         <section
-          aria-label="People Down to Meet Today"
+          aria-label="Matching People"
           className="bg-white dark:bg-[#1C1917] rounded-2xl p-3 border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_20px_-4px_rgba(0,0,0,0.5)] space-y-2.5"
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <Users className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100 truncate">
-                People Down to Meet
+                Matching People ({matchingPeople.length})
               </h2>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                {peopleDownToMeet.length} Active
-              </span>
             </div>
-
-            {onToggleBeacon && (
-              <button
-                type="button"
-                onClick={onToggleBeacon}
-                aria-label="Toggle beacon: I'm Free Today"
-                className={`min-h-[28px] px-2.5 py-0.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1.5 shrink-0 transition-all border ${
-                  activeUser.beacon?.active
-                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 shadow-xs'
-                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700/80 hover:bg-stone-200 dark:hover:bg-stone-700'
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                    activeUser.beacon?.active ? 'bg-emerald-500 animate-ping' : 'bg-stone-400'
-                  }`}
-                />
-                <span>I&apos;m Free Today</span>
-              </button>
-            )}
           </div>
 
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-0.5">
-            {peopleDownToMeet.map((person) => (
-              <button
-                key={person.id}
-                type="button"
-                onClick={() => onClickUser?.(person.id)}
-                className="flex flex-col items-center gap-1 shrink-0 group focus:outline-none cursor-pointer"
-                title={`${person.name}, ${person.age} · ${person.skillBadge || 'Verified Player'}`}
-              >
-                <div className="relative">
-                  <img
-                    src={person.avatar}
-                    alt={person.name}
-                    className="w-11 h-11 rounded-full object-cover border-2 border-stone-200 dark:border-stone-750 group-hover:scale-105 group-hover:border-orange-500 transition-all bg-stone-100 dark:bg-stone-800"
-                  />
-                  {(person.photoVerified || person.verified) && (
-                    <span
-                      title="Verified Human Member"
-                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs z-10"
-                    >
-                      <ShieldCheck className="w-2.5 h-2.5" />
-                    </span>
-                  )}
-                  {person.beacon?.active && (
-                    <span
-                      title="Free to Meet Today"
-                      className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-stone-900 animate-pulse"
+            {matchingPeople.map((person) => {
+              const idTag = getUserTag(person);
+              return (
+                <button
+                  key={person.id}
+                  type="button"
+                  onClick={() => onClickUser?.(person.id)}
+                  className="flex flex-col items-center gap-1 shrink-0 group focus:outline-none cursor-pointer"
+                  title={`${person.name} (${idTag}), ${person.age} · ${person.skillBadge || 'Member'}`}
+                >
+                  <div className="relative">
+                    <img
+                      src={person.avatar}
+                      alt={person.name}
+                      className="w-11 h-11 rounded-full object-cover border-2 border-stone-200 dark:border-stone-750 group-hover:scale-105 group-hover:border-orange-500 transition-all bg-stone-100 dark:bg-stone-800"
                     />
-                  )}
-                </div>
-                <span className="text-[11px] font-medium text-stone-800 dark:text-stone-200 group-hover:text-orange-500 transition-colors truncate max-w-[56px] text-center">
-                  {person.name.split(' ')[0]}
-                </span>
-              </button>
-            ))}
+                    {Boolean(person.photoVerified) && (
+                      <span
+                        title="Verified Human Member"
+                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs z-10"
+                      >
+                        <ShieldCheck className="w-2.5 h-2.5" />
+                      </span>
+                    )}
+                    {person.beacon?.active && (
+                      <span
+                        title="Free to Meet Today"
+                        className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-stone-900 animate-pulse"
+                      />
+                    )}
+                  </div>
+                  <span className="text-[11px] font-medium text-stone-800 dark:text-stone-200 group-hover:text-orange-500 transition-colors truncate max-w-[64px] text-center">
+                    {person.name.split(' ')[0]}
+                  </span>
+                  <span className="text-[9px] font-mono text-stone-400 dark:text-stone-500 -mt-0.5">
+                    {idTag}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
       )}

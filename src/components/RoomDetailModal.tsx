@@ -37,6 +37,7 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 import { SeatBubbles } from '@/components/SeatBubbles';
 import { StatusBadge } from '@/components/StatusBadge';
 import { triggerSensoryFeedback } from '@/lib/sound';
+import { getDefaultCoverForCategory } from '@/lib/geo';
 
 interface RoomDetailModalProps {
   lobby: LobbyWithDistance | null;
@@ -127,6 +128,13 @@ export function RoomDetailModal({
   const arrivedCount = lobby
     ? lobby.participants.filter((p) => p.arrivalStatus === 'ARRIVED').length
     : 0;
+
+  const coverImageUrl = useMemo(() => {
+    if (!lobby?.coverImage || lobby.coverImage.includes('unsplash.com')) {
+      return getDefaultCoverForCategory(lobby?.category || 'Coffee');
+    }
+    return lobby.coverImage;
+  }, [lobby?.coverImage, lobby?.category]);
 
   const meetupProgressPercent = useMemo(() => {
     if (!lobby) return 25;
@@ -435,7 +443,7 @@ export function RoomDetailModal({
         {/* TOP HERO BANNER */}
         <div className="relative h-40 sm:h-48 w-full shrink-0 bg-stone-900">
           <img
-            src={lobby.coverImage}
+            src={coverImageUrl}
             alt={lobby.title}
             className="w-full h-full object-cover"
           />
@@ -913,7 +921,7 @@ export function RoomDetailModal({
                               if (onClickParticipant) {
                                 onClickParticipant(person.id);
                               } else if (onOpenLightbox) {
-                                onOpenLightbox(person.avatar, person.name, person.age, true);
+                                onOpenLightbox(person.avatar, person.name, person.age, Boolean((person as any).photoVerified));
                               }
                             }}
                             className={`flex items-center gap-3 min-w-0 ${
@@ -931,7 +939,9 @@ export function RoomDetailModal({
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="text-sm font-extrabold text-stone-950 dark:text-white inline-flex items-center gap-1">
                                   <span>{person.name}, {person.age}</span>
-                                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
+                                  {Boolean((person as any).photoVerified) && (
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
+                                  )}
                                 </span>
                                 {personIsHost && (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-900 dark:bg-orange-600 text-white text-[10px] font-extrabold uppercase">
@@ -1061,7 +1071,7 @@ export function RoomDetailModal({
                           if (onClickParticipant) {
                             onClickParticipant(req.user.id);
                           } else if (onOpenLightbox) {
-                            onOpenLightbox(req.user.avatar, req.user.name, req.user.age, true);
+                            onOpenLightbox(req.user.avatar, req.user.name, req.user.age, Boolean((req.user as any).photoVerified));
                           }
                         }}
                         className={`flex items-center gap-2.5 min-w-0 ${
@@ -1079,7 +1089,9 @@ export function RoomDetailModal({
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-extrabold text-stone-950 dark:text-white truncate inline-flex items-center gap-1">
                               <span>{req.user.name}, {req.user.age}</span>
-                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
+                              {Boolean((req.user as any).photoVerified) && (
+                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
+                              )}
                             </span>
                           </div>
                           <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
@@ -1244,7 +1256,7 @@ export function RoomDetailModal({
                               if (onClickParticipant) {
                                 onClickParticipant(msg.senderId);
                               } else if (onOpenLightbox) {
-                                onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, true);
+                                onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, false);
                               }
                             }}
                             className={`w-8 h-8 rounded-full object-cover shrink-0 border border-white dark:border-stone-800 shadow-sm ${
@@ -1267,7 +1279,7 @@ export function RoomDetailModal({
                                   if (onClickParticipant) {
                                     onClickParticipant(msg.senderId);
                                   } else if (onOpenLightbox) {
-                                    onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, true);
+                                    onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, false);
                                   }
                                 }}
                                 className={`text-[11px] font-extrabold text-orange-700 dark:text-orange-400 mb-0.5 text-left block ${

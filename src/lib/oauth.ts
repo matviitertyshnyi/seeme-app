@@ -210,7 +210,6 @@ export async function provisionOrFindOAuthUser(
       persona.authProvider = provider;
       if (cleanEmail === 'vladtratata10@gmail.com') {
         persona.role = 'ADMIN';
-        persona.photoVerified = true;
       }
       if (details.name && !persona.name) {
         persona.name = details.name;

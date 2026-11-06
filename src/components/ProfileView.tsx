@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ShieldCheck,
   Edit3,
@@ -14,6 +14,8 @@ import {
   UserCheck,
   LogOut,
   MapPin,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import { UserPersona } from '@/types/lobby';
@@ -23,6 +25,7 @@ import {
   getTranslation,
 } from '@/lib/i18n';
 import { GoogleIcon, AppleIcon } from '@/components/AuthProfileModal';
+import { getUserTag } from '@/lib/user-handle';
 
 export interface ProfileViewProps {
   isSignedOut: boolean;
@@ -68,6 +71,18 @@ export function ProfileView({
   onOpenFriendsDrawer,
 }: ProfileViewProps) {
   const t = (key: any, params?: any) => getTranslation(currentLang, key, params);
+  const [copiedTag, setCopiedTag] = useState(false);
+
+  const handleCopyTag = async () => {
+    try {
+      await navigator.clipboard.writeText(getUserTag(activeUser));
+      setCopiedTag(true);
+      setTimeout(() => setCopiedTag(false), 2000);
+    } catch {
+      setCopiedTag(true);
+      setTimeout(() => setCopiedTag(false), 2000);
+    }
+  };
 
   const isRealUser = Boolean(
     activeUser.authProvider === 'google' ||
@@ -115,14 +130,6 @@ export function ProfileView({
 
             <button
               type="button"
-              onClick={() => onSwitchUser(activeUser.id)}
-              className="min-h-[44px] w-full py-3 rounded-full bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition-all"
-            >
-              Continue as {activeUser.name}
-            </button>
-
-            <button
-              type="button"
               onClick={onOpenAuthModal}
               className="min-h-[44px] w-full py-3 rounded-full bg-stone-900 hover:bg-black dark:bg-white text-white dark:text-stone-900 text-xs font-extrabold shadow-sm transition-all"
             >
@@ -147,7 +154,7 @@ export function ProfileView({
                     alt={activeUser.name}
                     className="w-16 h-16 rounded-full object-cover ring-2 ring-orange-500 group-hover:ring-4 group-hover:ring-orange-400/50 shadow-[0_0_16px_rgba(234,88,12,0.3)] transition-all"
                   />
-                  {activeUser.verified && (
+                  {Boolean(activeUser.photoVerified) && (
                     <span
                       title="Verified Member"
                       className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900"
@@ -159,9 +166,29 @@ export function ProfileView({
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100 flex items-center gap-1.5">
+                    <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100 flex items-center gap-1.5 flex-wrap">
                       <span>{activeUser.name}, {activeUser.age}</span>
-                      <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" aria-label="Verified" />
+                      <button
+                        type="button"
+                        onClick={handleCopyTag}
+                        title="Click to copy your ID tag"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-mono text-xs font-semibold transition-colors cursor-pointer border border-stone-200/80 dark:border-stone-700/80"
+                      >
+                        {copiedTag ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-500" />
+                            <span className="text-emerald-600 dark:text-emerald-400 font-sans text-[11px] font-bold">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{getUserTag(activeUser)}</span>
+                            <Copy className="w-3 h-3 text-stone-400" />
+                          </>
+                        )}
+                      </button>
+                      {Boolean(activeUser.photoVerified) && (
+                        <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" aria-label="Verified Human Photo" />
+                      )}
                     </h1>
                   </div>
 
@@ -238,32 +265,31 @@ export function ProfileView({
             </div>
           </section>
 
-          {/* Friends & Direct Messages Card */}
-          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200/90 dark:border-stone-800/90 shadow-2xs hover:border-orange-500/40 transition-colors">
+          {/* Unified Settings Section Card */}
+          <section className="bg-white dark:bg-[#1C1917] rounded-2xl border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_20px_-4px_rgba(0,0,0,0.5)] divide-y divide-stone-100 dark:divide-stone-800/80 overflow-hidden">
+            {/* Row 1: Friends & People Search */}
             <button
               type="button"
               onClick={onOpenFriendsDrawer}
-              className="w-full flex items-center justify-between text-left group cursor-pointer"
+              className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <Users className="w-5 h-5" />
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Users className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                    <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
                       Friends & Direct Messages
                     </h2>
                     {Boolean(((activeUser as any).incomingFriendRequestIds?.length || 0) > 0) && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-600 text-white animate-pulse">
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-orange-600 text-white animate-pulse">
                         {(activeUser as any).incomingFriendRequestIds.length} new
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-0.5">
-                    {((activeUser as any).friendIds?.length || 0) === 1
-                      ? '1 Friend connected · Chat 1-on-1'
-                      : `${(activeUser as any).friendIds?.length || 0} Friends connected · Chat 1-on-1`}
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
+                    Search by Name or #ID · Chat 1-on-1
                   </p>
                 </div>
               </div>
@@ -272,21 +298,19 @@ export function ProfileView({
                 <ChevronRight className="w-4 h-4" />
               </div>
             </button>
-          </section>
 
-          {/* Dark Mode & Appearance Toggle Card */}
-          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200/90 dark:border-stone-800/90 shadow-2xs">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+            {/* Row 2: Appearance & Theme */}
+            <div className="p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
                   {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                    Appearance & Theme
+                    Appearance
                   </h2>
                   <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                    {isDarkMode ? 'Dark warm stone palette' : 'Warm cream light mode'}
+                    {isDarkMode ? 'Dark warm stone' : 'Light'}
                   </p>
                 </div>
               </div>
@@ -295,7 +319,7 @@ export function ProfileView({
                 <button
                   type="button"
                   onClick={() => onToggleDarkMode(false)}
-                  className={`min-h-[32px] px-3 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
+                  className={`min-h-[30px] px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
                     !isDarkMode
                       ? 'bg-white text-stone-950 shadow-2xs'
                       : 'text-stone-400 hover:text-stone-200'
@@ -307,7 +331,7 @@ export function ProfileView({
                 <button
                   type="button"
                   onClick={() => onToggleDarkMode(true)}
-                  className={`min-h-[32px] px-3 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
+                  className={`min-h-[30px] px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
                     isDarkMode
                       ? 'bg-orange-600 text-white shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400'
@@ -318,60 +342,136 @@ export function ProfileView({
                 </button>
               </div>
             </div>
-          </section>
 
-          {/* Language Picker */}
-          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                Language / Мова / Język / Sprache / Langue
-              </h2>
-              <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase">
-                {currentLang.toUpperCase()}
-              </span>
-            </div>
+            {/* Row 3: Language */}
             <button
               type="button"
               onClick={onOpenLanguageSheet}
-              className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/70 hover:bg-stone-100 dark:hover:bg-stone-750 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs font-semibold flex items-center justify-between transition-all"
+              className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
-              <div className="flex items-center gap-2.5">
-                <span className="font-bold text-[10px] px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold text-xs flex items-center justify-center shrink-0 uppercase">
                   {currentLang.toUpperCase()}
-                </span>
-                <span className="font-bold text-stone-900 dark:text-stone-100">
-                  {SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.nativeName}
-                </span>
-                <span className="text-stone-400 font-normal">
-                  ({SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.name})
-                </span>
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Language
+                  </h2>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    {SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.nativeName}{' '}
+                    <span className="text-stone-400">
+                      ({SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.name})
+                    </span>
+                  </p>
+                </div>
               </div>
-              <ChevronDown className="w-4 h-4 text-stone-400" />
+              <ChevronDown className="w-4 h-4 text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-200 transition-colors shrink-0" />
             </button>
-          </section>
 
-          {/* Community Policies Trigger */}
-          <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-2.5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                {t('community_policies') || 'Community Policies & Safety Guidelines'}
-              </h2>
-            </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400">
-              Review community standards, zero-tolerance flaking rules, and in-person verification standards.
-            </p>
+            {/* Row 4: Community Policies & Safety */}
             <button
               type="button"
               onClick={onOpenPoliciesModal}
-              className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-stone-50 hover:bg-stone-100 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]"
+              className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>{t('community_policies') || 'Community Policies & Safety Guidelines'}</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Community Policies & Safety
+                  </h2>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    Rules & zero-tolerance flaking policy
+                  </p>
+                </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-200 transition-colors" />
+              <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-200 transition-colors shrink-0" />
             </button>
-            <div className="flex items-center gap-4 pt-1 text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+
+            {/* Row 5: Account & Sign Out */}
+            <div className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                    <LogOut className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                      Account
+                    </h2>
+                    <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                      Signed in as {activeUser.email || activeUser.name}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+
+              {/* Compact Demo Switcher & Reset for demo mode */}
+              {!isRealUser && personas.length > 1 && (
+                <div className="pt-3 border-t border-stone-100 dark:border-stone-800/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400">
+                      Demo Personas
+                    </span>
+                    <button
+                      type="button"
+                      onClick={onResetDemoData}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset Demo</span>
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {personas
+                      .filter(
+                        (p) => !p.name.includes('Adversarial') && !p.name.includes('Auditor')
+                      )
+                      .map((persona) => {
+                        const isSelected = persona.id === activeUser.id;
+                        return (
+                          <button
+                            key={persona.id}
+                            type="button"
+                            onClick={() => onSwitchUser(persona.id)}
+                            className={`p-1.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-950 dark:text-orange-200'
+                                : 'bg-stone-50/70 dark:bg-stone-800/40 hover:bg-stone-100 dark:hover:bg-stone-800 border-stone-200/80 dark:border-stone-700/60 text-stone-800 dark:text-stone-300'
+                            }`}
+                          >
+                            <img
+                              src={persona.avatar}
+                              alt={persona.name}
+                              className="w-6 h-6 rounded-full object-cover shrink-0"
+                            />
+                            <span className="text-xs font-semibold truncate flex-1">
+                              {persona.name.split(' ')[0]}
+                            </span>
+                            {isSelected && (
+                              <UserCheck className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Bar */}
+            <div className="p-3.5 bg-stone-50/70 dark:bg-stone-900/50 flex items-center justify-center gap-3 text-[11px] font-semibold text-stone-500 dark:text-stone-400 flex-wrap">
               <a href="/privacy" className="hover:text-orange-500 transition-colors">
                 Privacy Policy
               </a>
@@ -388,101 +488,6 @@ export function ProfileView({
               </a>
             </div>
           </section>
-
-          {/* Switch Active Demo Account (Only shown in demo mode, hidden for real logged-in users) */}
-          {!isRealUser ? (
-            <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                    Switch Active Demo Account
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={onResetDemoData}
-                  className="min-h-[32px] px-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Reset Demo</span>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {personas
-                  .filter(
-                    (p) => !p.name.includes('Adversarial') && !p.name.includes('Auditor')
-                  )
-                  .map((persona) => {
-                    const isSelected = persona.id === activeUser.id;
-                    return (
-                      <button
-                        key={persona.id}
-                        type="button"
-                        onClick={() => onSwitchUser(persona.id)}
-                        className={`min-h-[48px] p-2 rounded-xl border text-left flex items-center justify-between gap-2 transition-all ${
-                          isSelected
-                            ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500'
-                            : 'bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100 border-stone-200 dark:border-stone-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <img
-                            src={persona.avatar}
-                            alt={persona.name}
-                            className="w-8 h-8 rounded-full object-cover shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-stone-950 dark:text-stone-100 truncate">
-                              {persona.name}, {persona.age}
-                            </div>
-                            <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
-                              {persona.skillBadge}
-                            </div>
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <UserCheck className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-              </div>
-
-              <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end">
-                <button
-                  type="button"
-                  onClick={onSignOut}
-                  className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
-              </div>
-            </section>
-          ) : (
-            /* Real Authenticated User Account Actions */
-            <section className="bg-white dark:bg-[#1C1917] rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 shadow-2xs flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                  Signed In
-                </h2>
-                <p className="text-xs font-medium text-stone-800 dark:text-stone-200 mt-0.5 truncate">
-                  {activeUser.email || activeUser.name}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={onSignOut}
-                className="min-h-[42px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
-            </section>
-          )}
         </>
       )}
     </div>

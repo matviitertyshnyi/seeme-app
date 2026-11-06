@@ -23,6 +23,18 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   if (req) await optionalAuth(req);
   const db = await readDb();
+  if (Array.isArray(db.personas)) {
+    db.personas.forEach((p) => {
+      const isVlad = Boolean(p.name && p.name.includes('Vlad'));
+      const isPlaceholder =
+        !p.avatar ||
+        p.avatar.includes('unsplash.com') ||
+        p.avatar.startsWith('data:image/svg+xml');
+      if (isVlad || isPlaceholder) {
+        p.photoVerified = false;
+      }
+    });
+  }
   return NextResponse.json({
     personas: sanitizePersonas(db.personas),
     ratings: db.ratings || [],
@@ -253,7 +265,6 @@ export async function POST(req: NextRequest) {
         }
         if (userEmail === 'vladtratata10@gmail.com') {
           found.role = 'ADMIN';
-          found.photoVerified = true;
         }
       } else {
         const isFounder = userEmail === 'vladtratata10@gmail.com';
@@ -270,7 +281,7 @@ export async function POST(req: NextRequest) {
           onboarded: false,
           verified: true,
           verificationStatus: 'VERIFIED',
-          photoVerified: isFounder ? true : false,
+          photoVerified: false,
           role: isFounder ? 'ADMIN' : 'USER',
           isBanned: false,
           authProvider: 'google',
@@ -558,10 +569,25 @@ export async function POST(req: NextRequest) {
       if (Array.isArray(favoriteActivities) && favoriteActivities.length > 0) {
         persona.favoriteActivities = favoriteActivities;
       }
-      if (body.photoVerified === true || (avatar && avatar.startsWith('data:image/'))) {
-        persona.photoVerified = true;
-        persona.verified = true;
-        persona.verificationStatus = 'VERIFIED';
+      if (body.photoVerified !== undefined) {
+        persona.photoVerified = Boolean(body.photoVerified);
+        if (
+          persona.photoVerified &&
+          !persona.name?.includes('Vlad') &&
+          persona.avatar &&
+          !persona.avatar.includes('unsplash.com') &&
+          !persona.avatar.startsWith('data:image/svg+xml')
+        ) {
+          persona.verified = true;
+          persona.verificationStatus = 'VERIFIED';
+        } else if (
+          persona.name?.includes('Vlad') ||
+          !persona.avatar ||
+          persona.avatar.includes('unsplash.com') ||
+          persona.avatar.startsWith('data:image/svg+xml')
+        ) {
+          persona.photoVerified = false;
+        }
       }
       if (body.selfieVerificationUrl) {
         persona.selfieVerificationUrl = body.selfieVerificationUrl;

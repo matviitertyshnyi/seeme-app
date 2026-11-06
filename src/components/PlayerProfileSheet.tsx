@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { UserPersona } from '@/types/lobby';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { getUserTag } from '@/lib/user-handle';
 
 export interface PlayerProfileSheetProps {
   user: UserPersona | null;
@@ -69,7 +70,7 @@ export function PlayerProfileSheet({
   if (!isOpen || !user) return null;
 
   const isMe = user.id === activeUser.id;
-  const isPhotoVerified = Boolean((user as any).photoVerified || user.verified);
+  const isPhotoVerified = Boolean((user as any).photoVerified);
 
   const activeFriendIds: string[] = (activeUser as any).friendIds || [];
   const activeOutgoingIds: string[] =
@@ -181,10 +182,15 @@ export function PlayerProfileSheet({
                 <h2 className="text-2xl font-black text-stone-950 dark:text-white">
                   {user.name}, {user.age}
                 </h2>
-                <ShieldCheck
-                  className="w-5 h-5 text-emerald-500 shrink-0"
-                  aria-label="Verified Human"
-                />
+                <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-mono text-xs font-semibold">
+                  {getUserTag(user)}
+                </span>
+                {isPhotoVerified && (
+                  <ShieldCheck
+                    className="w-5 h-5 text-emerald-500 shrink-0"
+                    aria-label="Verified Human Photo"
+                  />
+                )}
               </div>
 
               {user.neighborhood && (

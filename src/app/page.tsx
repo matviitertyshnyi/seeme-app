@@ -48,7 +48,6 @@ import { CreateLobbyModal } from '@/components/CreateLobbyModal';
 import { AuthProfileModal } from '@/components/AuthProfileModal';
 import { MetricsModal } from '@/components/MetricsModal';
 import { SettingsModal } from '@/components/SettingsModal';
-import { WelcomeLoginScreen } from '@/components/WelcomeLoginScreen';
 import { AdminAccountsModal } from '@/components/AdminAccountsModal';
 import { BottomNav } from '@/components/BottomNav';
 import { MyMeetupsView } from '@/components/MyMeetupsView';
@@ -763,7 +762,7 @@ export default function LeaveTheRoomHomePage() {
     coHost?: UserPersona | null;
   }) => {
     if (isSignedOut) {
-      showToast('Please sign in to host a meetup');
+      showToast('Please sign in to join or interact with meetups');
       setAuthModalTab('LOGIN');
       setIsAuthModalOpen(true);
       return;
@@ -1047,7 +1046,7 @@ export default function LeaveTheRoomHomePage() {
     if (joiningLobbyId) return;
 
     if (isSignedOut) {
-      showToast('Please sign in to join meetups');
+      showToast('Please sign in to join or interact with meetups');
       setAuthModalTab('LOGIN');
       setIsAuthModalOpen(true);
       return;
@@ -1235,6 +1234,12 @@ export default function LeaveTheRoomHomePage() {
 
   const handleToggleSaveLobby = async (lobbyId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    if (isSignedOut) {
+      showToast('Please sign in to join or interact with meetups');
+      setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
+      return;
+    }
     const res = await fetch('/api/users', {
       method: 'POST',
       headers: {
@@ -1285,15 +1290,6 @@ export default function LeaveTheRoomHomePage() {
     );
   }
 
-  if (isSignedOut) {
-    return (
-      <WelcomeLoginScreen
-        onGoogleSignIn={handleGoogleSignIn}
-        onAppleSignIn={handleAppleSignIn}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#141210] text-stone-900 dark:text-stone-100 flex flex-col transition-colors duration-200">
       {/* Native iOS / Android Top Push Notification Banner */}
@@ -1307,6 +1303,33 @@ export default function LeaveTheRoomHomePage() {
       <ToastNotification message={toastMessage} />
 
       <main className={`w-full max-w-xl mx-auto flex-1 px-4 pt-3 ${activeNav === 'MAP' ? 'pb-20' : 'pb-24'}`}>
+        {/* Sleek sticky top guest bar when signed out */}
+        {isSignedOut && (
+          <div className="sticky top-2 z-40 mb-3 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-md">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <OpenDoorLogo className="w-8 h-8 shrink-0" size={32} />
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-stone-100 truncate block">
+                  Leave The Room — Live Local Meetups
+                </span>
+                <span className="text-[10px] text-stone-500 dark:text-stone-400 truncate block">
+                  Sign in to join, host & unlock map
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthModalTab('LOGIN');
+                setIsAuthModalOpen(true);
+              }}
+              className="shrink-0 min-h-[34px] px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
+
         {activeNav === 'EXPLORE' && (
           <ExploreView
             searchQuery={searchQuery}
@@ -1322,8 +1345,15 @@ export default function LeaveTheRoomHomePage() {
             radiusKm={radiusKm}
             formatRadiusUnit={formatRadiusUnit}
             onOpenRadiusSheet={() => setIsRadiusSheetOpen(true)}
+            onSelectRadius={(km) => setRadiusKm(km)}
             selectedAgeFilters={selectedAgeFilters}
             onOpenAgeSheet={() => setIsAgeSheetOpen(true)}
+            onToggleAgeFilter={(ageId) => {
+              setSelectedAgeFilters((prev) =>
+                prev.includes(ageId) ? prev.filter((id) => id !== ageId) : [...prev, ageId]
+              );
+            }}
+            onClearAgeFilters={() => setSelectedAgeFilters([])}
             statusFilter={statusFilter}
             onToggleStatusFilter={() =>
               setStatusFilter(statusFilter === 'LIVE' ? 'ALL' : 'LIVE')
@@ -1332,14 +1362,31 @@ export default function LeaveTheRoomHomePage() {
             availableToJoinLobbies={availableToJoinLobbies}
             joinedFilteredLobbies={joinedFilteredLobbies}
             activeUser={activeUser}
+            isSignedOut={isSignedOut}
             personas={personas}
-            onClickUser={(userId) => setInspectedUserId(userId)}
+            onClickUser={(userId) => {
+              if (isSignedOut) {
+                showToast('Please sign in to join or interact with meetups');
+                setAuthModalTab('LOGIN');
+                setIsAuthModalOpen(true);
+                return;
+              }
+              setInspectedUserId(userId);
+            }}
             onToggleBeacon={handleToggleBeacon}
             savedLobbyIds={activeUser.savedLobbyIds || []}
             onToggleSaveLobby={handleToggleSaveLobby}
             showSavedOnly={showSavedOnly}
             onToggleSavedOnly={() => setShowSavedOnly((prev) => !prev)}
-            onSelectLobby={(lobbyId) => setSelectedLobbyId(lobbyId)}
+            onSelectLobby={(lobbyId) => {
+              if (isSignedOut) {
+                showToast('Please sign in to join or interact with meetups');
+                setAuthModalTab('LOGIN');
+                setIsAuthModalOpen(true);
+                return;
+              }
+              setSelectedLobbyId(lobbyId);
+            }}
             onQuickJoin={handleQuickJoin}
             joiningLobbyId={joiningLobbyId}
             currentLang={currentLang}
@@ -1411,7 +1458,20 @@ export default function LeaveTheRoomHomePage() {
               userLng={userCoords.lng}
               radiusKm={radiusKm}
               activeUser={activeUser}
-              onSelectLobby={(item) => setSelectedLobbyId(item.id)}
+              isSignedOut={isSignedOut}
+              onRequestSignIn={() => {
+                setAuthModalTab('LOGIN');
+                setIsAuthModalOpen(true);
+              }}
+              onSelectLobby={(item) => {
+                if (isSignedOut) {
+                  showToast('Please sign in to join or interact with meetups');
+                  setAuthModalTab('LOGIN');
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                setSelectedLobbyId(item.id);
+              }}
               onQuickJoin={handleQuickJoin}
             />
           </div>
@@ -1457,7 +1517,7 @@ export default function LeaveTheRoomHomePage() {
             onToggleBeacon={handleToggleBeacon}
             onOpenCitySelector={() => setIsCitySelectorOpen(true)}
             onOpenLightbox={(url, name) =>
-              handleOpenLightbox(url, name, activeUser.age, activeUser.verified, activeUser.neighborhood)
+              handleOpenLightbox(url, name, activeUser.age, Boolean(activeUser.photoVerified), activeUser.neighborhood)
             }
             onOpenFriendsDrawer={() => setIsFriendsDrawerOpen(true)}
           />
@@ -1469,7 +1529,7 @@ export default function LeaveTheRoomHomePage() {
         onOpenHostModal={() => openHostModal({ startTime: 'Now' })}
         onChangeTab={(tab) => {
           if (tab === 'MY_MEETUPS' && isSignedOut) {
-            showToast('Please sign in to view your meetups');
+            showToast('Please sign in to join or interact with meetups');
             setAuthModalTab('LOGIN');
             setIsAuthModalOpen(true);
             return;

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { UserPersona } from '@/types/lobby';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { getUserTag, matchesUserSearch } from '@/lib/user-handle';
 
 export interface FriendsChatDrawerProps {
   isOpen: boolean;
@@ -162,19 +163,13 @@ export function FriendsChatDrawer({
     }
   };
 
-  // Find people filtered by search
-  const filteredPersonas = personas
-    .filter((p) => p.id !== activeUser.id)
-    .filter((p) => {
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        p.name.toLowerCase().includes(q) ||
-        (p.neighborhood && p.neighborhood.toLowerCase().includes(q)) ||
-        (p.favoriteActivities &&
-          p.favoriteActivities.some((act) => act.toLowerCase().includes(q)))
-      );
-    });
+  // Strict search-only matching: people are only visible via search query (>= 2 chars)
+  const isSearchActive = searchQuery.trim().length >= 2;
+  const filteredPersonas = isSearchActive
+    ? personas.filter(
+        (p) => p.id !== activeUser.id && matchesUserSearch(p, searchQuery)
+      )
+    : [];
 
   // Conversation list users (friends or anyone with a direct message history)
   const conversationUserIds = Array.from(
@@ -233,11 +228,11 @@ export function FriendsChatDrawer({
                     alt={partner.name}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-orange-500/30"
                   />
-                  {(partner as any).photoVerified || partner.verified ? (
+                  {Boolean((partner as any).photoVerified) && (
                     <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900">
                       <ShieldCheck className="w-2.5 h-2.5" />
                     </span>
-                  ) : null}
+                  )}
                 </div>
 
                 <div
@@ -247,7 +242,9 @@ export function FriendsChatDrawer({
                 >
                   <div className="flex items-center gap-1 font-bold text-sm text-stone-900 dark:text-white truncate">
                     <span className="truncate">{partner.name}</span>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    {Boolean((partner as any).photoVerified) && (
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    )}
                   </div>
                   <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate flex items-center gap-1">
                     <MapPin className="w-3 h-3 text-orange-500 shrink-0" />
@@ -524,7 +521,7 @@ export function FriendsChatDrawer({
                                 alt={user.name}
                                 className="w-11 h-11 rounded-full object-cover ring-2 ring-stone-200 dark:ring-stone-700"
                               />
-                              {((user as any).photoVerified || user.verified) && (
+                              {Boolean((user as any).photoVerified) && (
                                 <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900">
                                   <ShieldCheck className="w-2.5 h-2.5" />
                                 </span>
@@ -534,7 +531,9 @@ export function FriendsChatDrawer({
                             <div className="min-w-0">
                               <div className="flex items-center gap-1 font-bold text-sm text-stone-900 dark:text-white truncate">
                                 <span className="truncate">{user.name}</span>
-                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                {Boolean((user as any).photoVerified) && (
+                                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                )}
                               </div>
                               <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-0.5">
                                 {lastMsg ? lastMsg.text : user.neighborhood || 'Verified Member'}
@@ -596,7 +595,9 @@ export function FriendsChatDrawer({
                                 <div className="min-w-0">
                                   <div className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white truncate flex items-center gap-1">
                                     <span>{requester.name}</span>
-                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                    {Boolean((requester as any).photoVerified) && (
+                                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                    )}
                                   </div>
                                   <div className="text-[11px] text-stone-500 truncate">
                                     {requester.neighborhood}
@@ -683,14 +684,32 @@ export function FriendsChatDrawer({
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search by name, city, or activity..."
+                      placeholder="Search by name or #ID tag..."
                       className="w-full min-h-[42px] pl-9 pr-3 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs sm:text-sm text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-600"
                     />
                   </div>
 
-                  {filteredPersonas.length === 0 ? (
+                  {!isSearchActive ? (
+                    <div className="text-center py-10 px-4 space-y-3 bg-stone-50/50 dark:bg-stone-800/30 rounded-2xl border border-dashed border-stone-200 dark:border-stone-800">
+                      <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto">
+                        <Search className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-stone-900 dark:text-white">
+                          Search by Name or User ID
+                        </h4>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
+                          To protect member privacy, profiles are not listed publicly. Type a member&apos;s name or their #ID tag (e.g. {getUserTag(activeUser)}) to find and connect with them.
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-mono font-semibold">
+                        <span>Your ID:</span>
+                        <span className="text-orange-600 dark:text-orange-400 font-bold">{getUserTag(activeUser)}</span>
+                      </div>
+                    </div>
+                  ) : filteredPersonas.length === 0 ? (
                     <div className="text-center py-8 text-xs text-stone-500">
-                      No members match your search.
+                      No members match &ldquo;{searchQuery}&rdquo;. Try typing their name or exact #ID tag.
                     </div>
                   ) : (
                     filteredPersonas.map((p) => {
@@ -709,15 +728,27 @@ export function FriendsChatDrawer({
                               className="flex items-center gap-2.5 min-w-0 cursor-pointer"
                               onClick={() => onOpenPlayerProfile(p)}
                             >
-                              <img
-                                src={p.avatar}
-                                alt={p.name}
-                                className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-stone-200 dark:ring-stone-700"
-                              />
+                              <div className="relative shrink-0">
+                                <img
+                                  src={p.avatar}
+                                  alt={p.name}
+                                  className="w-10 h-10 rounded-full object-cover ring-2 ring-stone-200 dark:ring-stone-700"
+                                />
+                                {Boolean((p as any).photoVerified) && (
+                                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900">
+                                    <ShieldCheck className="w-2.5 h-2.5" />
+                                  </span>
+                                )}
+                              </div>
                               <div className="min-w-0">
-                                <div className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white truncate flex items-center gap-1">
-                                  <span>{p.name}, {p.age}</span>
-                                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                <div className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white truncate flex items-center gap-1.5 flex-wrap">
+                                  <span className="truncate">{p.name}, {p.age}</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-stone-200/70 dark:bg-stone-700 text-[10px] font-mono text-stone-600 dark:text-stone-300 font-semibold">
+                                    {getUserTag(p)}
+                                  </span>
+                                  {Boolean((p as any).photoVerified) && (
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                  )}
                                 </div>
                                 <div className="text-[11px] text-stone-500 truncate flex items-center gap-1">
                                   <MapPin className="w-3 h-3 text-orange-500 shrink-0" />

@@ -101,6 +101,9 @@ export function AuthProfileModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [faceChecking, setFaceChecking] = useState(false);
   const [faceError, setFaceError] = useState<string | null>(null);
+  const [isFaceVerified, setIsFaceVerified] = useState<boolean>(
+    Boolean((activeUser as any)?.photoVerified && activeUser?.avatar && !activeUser.avatar.startsWith('data:image/svg'))
+  );
   const [editError, setEditError] = useState<string | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -137,6 +140,9 @@ export function AuthProfileModal({
         setSelectedCityPreset(match || null);
         setIsCityDropdownOpen(false);
         setAvatar(activeUser.avatar);
+        setIsFaceVerified(
+          Boolean((activeUser as any)?.photoVerified && activeUser?.avatar && !activeUser.avatar.startsWith('data:image/svg'))
+        );
         setTagline(activeUser.tagline);
         setFavoriteActivities(
           activeUser.favoriteActivities && activeUser.favoriteActivities.length > 0
@@ -211,21 +217,23 @@ export function AuthProfileModal({
         ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
-        // Run Human Face Verification to reject shoes / non-human images
+        // Run Human Face Verification to reject shoes / screenshots / non-human images
         try {
           const result = await verifyHumanFace(dataUrl);
           if (!result.isValidFace) {
             setFaceError(result.message);
+            setIsFaceVerified(false);
             setFaceChecking(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
             if (cameraInputRef.current) cameraInputRef.current.value = '';
             return;
           }
           setAvatar(dataUrl);
+          setIsFaceVerified(true);
           setFaceError(null);
         } catch {
-          // If detection fails unexpectedly, keep image
-          setAvatar(dataUrl);
+          setFaceError('Could not verify human face in photo. Please upload a clear portrait.');
+          setIsFaceVerified(false);
         } finally {
           setFaceChecking(false);
         }
@@ -265,8 +273,10 @@ export function AuthProfileModal({
     }
 
     const hasRealFacePhoto = Boolean(
-      (avatar && avatar.startsWith('data:image/')) ||
-      (activeUser as any)?.photoVerified
+      isFaceVerified &&
+      avatar &&
+      !avatar.startsWith('data:image/svg') &&
+      !avatar.includes('unsplash.com')
     );
 
     const initialLetter = (name.trim()[0] || 'M').toUpperCase();
@@ -511,7 +521,7 @@ export function AuthProfileModal({
                   )}
 
                   {!faceChecking && !faceError && (
-                    (avatar && avatar.startsWith('data:image/')) || (activeUser as any)?.photoVerified ? (
+                    isFaceVerified && avatar && !avatar.startsWith('data:image/svg') ? (
                       <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
                         <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span>✓ Verified Human Face Photo</span>
@@ -737,7 +747,7 @@ export function AuthProfileModal({
         age={age}
         verified={activeUser.verified}
         photoVerified={Boolean(
-          avatar?.startsWith('data:image/') || (activeUser as any)?.photoVerified
+          isFaceVerified && avatar && !avatar.startsWith('data:image/svg')
         )}
         neighborhood={cityInput}
         onClose={() => setIsLightboxOpen(false)}
