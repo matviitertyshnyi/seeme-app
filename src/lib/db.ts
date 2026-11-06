@@ -143,13 +143,23 @@ function readLocalDb(): DatabaseSchema {
     if (!Array.isArray(parsed.notifications)) parsed.notifications = [];
     if (!Array.isArray(parsed.messages)) parsed.messages = [];
 
-    if (parsed.lobbies.length === 0 && INITIAL_SEED_DATA.lobbies.length > 0) {
-      parsed.lobbies = [...INITIAL_SEED_DATA.lobbies];
-      INITIAL_SEED_DATA.personas.forEach((p) => {
-        if (!parsed.personas.some((ep) => ep.id === p.id)) {
-          parsed.personas.push(p);
-        }
-      });
+    const existingLobbyIds = new Set(parsed.lobbies.map((l) => l.id));
+    let localNeedsSave = false;
+    for (const seedLobby of INITIAL_SEED_DATA.lobbies) {
+      if (!existingLobbyIds.has(seedLobby.id)) {
+        parsed.lobbies.push(seedLobby);
+        existingLobbyIds.add(seedLobby.id);
+        localNeedsSave = true;
+      }
+    }
+    const existingPersonaIds = new Set(parsed.personas.map((p) => p.id));
+    for (const p of INITIAL_SEED_DATA.personas) {
+      if (!existingPersonaIds.has(p.id)) {
+        parsed.personas.push(p);
+        localNeedsSave = true;
+      }
+    }
+    if (localNeedsSave) {
       try {
         writeLocalDb(parsed);
       } catch {}
@@ -234,14 +244,28 @@ export async function readDb(): Promise<DatabaseSchema> {
             if (!Array.isArray(parsed.notifications)) parsed.notifications = INITIAL_SEED_DATA.notifications || [];
             if (!Array.isArray(parsed.messages)) parsed.messages = INITIAL_SEED_DATA.messages || [];
 
-            if (parsed.lobbies.length === 0 && INITIAL_SEED_DATA.lobbies.length > 0) {
-              parsed.lobbies = [...INITIAL_SEED_DATA.lobbies];
-              INITIAL_SEED_DATA.personas.forEach((p) => {
-                if (!parsed.personas.some((ep) => ep.id === p.id)) {
-                  parsed.personas.push(p);
-                }
-              });
-              await writeDb(parsed);
+            const existingLobbyIds = new Set(parsed.lobbies.map((l) => l.id));
+            let cloudNeedsSave = false;
+            for (const seedLobby of INITIAL_SEED_DATA.lobbies) {
+              if (!existingLobbyIds.has(seedLobby.id)) {
+                parsed.lobbies.push(seedLobby);
+                existingLobbyIds.add(seedLobby.id);
+                cloudNeedsSave = true;
+              }
+            }
+            const existingPersonaIds = new Set(parsed.personas.map((p) => p.id));
+            for (const p of INITIAL_SEED_DATA.personas) {
+              if (!existingPersonaIds.has(p.id)) {
+                parsed.personas.push(p);
+                cloudNeedsSave = true;
+              }
+            }
+            if (cloudNeedsSave) {
+              try {
+                await writeDb(parsed);
+              } catch (writeErr) {
+                console.warn('[Cloud DB] Failed to persist backfilled seed lobbies:', writeErr);
+              }
             }
             return parsed;
           }

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users, MapPin } from 'lucide-react';
+import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users, MapPin, Globe2 } from 'lucide-react';
 import { LobbyWithDistance, RoomStatus, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
@@ -42,6 +42,8 @@ export interface ExploreViewProps {
   onOpenHostModal: () => void;
   onResetFilters: () => void;
   onOpenCitySelector?: () => void;
+  hasChosenCity?: boolean;
+  onSelectCity?: (city: { lat: number; lng: number; label: string }) => void;
   personas?: UserPersona[];
   onClickUser?: (userId: string) => void;
   onToggleBeacon?: () => void;
@@ -85,6 +87,8 @@ export function ExploreView({
   onOpenHostModal,
   onResetFilters,
   onOpenCitySelector,
+  hasChosenCity = true,
+  onSelectCity,
   personas = [],
   onClickUser,
   onToggleBeacon,
@@ -456,7 +460,59 @@ export function ExploreView({
         </section>
       )}
 
-      {effectiveTotalCount === 0 ? (
+      {!hasChosenCity ? (
+        <div className="bg-white dark:bg-[#1C1917] rounded-3xl p-6 sm:p-8 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.5)] max-w-lg mx-auto space-y-5">
+          <div className="w-16 h-16 rounded-3xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center justify-center mx-auto shadow-sm">
+            <MapPin className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1.5">
+            <h2 className="text-base sm:text-lg font-bold text-stone-950 dark:text-stone-100">
+              Choose Your City
+            </h2>
+            <p className="text-xs text-stone-500 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
+              Select your city to discover real-world meetups, sports rallies, and activities happening near you.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenCitySelector}
+            className="w-full min-h-[46px] px-5 py-3 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-md shadow-orange-600/20 inline-flex items-center justify-center gap-2 transition active:scale-[0.99] cursor-pointer"
+          >
+            <Globe2 className="w-4 h-4" />
+            <span>Select City from List</span>
+          </button>
+
+          <div className="pt-3 border-t border-stone-100 dark:border-stone-800/80">
+            <p className="text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2.5">
+              Popular Cities
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
+              {[
+                { label: 'Warsaw, Poland', name: 'Warsaw', flag: '🇵🇱', lat: 52.2297, lng: 21.0122 },
+                { label: 'Gdynia, Poland', name: 'Gdynia', flag: '🇵🇱', lat: 54.5189, lng: 18.5305 },
+                { label: 'Gdansk, Poland', name: 'Gdansk', flag: '🇵🇱', lat: 54.3520, lng: 18.6466 },
+                { label: 'Krakow, Poland', name: 'Krakow', flag: '🇵🇱', lat: 50.0647, lng: 19.9450 },
+                { label: 'Berlin, Germany', name: 'Berlin', flag: '🇩🇪', lat: 52.5200, lng: 13.4050 },
+                { label: 'Paris, France', name: 'Paris', flag: '🇫🇷', lat: 48.8566, lng: 2.3522 },
+                { label: 'London, UK', name: 'London', flag: '🇬🇧', lat: 51.5074, lng: -0.1278 },
+                { label: 'New York, USA', name: 'New York', flag: '🇺🇸', lat: 40.7128, lng: -74.0060 },
+              ].map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => onSelectCity?.({ lat: item.lat, lng: item.lng, label: item.label })}
+                  className="min-h-[32px] px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <span>{item.flag}</span>
+                  <span>{item.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : effectiveTotalCount === 0 ? (
         <div className="bg-white dark:bg-[#1C1917] rounded-3xl p-8 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.5)] max-w-lg mx-auto space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-750 flex items-center justify-center mx-auto shadow-sm">
             <SearchX className="w-6 h-6" />

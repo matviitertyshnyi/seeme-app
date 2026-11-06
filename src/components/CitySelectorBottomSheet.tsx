@@ -49,12 +49,27 @@ export function CitySelectorBottomSheet({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      cities = cities.filter(
-        (c) =>
+      cities = cities.filter((c) => {
+        if (
           c.name.toLowerCase().includes(q) ||
           c.country.toLowerCase().includes(q) ||
           c.label.toLowerCase().includes(q)
-      );
+        ) {
+          return true;
+        }
+        if (
+          c.aliases &&
+          c.aliases.some(
+            (alias) => alias.toLowerCase().includes(q) || q.includes(alias.toLowerCase())
+          )
+        ) {
+          return true;
+        }
+        if (customResults.length > 0 && customResults.some((cr) => cr.id === c.id)) {
+          return true;
+        }
+        return false;
+      });
     }
 
     return cities;

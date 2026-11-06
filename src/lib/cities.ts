@@ -7,6 +7,7 @@ export interface CityPreset {
   lng: number;
   label: string;
   flag: string;
+  aliases?: string[];
 }
 
 export const POPULAR_CITIES: CityPreset[] = [
@@ -20,6 +21,7 @@ export const POPULAR_CITIES: CityPreset[] = [
     lng: 18.5305,
     label: 'Gdynia, Poland',
     flag: 'PL',
+    aliases: ['gdynia', 'гдиня'],
   },
   {
     id: 'pl-gdansk',
@@ -30,6 +32,7 @@ export const POPULAR_CITIES: CityPreset[] = [
     lng: 18.6466,
     label: 'Gdansk, Poland',
     flag: 'PL',
+    aliases: ['gdańsk', 'gdansk', 'danzig', 'гданськ'],
   },
   {
     id: 'pl-sopot',
@@ -40,6 +43,7 @@ export const POPULAR_CITIES: CityPreset[] = [
     lng: 18.5601,
     label: 'Sopot, Poland',
     flag: 'PL',
+    aliases: ['sopot', 'сопот'],
   },
   {
     id: 'pl-warsaw',
@@ -50,6 +54,7 @@ export const POPULAR_CITIES: CityPreset[] = [
     lng: 21.0122,
     label: 'Warsaw, Poland',
     flag: 'PL',
+    aliases: ['warszawa', 'warsaw', 'varsovie', 'warschau', 'варшава'],
   },
   {
     id: 'pl-krakow',
@@ -60,6 +65,7 @@ export const POPULAR_CITIES: CityPreset[] = [
     lng: 19.945,
     label: 'Krakow, Poland',
     flag: 'PL',
+    aliases: ['kraków', 'krakow', 'cracow', 'краків', 'краков'],
   },
   {
     id: 'pl-wroclaw',
@@ -798,12 +804,24 @@ export async function searchGlobalCities(query: string): Promise<CityPreset[]> {
   if (!clean) return POPULAR_CITIES;
 
   // 1. Search in presets first
-  const matchedPresets = POPULAR_CITIES.filter(
-    (c) =>
+  const matchedPresets = POPULAR_CITIES.filter((c) => {
+    if (
       c.name.toLowerCase().includes(clean) ||
       c.country.toLowerCase().includes(clean) ||
       c.label.toLowerCase().includes(clean)
-  );
+    ) {
+      return true;
+    }
+    if (
+      c.aliases &&
+      c.aliases.some(
+        (alias) => alias.toLowerCase().includes(clean) || clean.includes(alias.toLowerCase())
+      )
+    ) {
+      return true;
+    }
+    return false;
+  });
 
   if (matchedPresets.length >= 4) {
     return matchedPresets;

@@ -142,17 +142,42 @@ export default function LeaveTheRoomHomePage() {
   const [createModalCoHost, setCreateModalCoHost] =
     useState<UserPersona | null>(null);
 
-  // User Coordinates
+  // Location and City Selection States
+  const [hasChosenCity, setHasChosenCity] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return Boolean(localStorage.getItem('leavetheroom_user_location'));
+    }
+    return false;
+  });
+
   const [userCoords, setUserCoords] = useState<{
     lat: number;
     lng: number;
     label: string;
     isLiveGps: boolean;
-  }>({
-    lat: DEFAULT_USER_COORDS.lat,
-    lng: DEFAULT_USER_COORDS.lng,
-    label: DEFAULT_USER_COORDS.label,
-    isLiveGps: false,
+  }>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLoc = localStorage.getItem('leavetheroom_user_location');
+      if (savedLoc) {
+        try {
+          const parsed = JSON.parse(savedLoc);
+          if (parsed.lat && parsed.lng && parsed.label) {
+            return {
+              lat: parsed.lat,
+              lng: parsed.lng,
+              label: parsed.label,
+              isLiveGps: false,
+            };
+          }
+        } catch {}
+      }
+    }
+    return {
+      lat: DEFAULT_USER_COORDS.lat,
+      lng: DEFAULT_USER_COORDS.lng,
+      label: 'Select City',
+      isLiveGps: false,
+    };
   });
   const [isLocating, setIsLocating] = useState(false);
 
@@ -382,7 +407,25 @@ export default function LeaveTheRoomHomePage() {
       if (!res.ok) return;
       const data = await res.json();
       if (Array.isArray(data.lobbies)) {
-        setRawLobbies(data.lobbies);
+        setRawLobbies((prev) => {
+          const serverLobbyIds = new Set(data.lobbies.map((l: Lobby) => l.id));
+          const localOnly = prev.filter(
+            (l) => !serverLobbyIds.has(l.id) && l.id.startsWith('lobby-city-')
+          );
+          const seedMissing = INITIAL_SEED_DATA.lobbies.filter(
+            (l) => !serverLobbyIds.has(l.id)
+          );
+
+          const combined = [...data.lobbies];
+          const existingIds = new Set(combined.map((l) => l.id));
+          for (const l of [...seedMissing, ...localOnly]) {
+            if (!existingIds.has(l.id)) {
+              combined.push(l);
+              existingIds.add(l.id);
+            }
+          }
+          return combined;
+        });
       }
       if (Array.isArray(data.personas) && data.personas.length > 0) {
         setPersonas((prev) => {
@@ -544,15 +587,17 @@ export default function LeaveTheRoomHomePage() {
                 label: parsed.label,
                 isLiveGps: false,
               });
+              setHasChosenCity(true);
             }
           } catch {}
         } else if (loggedInUser) {
           const userCity = loggedInUser.neighborhood;
-          if (userCity && userCity !== 'Greenwich Village') {
+          if (userCity && userCity !== 'Greenwich Village' && userCity !== 'Select your city') {
             const matchedPreset = POPULAR_CITIES.find(
               (c) =>
                 c.label.toLowerCase().includes(userCity.toLowerCase()) ||
-                c.name.toLowerCase() === userCity.toLowerCase()
+                c.name.toLowerCase() === userCity.toLowerCase() ||
+                (c.aliases && c.aliases.some((a) => a.toLowerCase() === userCity.toLowerCase()))
             );
             if (matchedPreset) {
               const newCoords = {
@@ -563,13 +608,20 @@ export default function LeaveTheRoomHomePage() {
               };
               setUserCoords(newCoords);
               localStorage.setItem('leavetheroom_user_location', JSON.stringify(newCoords));
+              setHasChosenCity(true);
             } else {
+              setHasChosenCity(false);
               setIsCitySelectorOpen(true);
             }
           } else {
             // First time login with no city selected -> prompt user to select their city
+            setHasChosenCity(false);
             setIsCitySelectorOpen(true);
           }
+        } else {
+          // Unauthenticated user without a chosen city -> prompt user to choose city before showing events
+          setHasChosenCity(false);
+          setIsCitySelectorOpen(true);
         }
 
         setHasCheckedSession(true);
@@ -1050,6 +1102,8 @@ export default function LeaveTheRoomHomePage() {
   };
 
   const handleSelectCity = async (city: { lat: number; lng: number; label: string }) => {
+    setHasChosenCity(true);
+    setIsCitySelectorOpen(false);
     setUserCoords({
       lat: city.lat,
       lng: city.lng,
@@ -1079,14 +1133,20 @@ export default function LeaveTheRoomHomePage() {
         });
       } catch {}
     }
-    // Ensure the selected city has at least 2 events happening
+    // Ensure the selected city has at least 2 events happening within radius
     const nearby = attachAndSortByDistance(rawLobbies, city.lat, city.lng).filter((m) => m.distanceKm <= 35);
     if (nearby.length < 2) {
-      const cityName = city.label.split(',')[0].trim();
+      const cityName = city.label.split(',')[0].trim().toLowerCase();
+      const matchedPreset = POPULAR_CITIES.find(
+        (p) =>
+          p.name.toLowerCase() === cityName ||
+          p.label.toLowerCase().includes(cityName) ||
+          (p.aliases && p.aliases.some((a) => a.toLowerCase() === cityName))
+      );
       const generated = generateCityEvents(
-        {
-          id: `city-custom-${Date.now()}`,
-          name: cityName,
+        matchedPreset || {
+          id: `city-custom-${city.lat.toFixed(2)}-${city.lng.toFixed(2)}`,
+          name: city.label.split(',')[0].trim(),
           country: city.label.split(',')[1]?.trim() || 'EU',
           countryCode: 'EU',
           lat: city.lat,
@@ -1096,7 +1156,11 @@ export default function LeaveTheRoomHomePage() {
         },
         personas
       );
-      setRawLobbies((prev) => [...generated, ...prev]);
+      setRawLobbies((prev) => {
+        const existingIds = new Set(prev.map((l) => l.id));
+        const toAdd = generated.filter((g) => !existingIds.has(g.id));
+        return [...toAdd, ...prev];
+      });
     }
 
     showToast(`Location set to ${city.label}`);
@@ -1135,6 +1199,7 @@ export default function LeaveTheRoomHomePage() {
           isLiveGps: true,
         };
         setUserCoords(newCoords);
+        setHasChosenCity(true);
         if (typeof window !== 'undefined') {
           localStorage.setItem('leavetheroom_user_location', JSON.stringify(newCoords));
         }
@@ -1461,6 +1526,8 @@ export default function LeaveTheRoomHomePage() {
             userLocationLabel={userCoords.label}
             onNearMeGps={handleNearMeGps}
             onOpenCitySelector={() => setIsCitySelectorOpen(true)}
+            hasChosenCity={hasChosenCity}
+            onSelectCity={handleSelectCity}
             radiusKm={radiusKm}
             formatRadiusUnit={formatRadiusUnit}
             onOpenRadiusSheet={() => setIsRadiusSheetOpen(true)}
