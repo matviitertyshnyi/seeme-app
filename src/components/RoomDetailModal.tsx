@@ -22,6 +22,7 @@ import {
   ThumbsUp,
   Users,
   Edit3,
+  Clock,
 } from 'lucide-react';
 import {
   ArrivalStatus,
@@ -133,6 +134,89 @@ export function RoomDetailModal({
     !lobby.equipmentNote.startsWith('I have extra gear for ') &&
     !lobby.equipmentNote.startsWith('All equipment ready.')
   );
+
+  const isCheckInActive = useMemo(() => {
+    if (!lobby) return false;
+    if (
+      lobby.roomStatus === 'LIVE' ||
+      lobby.computedStatus === 'LIVE' ||
+      lobby.startTime === 'Now'
+    ) {
+      return true;
+    }
+    const str = (lobby.startTimeBadge || lobby.startTime || '').trim();
+    if (!str) return false;
+    const lower = str.toLowerCase();
+    if (
+      lower.includes('live') ||
+      lower.includes('now') ||
+      lower.includes('in 30m') ||
+      lower.includes('in 1h')
+    ) {
+      return true;
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    if (lower.startsWith('today at')) {
+      return true;
+    }
+
+    if (lower.startsWith('tomorrow at')) {
+      const timeMatch = str.match(/(\d{1,2}):(\d{2})/);
+      if (timeMatch) {
+        const target = new Date(now);
+        target.setDate(target.getDate() + 1);
+        target.setHours(Number(timeMatch[1]), Number(timeMatch[2]), 0, 0);
+        const diffMs = target.getTime() - now.getTime();
+        return diffMs <= 24 * 60 * 60 * 1000;
+      }
+      return true;
+    }
+
+    const dateMatch = str.match(
+      /([A-Za-z]{3})\s+(\d{1,2})(?:\s+at|\s*,)?\s+(\d{1,2}):(\d{2})/i
+    );
+    if (dateMatch) {
+      const monthStr = dateMatch[1];
+      const day = Number(dateMatch[2]);
+      const hours = Number(dateMatch[3]);
+      const mins = Number(dateMatch[4]);
+      const months = [
+        'jan',
+        'feb',
+        'mar',
+        'apr',
+        'may',
+        'jun',
+        'jul',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+      ];
+      const monthIdx = months.indexOf(monthStr.toLowerCase());
+      if (monthIdx !== -1) {
+        let targetYear = currentYear;
+        if (now.getMonth() === 11 && monthIdx === 0) {
+          targetYear++;
+        }
+        const target = new Date(targetYear, monthIdx, day, hours, mins, 0, 0);
+        const diffMs = target.getTime() - now.getTime();
+        return diffMs <= 24 * 60 * 60 * 1000 && diffMs >= -4 * 60 * 60 * 1000;
+      }
+    }
+
+    const parsed = Date.parse(str);
+    if (!isNaN(parsed)) {
+      const diffMs = parsed - now.getTime();
+      return diffMs <= 24 * 60 * 60 * 1000 && diffMs >= -4 * 60 * 60 * 1000;
+    }
+
+    return false;
+  }, [lobby?.roomStatus, lobby?.computedStatus, lobby?.startTime, lobby?.startTimeBadge]);
 
   useEffect(() => {
     if (myParticipantRecord?.spotClue) {
@@ -519,24 +603,24 @@ export function RoomDetailModal({
             </div>
           </div>
 
-          {/* Bottom Row: Category overline, Title */}
+          {/* Bottom Row: Title on top, details on bottom */}
           <div className="absolute bottom-3.5 left-4 right-4 text-white">
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-300 mb-0.5 flex-wrap">
-              <CategoryIcon category={lobby.category} className="w-3.5 h-3.5 text-stone-300" />
-              <span>{lobby.category}</span>
-              {lobby.joinMode === 'APPROVAL_REQUIRED' && (
-                <span className="text-stone-400">· Approval Required</span>
-              )}
-              {lobby.createdAt && (
-                <span className="text-stone-400">· {formatEventCreationDate(lobby.createdAt)}</span>
-              )}
-            </div>
             <h2
               id="meetup-detail-title"
-              className="text-xl sm:text-2xl font-bold text-white leading-tight truncate"
+              className="text-xl sm:text-2xl font-bold text-white leading-tight truncate mb-1"
             >
               {lobby.title}
             </h2>
+            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-300 flex-wrap">
+              <CategoryIcon category={lobby.category} className="w-3.5 h-3.5 text-stone-300" />
+              <span className="font-semibold text-white">{lobby.category}</span>
+              {lobby.joinMode === 'APPROVAL_REQUIRED' && (
+                <span className="text-stone-300">· Approval Required</span>
+              )}
+              {lobby.createdAt && (
+                <span className="text-[11px] text-stone-400">· Created {formatEventCreationDate(lobby.createdAt)}</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -619,18 +703,44 @@ export function RoomDetailModal({
               </div>
             )}
 
-            {/* CARD 1: Location & Details */}
-            <div className="bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 rounded-2xl p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                    {lobby.venueName}
+            {/* CARD 1: When & Where Overview */}
+            <div className="bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 rounded-2xl p-4 space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-stone-200/70 dark:border-stone-800">
+                {/* When */}
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4" />
                   </div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                    {lobby.venueAddress}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] uppercase tracking-wider font-extrabold text-stone-500 dark:text-stone-400 block">
+                      When
+                    </span>
+                    <span className="text-sm font-bold text-stone-950 dark:text-stone-100 block">
+                      {lobby.startTimeBadge || lobby.startTime || 'Today'}
+                    </span>
+                    {lobby.distanceLabel && (
+                      <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                        {lobby.distanceLabel} away
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Where */}
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] uppercase tracking-wider font-extrabold text-stone-500 dark:text-stone-400 block">
+                      Where
+                    </span>
+                    <span className="text-sm font-bold text-stone-950 dark:text-stone-100 block truncate">
+                      {lobby.venueName}
+                    </span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400 block line-clamp-1">
+                      {lobby.venueAddress}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -683,17 +793,17 @@ export function RoomDetailModal({
                 </button>
               </div>
 
-              {/* Host Note inside Location card if custom and non-generic */}
+              {/* Host Description inside Location card if custom and non-generic */}
               {hasCustomHostNote && (
                 <div className="pt-3 border-t border-stone-200/70 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                  <span className="font-semibold text-stone-700 dark:text-stone-200 mr-1.5">Note:</span>
+                  <span className="font-semibold text-stone-700 dark:text-stone-200 mr-1.5">Description:</span>
                   {lobby.equipmentNote}
                 </div>
               )}
             </div>
 
-            {/* CARD 2: Arrival Check-In (For confirmed participants) */}
-            {isParticipant && (
+            {/* CARD 2: Arrival Check-In (Only within 24 hours of meeting) */}
+            {isParticipant && isCheckInActive && (
               <div className="bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">
@@ -1127,19 +1237,21 @@ export function RoomDetailModal({
                   <div ref={chatEndRef} />
                 </div>
 
-                {/* Quick replies */}
-                <div className="px-4 py-2 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
-                  {QUICK_COORDINATION_REPLIES.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={() => handleSendMessage(chip)}
-                      className="min-h-[32px] px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700/80 text-xs font-medium whitespace-nowrap transition-colors shrink-0 cursor-pointer"
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
+                {/* Quick replies (only within 24 hours of meeting) */}
+                {isCheckInActive && (
+                  <div className="px-4 py-2 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
+                    {QUICK_COORDINATION_REPLIES.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => handleSendMessage(chip)}
+                        className="min-h-[32px] px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700/80 text-xs font-medium whitespace-nowrap transition-colors shrink-0 cursor-pointer"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <form
                   onSubmit={(e) => {

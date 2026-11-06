@@ -583,7 +583,7 @@ export function CreateLobbyModal({
             </div>
           </div>
 
-          {/* 2. Meetup Title & Notes */}
+          {/* 2. Meetup Title & Description */}
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">
@@ -601,13 +601,13 @@ export function CreateLobbyModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">
-                  Equipment Note
+                  Description
                 </label>
                 <textarea
                   rows={2}
                   value={equipmentNote}
                   onChange={(e) => setEquipmentNote(e.target.value)}
-                  placeholder="e.g., Bringing extra gear, board game, or meetup details..."
+                  placeholder="e.g., Meetup description, what to bring, or spot details..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
                 />
               </div>

@@ -210,7 +210,7 @@ export function SwipeDeck({
           <div className="p-5 sm:p-6 space-y-4">
             <div className="bg-stone-50 rounded-2xl p-3.5 border border-stone-100">
               <div className="text-[11px] font-extrabold uppercase tracking-wider text-stone-500 mb-1">
-                Equipment & Details
+                Description & Details
               </div>
               <p className="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed">
                 {currentLobby.equipmentNote}

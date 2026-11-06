@@ -162,7 +162,7 @@ export function EditMeetupModal({
               Edit Meetup Details
             </h2>
             <p className="text-xs text-stone-500 font-medium">
-              Update room status, start time, notes, and group capacity
+              Update room status, start time, description, and group capacity
             </p>
           </div>
           <button
@@ -301,17 +301,17 @@ export function EditMeetupModal({
             />
           </div>
 
-          {/* 5. Equipment / Meetup Note */}
+          {/* 5. Description */}
           <div>
             <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-600 dark:text-stone-400 mb-1.5 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-orange-500" />
-              <span>Equipment / Meetup Note</span>
+              <span>Description</span>
             </label>
             <textarea
               rows={2}
               value={equipmentNote}
               onChange={(e) => setEquipmentNote(e.target.value)}
-              placeholder="What should players bring? Any spot instructions?"
+              placeholder="Meetup description, what to bring, or spot details..."
               className="w-full p-3.5 rounded-2xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs sm:text-sm text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-600 font-medium"
             />
           </div>
