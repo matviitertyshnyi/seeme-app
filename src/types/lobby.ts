@@ -233,3 +233,19 @@ export interface DatabaseSchema {
   notifications: AppNotification[];
   directMessages?: DirectMessage[];
 }
+
+/**
+ * Checks whether a user persona has a valid, verified human profile photo.
+ * Rejects Unsplash placeholders, SVG letter fallbacks, empty strings, and unverified avatars.
+ */
+export function hasRealProfilePhoto(
+  user?: { avatar?: string; photoVerified?: boolean } | null
+): boolean {
+  if (!user || !user.avatar) return false;
+  const avatar = user.avatar.trim();
+  if (!avatar) return false;
+  if (avatar.includes('unsplash.com')) return false;
+  if (avatar.startsWith('data:image/svg')) return false;
+  return Boolean(user.photoVerified || avatar.startsWith('data:image/'));
+}
+

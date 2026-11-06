@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withDbMutation } from '@/lib/db';
 import { requireAuth, errorResponse, AuthError } from '@/lib/auth-guard';
-import { ArrivalStatus, Participant } from '@/types/lobby';
+import { ArrivalStatus, Participant, hasRealProfilePhoto } from '@/types/lobby';
 
 export const dynamic = 'force-dynamic';
 
@@ -304,6 +304,15 @@ export async function POST(
 
     // 6. JOIN / REQUEST_JOIN / JOIN_OR_REQUEST
     const joiningUser = authUser;
+
+    // Real human profile photo guard
+    if (!hasRealProfilePhoto(joiningUser)) {
+      return errorResponse(
+        'Profile photo is required to join meetups. Please upload a verified photo of your face.',
+        403,
+        'FORBIDDEN'
+      );
+    }
 
     // Check if banned from this meetup or by the host
     const hostPersona = db.personas.find((p) => p.id === meetup.hostId);

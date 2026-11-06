@@ -13,7 +13,7 @@ import {
   Maximize2,
   AlertCircle,
 } from 'lucide-react';
-import { ActivityCategory, UserPersona } from '@/types/lobby';
+import { ActivityCategory, UserPersona, hasRealProfilePhoto } from '@/types/lobby';
 import {
   ACTIVITY_GROUPS,
   GROUPED_ACTIVITIES,
@@ -142,7 +142,7 @@ export function AuthProfileModal({
         setIsCityDropdownOpen(false);
         setAvatar(activeUser.avatar);
         setIsFaceVerified(
-          Boolean((activeUser as any)?.photoVerified && activeUser?.avatar && !activeUser.avatar.startsWith('data:image/svg'))
+          Boolean(hasRealProfilePhoto(activeUser))
         );
         setTagline(activeUser.tagline);
         setFavoriteActivities(
@@ -155,7 +155,11 @@ export function AuthProfileModal({
   }, [isOpen, initialTab, activeUser?.id]);
 
   const isAgeLocked = Boolean(activeUser?.onboarded === true && activeUser?.age && activeUser.age >= 18);
-  const isMandatoryOnboarding = activeUser?.onboarded === false || !activeUser?.age || activeUser?.age < 18;
+  const isMandatoryOnboarding =
+    activeUser?.onboarded === false ||
+    !activeUser?.age ||
+    activeUser?.age < 18 ||
+    !hasRealProfilePhoto(activeUser);
 
   const filteredCities = useMemo(() => {
     const q = cityInput.trim().toLowerCase();
@@ -280,9 +284,14 @@ export function AuthProfileModal({
       !avatar.includes('unsplash.com')
     );
 
-    const initialLetter = (name.trim()[0] || 'M').toUpperCase();
-    const fallbackAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="64" fill="%23EA580C"/><text x="50%" y="54%" font-family="system-ui,-apple-system,sans-serif" font-weight="bold" font-size="54" fill="%23FFFFFF" text-anchor="middle" dominant-baseline="middle">${initialLetter}</text></svg>`;
-    const finalAvatar = (avatar && avatar.trim()) || activeUser?.avatar || fallbackAvatar;
+    if (!hasRealFacePhoto) {
+      setEditError(
+        'A verified profile photo of your face is required to join or host meetups. Please upload a clear photo of your face or take a live selfie.'
+      );
+      return;
+    }
+
+    const finalAvatar = avatar.trim();
 
     setIsSubmitting(true);
 
@@ -423,7 +432,7 @@ export function AuthProfileModal({
               {/* Profile Photo Upload & Selfie Camera */}
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
-                  Profile Photo (Optional)
+                  Profile Photo (Required)
                 </label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Clickable 72x72 Avatar preview */}
@@ -504,8 +513,9 @@ export function AuthProfileModal({
                         <span>✓ Verified Human Face Photo</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 text-stone-600 dark:text-stone-400 text-xs font-medium">
-                        <span>Profile photo is optional. You can upload a photo or selfie anytime.</span>
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+                        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>Real photo required — please upload a photo of your face or take a selfie to join and host meetups</span>
                       </div>
                     )
                   )}

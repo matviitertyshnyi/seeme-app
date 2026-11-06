@@ -19,6 +19,7 @@ import {
   StartTimeOption,
   UserPersona,
   UserSettings,
+  hasRealProfilePhoto,
 } from '@/types/lobby';
 import { DEMO_PERSONAS, INITIAL_SEED_DATA } from '@/lib/seed';
 import { attachAndSortByDistance, DEFAULT_USER_COORDS, doesMeetupMatchAgeFilters } from '@/lib/geo';
@@ -237,16 +238,20 @@ export default function LeaveTheRoomHomePage() {
 
   const hasPromptedOnboarding = useRef(false);
   useEffect(() => {
-    if (
-      !hasPromptedOnboarding.current &&
+    if (isSignedOut) {
+      hasPromptedOnboarding.current = false;
+      return;
+    }
+    const needsProfileSetup =
       activeUser &&
       (activeUser.onboarded === false ||
         !activeUser.age ||
         activeUser.age < 18 ||
+        !hasRealProfilePhoto(activeUser) ||
         activeUser.neighborhood === 'Select your city' ||
-        !activeUser.neighborhood) &&
-      !isSignedOut
-    ) {
+        !activeUser.neighborhood);
+
+    if (!hasPromptedOnboarding.current && needsProfileSetup) {
       hasPromptedOnboarding.current = true;
       setAuthModalTab('EDIT');
       setIsAuthModalOpen(true);
@@ -474,7 +479,14 @@ export default function LeaveTheRoomHomePage() {
               setIsSignedOut(false);
               localStorage.setItem('leavetheroom_session_user_id', authedUser.id);
               localStorage.setItem('seeme_session_user_id', authedUser.id);
-              if (authedUser.onboarded === false || authedUser.neighborhood === 'Select your city') {
+              const needsProfileSetup =
+                authedUser.onboarded === false ||
+                !authedUser.age ||
+                authedUser.age < 18 ||
+                !hasRealProfilePhoto(authedUser) ||
+                authedUser.neighborhood === 'Select your city' ||
+                !authedUser.neighborhood;
+              if (needsProfileSetup) {
                 setAuthModalTab('EDIT');
                 setIsAuthModalOpen(true);
               }
@@ -492,7 +504,20 @@ export default function LeaveTheRoomHomePage() {
             setActivePersonaId(savedSession);
             setIsSignedOut(false);
             const foundInList = personas.find((p) => p.id === savedSession);
-            if (foundInList) loggedInUser = foundInList;
+            if (foundInList) {
+              loggedInUser = foundInList;
+              const needsProfileSetup =
+                foundInList.onboarded === false ||
+                !foundInList.age ||
+                foundInList.age < 18 ||
+                !hasRealProfilePhoto(foundInList) ||
+                foundInList.neighborhood === 'Select your city' ||
+                !foundInList.neighborhood;
+              if (needsProfileSetup) {
+                setAuthModalTab('EDIT');
+                setIsAuthModalOpen(true);
+              }
+            }
           } else {
             setIsSignedOut(true);
           }
@@ -764,6 +789,13 @@ export default function LeaveTheRoomHomePage() {
     if (isSignedOut) {
       showToast('Please sign in to join or interact with meetups');
       setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (!hasRealProfilePhoto(activeUser)) {
+      showToast('Please add your real profile photo before hosting a meetup');
+      setAuthModalTab('EDIT');
       setIsAuthModalOpen(true);
       return;
     }
@@ -1048,6 +1080,13 @@ export default function LeaveTheRoomHomePage() {
     if (isSignedOut) {
       showToast('Please sign in to join or interact with meetups');
       setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (!hasRealProfilePhoto(activeUser)) {
+      showToast('Please upload or verify your real profile photo to join meetups');
+      setAuthModalTab('EDIT');
       setIsAuthModalOpen(true);
       return;
     }
@@ -1557,7 +1596,10 @@ export default function LeaveTheRoomHomePage() {
         onClickParticipant={(userId) => setInspectedUserId(userId)}
         onOpenLightbox={handleOpenLightbox}
         onRequestAuth={() => {
-          setAuthModalTab('LOGIN');
+          setAuthModalTab(isSignedOut ? 'LOGIN' : 'EDIT');
+          if (!isSignedOut && !hasRealProfilePhoto(activeUser)) {
+            showToast('Please upload or verify your real profile photo to join meetups');
+          }
           setIsAuthModalOpen(true);
         }}
         onClose={() => setSelectedLobbyId(null)}

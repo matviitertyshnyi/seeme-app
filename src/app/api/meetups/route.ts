@@ -13,6 +13,7 @@ import {
   Participant,
   RoomStatus,
   StartTimeOption,
+  hasRealProfilePhoto,
 } from '@/types/lobby';
 
 export const dynamic = 'force-dynamic';
@@ -152,6 +153,15 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Authenticate session
     const { user: authUser } = await requireAuth(req);
+
+    // Profile photo guard for hosting meetups
+    if (!hasRealProfilePhoto(authUser)) {
+      return errorResponse(
+        'Profile photo is required to host a meetup. Please upload a verified photo of your face.',
+        403,
+        'FORBIDDEN'
+      );
+    }
 
     // 2. Validate payload
     const rawBody = await req.json();

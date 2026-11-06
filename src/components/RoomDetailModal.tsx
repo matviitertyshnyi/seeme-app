@@ -28,6 +28,7 @@ import {
   ChatMessage,
   LobbyWithDistance,
   UserPersona,
+  hasRealProfilePhoto,
 } from '@/types/lobby';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -271,6 +272,10 @@ export function RoomDetailModal({
     if (e) e.preventDefault();
     if (isLoadingAction) return;
     if (isSignedOut) {
+      if (onRequestAuth) onRequestAuth();
+      return;
+    }
+    if (!hasRealProfilePhoto(activeUser)) {
       if (onRequestAuth) onRequestAuth();
       return;
     }
