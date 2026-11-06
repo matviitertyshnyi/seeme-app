@@ -1485,15 +1485,15 @@ export default function LeaveTheRoomHomePage() {
         )}
 
         {activeNav === 'MAP' && (
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2 pb-0.5">
               <button
                 type="button"
                 onClick={() => setIsCategorySheetOpen(true)}
-                className={`min-h-[38px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 border transition-all cursor-pointer ${
+                className={`min-h-[40px] inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-2xs ${
                   selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
                     ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
-                    : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700/80 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700/80'
                 }`}
                 title="Filter by Activity"
               >
@@ -1505,7 +1505,11 @@ export default function LeaveTheRoomHomePage() {
                       ? selectedBroadCategory
                       : 'All Rooms'
                   }
-                  className="w-3.5 h-3.5 shrink-0"
+                  className={`w-4 h-4 shrink-0 ${
+                    selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
+                      ? 'text-white'
+                      : 'text-orange-600 dark:text-orange-400'
+                  }`}
                 />
                 <span>
                   {selectedCategory && selectedCategory !== 'All'
@@ -1514,48 +1518,32 @@ export default function LeaveTheRoomHomePage() {
                     ? selectedBroadCategory
                     : 'All Activities'}
                 </span>
-                <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200'
+                  }`}
+                >
+                  {selectedCategory && selectedCategory !== 'All'
+                    ? activityCounts[selectedCategory] ?? 0
+                    : categoryCounts[selectedBroadCategory] ??
+                      lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-stone-400 shrink-0" />
               </button>
 
-              {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
-                (catName) => {
-                  const isSelected =
-                    (selectedCategory === catName || (selectedCategory === 'All' && selectedBroadCategory === catName)) &&
-                    (catName === 'All Categories' ? selectedBroadCategory === 'All Categories' : true);
-                  const count =
-                    catName === 'All Categories'
-                      ? lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length
-                      : lobbiesWithDistance.filter(
-                          (l) => getBroadCategory(l.category) === catName && l.distanceKm <= radiusKm
-                        ).length;
-
-                  return (
-                    <button
-                      key={catName}
-                      type="button"
-                      onClick={() => {
-                        setSelectedBroadCategory(catName);
-                        setSelectedCategory(catName === 'All Categories' ? 'All' : catName);
-                      }}
-                      className={`min-h-[38px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 border transition-all ${
-                        isSelected
-                          ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 border-stone-900 dark:border-white shadow-xs'
-                          : 'bg-white dark:bg-[#1C1917] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800'
-                      }`}
-                    >
-                      <span>{catName === 'All Categories' ? 'All Meetups' : catName}</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          isSelected
-                            ? 'bg-stone-800 text-stone-200 dark:bg-stone-200 dark:text-stone-800'
-                            : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                }
+              {(selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('All');
+                    setSelectedBroadCategory('All Categories');
+                  }}
+                  className="min-h-[34px] px-3 py-1 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 text-xs font-semibold border border-stone-200 dark:border-stone-700/80 transition-colors cursor-pointer"
+                >
+                  Reset Filter
+                </button>
               )}
             </div>
 
@@ -1566,14 +1554,6 @@ export default function LeaveTheRoomHomePage() {
               radiusKm={radiusKm}
               activeUser={activeUser}
               isSignedOut={isSignedOut}
-              selectedActivity={
-                selectedCategory !== 'All'
-                  ? selectedCategory
-                  : selectedBroadCategory !== 'All Categories'
-                  ? selectedBroadCategory
-                  : 'All'
-              }
-              onOpenActivitySelector={() => setIsCategorySheetOpen(true)}
               onRequestSignIn={() => {
                 setAuthModalTab('LOGIN');
                 setIsAuthModalOpen(true);

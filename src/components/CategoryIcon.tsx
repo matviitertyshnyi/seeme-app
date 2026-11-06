@@ -15,6 +15,7 @@ import {
   BookOpen,
   Utensils,
   GlassWater,
+  Compass,
 } from 'lucide-react';
 import { ActivityCategory, ActivityGroup } from '@/types/lobby';
 
@@ -157,7 +158,10 @@ export function CategoryIcon({
     case 'Study Session':
       return <BookOpen className={className} />;
     case 'All Rooms':
+    case 'All Categories':
+    case 'All Activities':
+    case 'All':
     default:
-      return <Sparkles className={className} />;
+      return <Compass className={className} />;
   }
 }

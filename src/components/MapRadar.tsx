@@ -10,13 +10,11 @@ import {
   UserPlus,
   LocateFixed,
   Lock,
-  ChevronDown,
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SeatBubbles } from '@/components/SeatBubbles';
 import { StatusBadge } from '@/components/StatusBadge';
 import { resolveCoverImage, formatEventCreationDate } from '@/lib/geo';
-import { CategoryIcon } from '@/components/CategoryIcon';
 
 function escapeHtml(str: string): string {
   return str
@@ -37,8 +35,6 @@ interface MapRadarProps {
   onQuickJoin: (lobby: LobbyWithDistance, e: React.MouseEvent) => void;
   isSignedOut?: boolean;
   onRequestSignIn?: () => void;
-  selectedActivity?: string;
-  onOpenActivitySelector?: () => void;
 }
 
 export default function MapRadar({
@@ -51,8 +47,6 @@ export default function MapRadar({
   onQuickJoin,
   isSignedOut = false,
   onRequestSignIn,
-  selectedActivity = 'All',
-  onOpenActivitySelector,
 }: MapRadarProps) {
   if (typeof window === 'undefined') {
     return null;
@@ -273,46 +267,7 @@ export default function MapRadar({
       />
 
       {!isSignedOut && (
-        <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-1.5 sm:gap-2 pointer-events-auto max-w-[calc(100%-60px)]">
-          {/* Activity Type Filter Button - Direct selector requested on map */}
-          {onOpenActivitySelector && (
-            <button
-              type="button"
-              onClick={onOpenActivitySelector}
-              className={`min-h-[34px] sm:min-h-[36px] backdrop-blur-md px-3 py-1 rounded-full shadow-md border inline-flex items-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                selectedActivity && selectedActivity !== 'All' && selectedActivity !== 'All Categories'
-                  ? 'bg-orange-600 text-white border-orange-600 shadow-orange-500/20'
-                  : 'bg-white/95 dark:bg-[#1C1917]/95 hover:bg-stone-50 dark:hover:bg-stone-800 border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200'
-              }`}
-              title="Filter by Activity Type"
-            >
-              <CategoryIcon
-                category={
-                  selectedActivity && selectedActivity !== 'All' && selectedActivity !== 'All Categories'
-                    ? selectedActivity
-                    : 'All Rooms'
-                }
-                className={`w-3.5 h-3.5 shrink-0 ${
-                  selectedActivity && selectedActivity !== 'All' && selectedActivity !== 'All Categories'
-                    ? 'text-white'
-                    : 'text-orange-600 dark:text-orange-400'
-                }`}
-              />
-              <span className="truncate max-w-[95px] sm:max-w-none">
-                {selectedActivity && selectedActivity !== 'All' && selectedActivity !== 'All Categories'
-                  ? selectedActivity
-                  : 'Activity'}
-              </span>
-              <ChevronDown
-                className={`w-3 h-3 shrink-0 ${
-                  selectedActivity && selectedActivity !== 'All' && selectedActivity !== 'All Categories'
-                    ? 'text-white/80'
-                    : 'text-stone-400'
-                }`}
-              />
-            </button>
-          )}
-
+        <div className="absolute top-3 left-3 z-[1000] flex flex-wrap items-center gap-2 pointer-events-auto">
           {/* Filter Pills */}
           <div className="bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md p-1 rounded-full shadow-md border border-stone-200 dark:border-stone-800 flex items-center gap-1 text-xs text-stone-900 dark:text-stone-100">
             <button
