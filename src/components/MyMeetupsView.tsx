@@ -132,11 +132,11 @@ export function MyMeetupsView({
           onClick={() => setActiveTab('HOSTING')}
           className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'HOSTING'
-              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
+              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-stone-700/80'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
           }`}
         >
-          <Crown className="w-3.5 h-3.5 shrink-0 text-orange-600 dark:text-orange-400" />
+          <Crown className="w-3.5 h-3.5 shrink-0 text-current" />
           <span>Hosting</span>
           <span className="text-[11px] font-bold text-stone-400">
             ({myHostingRooms.length})
@@ -155,11 +155,11 @@ export function MyMeetupsView({
           onClick={() => setActiveTab('JOINED')}
           className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'JOINED'
-              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
+              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-stone-700/80'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
           }`}
         >
-          <Users className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <Users className="w-3.5 h-3.5 shrink-0 text-current" />
           <span>Joined</span>
           <span className="text-[11px] font-bold text-stone-400">
             ({myJoinedRooms.length})
@@ -175,11 +175,11 @@ export function MyMeetupsView({
           onClick={() => setActiveTab('SAVED')}
           className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'SAVED'
-              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
+              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-stone-700/80'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
           }`}
         >
-          <Bookmark className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
+          <Bookmark className="w-3.5 h-3.5 shrink-0 text-current" />
           <span>Saved</span>
           <span className="text-[11px] font-bold text-stone-400">
             ({mySavedRooms.length})
@@ -195,11 +195,11 @@ export function MyMeetupsView({
           onClick={() => setActiveTab('PAST')}
           className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'PAST'
-              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-orange-500/40'
+              ? 'bg-white dark:bg-[#1C1917] text-stone-950 dark:text-white shadow-xs dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] border border-stone-200/80 dark:border-stone-700/80'
               : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-transparent'
           }`}
         >
-          <Clock className="w-3.5 h-3.5 shrink-0 text-stone-400" />
+          <Clock className="w-3.5 h-3.5 shrink-0 text-current" />
           <span>Past</span>
           <span className="text-[11px] font-bold text-stone-400">
             ({myPastRooms.length})
@@ -212,8 +212,8 @@ export function MyMeetupsView({
           <div className="bg-white dark:bg-[#1C1917] rounded-3xl p-8 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.5)] space-y-4">
             {activeTab === 'HOSTING' && (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto shadow-[0_0_16px_rgba(234,88,12,0.2)]">
-                  <Crown className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 flex items-center justify-center mx-auto">
+                  <Crown className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
@@ -226,7 +226,7 @@ export function MyMeetupsView({
                 <button
                   type="button"
                   onClick={() => onOpenHostModal({ startTime: 'Now' })}
-                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-[0_4px_16px_rgba(234,88,12,0.4)] border border-orange-400/30 inline-flex items-center gap-1.5 transition active:scale-[0.98]"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm inline-flex items-center gap-1.5 transition active:scale-[0.98]"
                 >
                   <Plus className="w-4 h-4 stroke-[2.5]" />
                   <span>Host a Meetup Now</span>
@@ -236,8 +236,8 @@ export function MyMeetupsView({
 
             {activeTab === 'JOINED' && (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 flex items-center justify-center mx-auto border border-stone-200 dark:border-stone-700">
-                  <Users className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 flex items-center justify-center mx-auto">
+                  <Users className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
@@ -250,7 +250,7 @@ export function MyMeetupsView({
                 <button
                   type="button"
                   onClick={onNavigateExplore}
-                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-[0_4px_16px_rgba(234,88,12,0.4)] border border-orange-400/30 transition active:scale-[0.98] inline-flex items-center gap-1.5"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition active:scale-[0.98] inline-flex items-center gap-1.5"
                 >
                   <Compass className="w-4 h-4" />
                   <span>Discover Open Meetups</span>
@@ -260,8 +260,8 @@ export function MyMeetupsView({
 
             {activeTab === 'SAVED' && (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border border-amber-200 dark:border-amber-800">
-                  <Bookmark className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 flex items-center justify-center mx-auto">
+                  <Bookmark className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">
@@ -274,7 +274,7 @@ export function MyMeetupsView({
                 <button
                   type="button"
                   onClick={onNavigateExplore}
-                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-[0_4px_16px_rgba(234,88,12,0.4)] border border-orange-400/30 transition active:scale-[0.98] inline-flex items-center gap-1.5"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition active:scale-[0.98] inline-flex items-center gap-1.5"
                 >
                   <Compass className="w-4 h-4" />
                   <span>Discover Open Meetups</span>
@@ -284,8 +284,8 @@ export function MyMeetupsView({
 
             {activeTab === 'PAST' && (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-400 flex items-center justify-center mx-auto border border-stone-200 dark:border-stone-700">
-                  <Clock className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 flex items-center justify-center mx-auto">
+                  <Clock className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-stone-950 dark:text-stone-100">

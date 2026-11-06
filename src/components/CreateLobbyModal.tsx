@@ -287,9 +287,7 @@ export function CreateLobbyModal({
       `Spontaneous ${activeCategoryName} Meetup (${
         maxParticipants === 2 ? '1v1' : `Up to ${maxParticipants}`
       })`;
-    const finalNote =
-      equipmentNote.trim() ||
-      `I have extra gear for ${activeCategoryName}. Drop a message in the meetup chat when you arrive.`;
+    const finalNote = equipmentNote.trim();
 
     setIsSubmitting(true);
     try {

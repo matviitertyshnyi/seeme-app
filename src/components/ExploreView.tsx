@@ -193,7 +193,7 @@ export function ExploreView({
                 ? t('all_activities') || 'All Meetups'
                 : selectedBroadCategory}
             </span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-orange-500/20 text-orange-600 dark:text-orange-400">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200">
               {categoryCounts[selectedBroadCategory] ?? totalLobbiesCount}
             </span>
             <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
@@ -206,7 +206,7 @@ export function ExploreView({
             <button
               type="button"
               onClick={onOpenCitySelector || onNearMeGps}
-              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-orange-600 transition-colors inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs shrink-0 cursor-pointer"
+              className="font-semibold text-stone-800 dark:text-stone-200 hover:text-stone-950 dark:hover:text-white transition-colors inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs shrink-0 cursor-pointer"
               title="Tap to select country, city or GPS location"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
@@ -252,15 +252,15 @@ export function ExploreView({
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
                           isSelected
-                            ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold'
-                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium'
+                            ? 'bg-stone-100 dark:bg-stone-800 text-stone-950 dark:text-white font-semibold'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 font-medium'
                         }`}
                       >
                         <div>
                           <div className="font-semibold">{formatRadiusUnit(opt.km)}</div>
                           <div className="text-[10px] text-stone-400 dark:text-stone-500">{opt.desc}</div>
                         </div>
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />}
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-stone-900 dark:bg-white" />}
                       </button>
                     );
                   })}
@@ -277,11 +277,11 @@ export function ExploreView({
                 onClick={() => setOpenDropdown((prev) => (prev === 'AGE' ? null : 'AGE'))}
                 className={`min-h-[26px] sm:min-h-[28px] inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                   selectedAgeFilters.length > 0
-                    ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-2xs'
+                    ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 shadow-2xs'
                     : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 border border-transparent dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
                 }`}
               >
-                <span className="text-stone-400 text-[10px] sm:text-[11px] font-normal">
+                <span className={selectedAgeFilters.length > 0 ? 'text-stone-300 dark:text-stone-600 text-[10px] sm:text-[11px] font-normal' : 'text-stone-400 text-[10px] sm:text-[11px] font-normal'}>
                   {currentLang === 'uk' ? 'Вік:' : 'Age:'}
                 </span>
                 <span>
@@ -311,13 +311,13 @@ export function ExploreView({
                     }}
                     className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
                       selectedAgeFilters.length === 0
-                        ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold'
-                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium'
+                        ? 'bg-stone-100 dark:bg-stone-800 text-stone-950 dark:text-white font-semibold'
+                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 font-medium'
                     }`}
                   >
                     <span>All Ages (18+)</span>
                     {selectedAgeFilters.length === 0 && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-stone-900 dark:bg-white" />
                     )}
                   </button>
 
@@ -336,15 +336,15 @@ export function ExploreView({
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
                           isChecked
-                            ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold'
-                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium'
+                            ? 'bg-stone-100 dark:bg-stone-800 text-stone-950 dark:text-white font-semibold'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 font-medium'
                         }`}
                       >
                         <span className="truncate pr-2">{preset.label}</span>
                         <span
                           className={`w-4 h-4 rounded-md border flex items-center justify-center text-[10px] shrink-0 ${
                             isChecked
-                              ? 'bg-orange-600 border-orange-600 text-white font-bold'
+                              ? 'bg-stone-900 border-stone-900 dark:bg-white dark:border-white text-white dark:text-stone-950 font-bold'
                               : 'border-stone-300 dark:border-stone-600'
                           }`}
                         >
@@ -362,13 +362,13 @@ export function ExploreView({
               onClick={onToggleStatusFilter}
               className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 cursor-pointer ${
                 statusFilter === 'LIVE'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 shadow-2xs'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                  statusFilter === 'LIVE' ? 'bg-white' : 'bg-emerald-500'
+                  statusFilter === 'LIVE' ? 'bg-emerald-400' : 'bg-emerald-500'
                 }`}
               />
               <span>{currentLang === 'uk' ? 'Наживо' : 'Live'}</span>
@@ -381,11 +381,11 @@ export function ExploreView({
                 aria-label="Filter to saved meetups"
                 className={`min-h-[26px] sm:min-h-[28px] px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-colors inline-flex items-center gap-1 shrink-0 cursor-pointer ${
                   showSavedOnly
-                    ? 'bg-orange-600 text-white shadow-2xs'
+                    ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 shadow-2xs'
                     : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 }`}
               >
-                <Bookmark className={`w-3 h-3 ${showSavedOnly ? 'fill-white text-white' : 'text-stone-400'}`} />
+                <Bookmark className={`w-3 h-3 ${showSavedOnly ? 'fill-current text-white dark:text-stone-950' : 'text-stone-400'}`} />
                 <span>{currentLang === 'uk' ? 'Збережені' : 'Saved'}</span>
               </button>
             )}

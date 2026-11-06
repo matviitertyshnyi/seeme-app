@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, Crown, Check, ShieldCheck } from 'lucide-react';
+import { Plus, Crown } from 'lucide-react';
 import { Participant } from '@/types/lobby';
 
 interface SeatBubblesProps {
@@ -31,7 +31,6 @@ export function SeatBubbles({
     <div className="flex flex-wrap items-start gap-2.5">
       {participants.map((person) => {
         const isHost = person.id === actualHostId;
-        const isMe = person.id === activeUserId;
         const skillLabel = person.skillBadge || (isHost ? 'Host' : 'Active');
         const isArrived = person.arrivalStatus === 'ARRIVED';
         const isFiveMin = person.arrivalStatus === 'FIVE_MIN_OUT';
@@ -67,67 +66,26 @@ export function SeatBubbles({
               isArrived ? ' · Arrived at venue' : isFiveMin ? ' · 5m away' : ''
             }${person.spotClue ? ` ("${person.spotClue}")` : ''}`}
           >
-            {/* 44x44px (w-11 h-11) circular avatar bubble */}
-            <div
-              className={`relative w-11 h-11 rounded-full p-[2px] transition-transform duration-200 group-hover:scale-105 ${
-                isArrived
-                  ? 'bg-emerald-600 shadow-sm'
-                  : isHost
-                  ? 'bg-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.4)]'
-                  : isMe
-                  ? 'bg-orange-500 shadow-[0_0_8px_rgba(234,88,12,0.3)]'
-                  : 'bg-stone-300 dark:bg-stone-700'
-              }`}
-            >
+            <div className="relative w-10 h-10 rounded-full ring-1 ring-stone-300 dark:ring-stone-700 bg-stone-100 dark:bg-stone-800 transition-transform duration-200 group-hover:scale-105">
               <img
                 src={person.avatar}
                 alt={person.name}
-                className="w-full h-full rounded-full object-cover border-2 border-white dark:border-stone-900 bg-stone-100 dark:bg-stone-800"
+                className="w-full h-full rounded-full object-cover"
               />
-              {Boolean((person as any).photoVerified) && !isHost && (
-                <span
-                  aria-label="Verified Human Member"
-                  title="Verified Member"
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs z-10"
-                >
-                  <ShieldCheck className="w-2.5 h-2.5" />
-                </span>
-              )}
               {isHost && (
                 <span
                   aria-label="Meetup Host"
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs"
+                  title="Host"
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-950 flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs"
                 >
                   <Crown className="w-2.5 h-2.5" />
-                </span>
-              )}
-              {isArrived && (
-                <span
-                  aria-label="Arrived at venue"
-                  title="Checked in: Arrived at venue"
-                  className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white dark:ring-stone-900 shadow-xs"
-                >
-                  <Check className="w-2.5 h-2.5 stroke-[3]" />
                 </span>
               )}
             </div>
 
             {showSkillBadges && (
-              <span
-                className={`mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-tight whitespace-nowrap border inline-flex items-center ${
-                  isArrived
-                    ? 'bg-emerald-50 text-emerald-950 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-200 dark:border-emerald-700'
-                    : isHost
-                    ? 'bg-orange-50 text-orange-950 border-orange-300 dark:bg-orange-950/70 dark:text-orange-200 dark:border-orange-700'
-                    : isMe
-                    ? 'bg-amber-50 text-amber-950 border-amber-300 dark:bg-amber-950/70 dark:text-amber-200 dark:border-amber-700'
-                    : 'bg-stone-100 text-stone-800 border-stone-300 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-700'
-                }`}
-              >
+              <span className="mt-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200/80 dark:border-stone-700/80 inline-flex items-center gap-1">
                 <span>{person.name.split(' ')[0]}</span>
-                {Boolean((person as any).photoVerified) && (
-                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-500 shrink-0 inline ml-0.5" />
-                )}
               </span>
             )}
           </div>
@@ -141,12 +99,12 @@ export function SeatBubbles({
             onClick={onEmptySeatClick}
             aria-label={`Claim open seat ${idx + 1}`}
             title="Tap to claim open seat"
-            className="w-11 h-11 rounded-full border-2 border-dashed border-orange-500/50 dark:border-orange-500/60 bg-orange-500/10 dark:bg-orange-500/15 hover:bg-orange-500/20 hover:border-orange-500 active:scale-95 text-orange-600 dark:text-orange-400 flex items-center justify-center transition-all duration-150 shadow-[0_0_10px_rgba(234,88,12,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 dark:focus-visible:ring-offset-stone-900"
+            className="w-10 h-10 rounded-full border border-dashed border-stone-300 dark:border-stone-700 bg-stone-100/50 dark:bg-stone-800/40 hover:border-stone-400 dark:hover:border-stone-500 text-stone-400 dark:text-stone-500 flex items-center justify-center transition-colors"
           >
-            <Plus className="w-4 h-4 stroke-[2.6]" />
+            <Plus className="w-4 h-4 stroke-[2]" />
           </button>
           {showSkillBadges && (
-            <span className="mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold text-orange-600 dark:text-orange-300 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800/60">
+            <span className="mt-1 text-[10px] font-medium text-stone-400 dark:text-stone-500">
               Open
             </span>
           )}

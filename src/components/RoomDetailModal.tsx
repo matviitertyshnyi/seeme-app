@@ -6,7 +6,6 @@ import {
   MapPin,
   Navigation,
   ExternalLink,
-  Zap,
   ShieldCheck,
   Send,
   Check,
@@ -17,12 +16,9 @@ import {
   LogOut,
   Lock,
   MessageSquare,
-  Crown,
-  Star,
   Bookmark,
   ShieldBan,
   Copy,
-  CheckCircle2,
   ThumbsUp,
   Users,
   Edit3,
@@ -34,7 +30,6 @@ import {
   UserPersona,
 } from '@/types/lobby';
 import { CategoryIcon } from '@/components/CategoryIcon';
-import { SeatBubbles } from '@/components/SeatBubbles';
 import { StatusBadge } from '@/components/StatusBadge';
 import { triggerSensoryFeedback } from '@/lib/sound';
 import { getDefaultCoverForCategory } from '@/lib/geo';
@@ -95,9 +90,7 @@ export function RoomDetailModal({
   onClickParticipant,
   onOpenLightbox,
 }: RoomDetailModalProps) {
-  const [mobileSection, setMobileSection] = useState<'DETAILS' | 'CHAT'>(
-    'DETAILS'
-  );
+  const [mobileSection, setMobileSection] = useState<'DETAILS' | 'CHAT'>('DETAILS');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessageText, setNewMessageText] = useState('');
   const [requestNote, setRequestNote] = useState('');
@@ -120,14 +113,6 @@ export function RoomDetailModal({
   const isFull = lobby
     ? lobby.participants.length >= lobby.maxParticipants || isFinished
     : false;
-  const onWayCount = lobby
-    ? lobby.participants.filter(
-        (p) => p.arrivalStatus === 'ON_MY_WAY' || p.arrivalStatus === 'FIVE_MIN_OUT'
-      ).length
-    : 0;
-  const arrivedCount = lobby
-    ? lobby.participants.filter((p) => p.arrivalStatus === 'ARRIVED').length
-    : 0;
 
   const coverImageUrl = useMemo(() => {
     if (!lobby?.coverImage || lobby.coverImage.includes('unsplash.com')) {
@@ -136,15 +121,12 @@ export function RoomDetailModal({
     return lobby.coverImage;
   }, [lobby?.coverImage, lobby?.category]);
 
-  const meetupProgressPercent = useMemo(() => {
-    if (!lobby) return 25;
-    const maxP = Math.max(1, lobby.maxParticipants);
-    if (arrivedCount >= maxP) return 100;
-    const playersContribution = (lobby.participants.length / maxP) * 25;
-    const onWayContribution = (onWayCount / maxP) * 25;
-    const arrivedContribution = (arrivedCount / maxP) * 25;
-    return Math.min(100, Math.round(25 + playersContribution + onWayContribution + arrivedContribution));
-  }, [lobby, onWayCount, arrivedCount]);
+  const hasCustomHostNote = Boolean(
+    lobby?.equipmentNote &&
+    lobby.equipmentNote.trim().length > 0 &&
+    !lobby.equipmentNote.startsWith('I have extra gear for ') &&
+    !lobby.equipmentNote.startsWith('All equipment ready.')
+  );
 
   useEffect(() => {
     if (myParticipantRecord?.spotClue) {
@@ -280,8 +262,8 @@ export function RoomDetailModal({
     }
   };
 
-  const handleJoinOrRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleJoinOrRequest = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (isLoadingAction) return;
     if (isSignedOut) {
       if (onRequestAuth) onRequestAuth();
@@ -447,8 +429,9 @@ export function RoomDetailModal({
             alt={lobby.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/35 to-stone-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20" />
 
+          {/* Top Row: Status + Distance, Actions */}
           <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <StatusBadge
@@ -456,8 +439,8 @@ export function RoomDetailModal({
                 timeLabel={lobby.startTimeBadge}
                 variant="solid"
               />
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-stone-900/85 text-xs font-extrabold text-white backdrop-blur-md">
-                <Navigation className="w-3.5 h-3.5 text-orange-300" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-950/80 border border-white/15 text-[11px] font-semibold text-stone-200 backdrop-blur-md">
+                <Navigation className="w-3 h-3 text-stone-400" />
                 {lobby.distanceLabel}
               </span>
             </div>
@@ -469,14 +452,14 @@ export function RoomDetailModal({
                   onClick={() => onToggleSave(lobby.id)}
                   aria-label={isSaved ? 'Remove saved meetup' : 'Save meetup'}
                   title={isSaved ? 'Remove saved meetup' : 'Save meetup'}
-                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors backdrop-blur-md border border-white/15 cursor-pointer ${
                     isSaved
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-stone-900/80 hover:bg-stone-900 text-white'
+                      ? 'bg-white text-stone-950'
+                      : 'bg-stone-950/80 hover:bg-stone-900 text-stone-200'
                   }`}
                 >
                   <Bookmark
-                    className={`w-4 h-4 ${isSaved ? 'fill-white text-white' : 'text-stone-300'}`}
+                    className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`}
                   />
                 </button>
               )}
@@ -486,9 +469,9 @@ export function RoomDetailModal({
                   type="button"
                   onClick={() => onOpenEditMeetup(lobby)}
                   aria-label="Edit meetup details"
-                  className="h-11 px-3.5 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer"
+                  className="h-9 sm:h-10 px-3 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md cursor-pointer"
                 >
-                  <Edit3 className="w-4 h-4 text-orange-300" />
+                  <Edit3 className="w-3.5 h-3.5 text-stone-200" />
                   <span>Edit</span>
                 </button>
               )}
@@ -497,116 +480,101 @@ export function RoomDetailModal({
                 type="button"
                 onClick={handleShareMeetup}
                 aria-label="Share meetup link"
-                className="h-11 px-3.5 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="h-9 sm:h-10 px-3 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md cursor-pointer"
               >
                 {copiedShareLink ? (
                   <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span>Link Copied</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Copied</span>
                   </>
                 ) : (
                   <>
-                    <ExternalLink className="w-4 h-4 text-orange-300" />
+                    <ExternalLink className="w-3.5 h-3.5 text-stone-200" />
                     <span>Share</span>
                   </>
                 )}
               </button>
+
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close meetup details"
-                className="w-11 h-11 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 flex items-center justify-center transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 text-stone-200" />
               </button>
             </div>
           </div>
 
+          {/* Bottom Row: Category overline, Title */}
           <div className="absolute bottom-3.5 left-4 right-4 text-white">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-extrabold">
-                <CategoryIcon category={lobby.category} className="w-3.5 h-3.5" />
-                {lobby.category}
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-900/80 backdrop-blur-md text-[11px] font-extrabold uppercase tracking-wider">
-                {lobby.joinMode === 'OPEN' ? (
-                  <>
-                    <Zap className="w-3 h-3 text-emerald-300 fill-current" />
-                    Instant Join
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="w-3 h-3 text-amber-300" />
-                    Host Approval
-                  </>
-                )}
-              </span>
+            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-300 mb-0.5">
+              <CategoryIcon category={lobby.category} className="w-3.5 h-3.5 text-stone-300" />
+              <span>{lobby.category}</span>
+              {lobby.joinMode === 'APPROVAL_REQUIRED' && (
+                <span className="text-stone-400">· Approval Required</span>
+              )}
             </div>
             <h2
               id="meetup-detail-title"
-              className="text-lg sm:text-2xl font-extrabold leading-snug truncate"
+              className="text-xl sm:text-2xl font-bold text-white leading-tight truncate"
             >
               {lobby.title}
             </h2>
           </div>
         </div>
 
-        {/* MOBILE SEGMENTED SWITCHER (Prevents vertical stacking overlap on phones) */}
-        <div className="lg:hidden px-4 py-2.5 bg-stone-100 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 grid grid-cols-2 gap-2 shrink-0">
+        {/* MOBILE SEGMENTED SWITCHER */}
+        <div className="lg:hidden px-4 py-2 bg-stone-100 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 grid grid-cols-2 gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setMobileSection('DETAILS')}
-            className={`min-h-[44px] rounded-xl text-xs font-extrabold inline-flex items-center justify-center gap-2 transition-all ${
+            className={`min-h-[38px] rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
               mobileSection === 'DETAILS'
-                ? 'bg-white dark:bg-stone-800 text-orange-600 dark:text-orange-400 shadow-sm'
-                : 'text-stone-700 dark:text-stone-300'
+                ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-xs'
+                : 'text-stone-500 dark:text-stone-400'
             }`}
           >
             <Users className="w-4 h-4" />
             <span>
-              Details & Players ({lobby.participants.length}/
-              {lobby.maxParticipants})
+              Details ({lobby.participants.length}/{lobby.maxParticipants})
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setMobileSection('CHAT')}
-            className={`min-h-[44px] rounded-xl text-xs font-extrabold inline-flex items-center justify-center gap-2 transition-all ${
+            className={`min-h-[38px] rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
               mobileSection === 'CHAT'
-                ? 'bg-white dark:bg-stone-800 text-orange-600 dark:text-orange-400 shadow-sm'
-                : 'text-stone-700 dark:text-stone-300'
+                ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-xs'
+                : 'text-stone-500 dark:text-stone-400'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
             <span>
               {isParticipant
-                ? `Group Chat (${messages.length})`
+                ? `Chat (${messages.length})`
                 : 'Join Meetup'}
             </span>
           </button>
         </div>
 
-        {/* BODY: 2 COLUMNS ON DESKTOP, CLEAN SINGLE ACTIVE VIEW ON MOBILE */}
+        {/* BODY: 2 COLUMNS ON DESKTOP */}
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-          {/* LEFT PANEL: Meetup Details, Check-In, Venue, Players & Approval Queue */}
+          {/* LEFT PANEL */}
           <div
             className={`${
               mobileSection === 'DETAILS' ? 'flex' : 'hidden lg:flex'
-            } lg:w-[55%] flex-col overflow-y-auto p-4 sm:p-6 space-y-5 lg:border-r border-stone-200 dark:border-stone-800`}
+            } lg:w-[55%] flex-col overflow-y-auto p-4 sm:p-6 space-y-4 lg:border-r border-stone-200 dark:border-stone-800`}
           >
-            {/* Primary Join CTA Banner on Mobile if user is not yet in the meetup */}
+            {/* Unjoined Banner */}
             {!isParticipant && !myPendingRequest && !isFull && (
-              <div className="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 flex items-center justify-between gap-3">
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-xs font-extrabold text-orange-950 dark:text-orange-200">
-                    {lobby.maxParticipants - lobby.participants.length} open{' '}
-                    {lobby.maxParticipants - lobby.participants.length === 1
-                      ? 'seat'
-                      : 'seats'}{' '}
-                    available
+                  <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    {lobby.maxParticipants - lobby.participants.length} {lobby.maxParticipants - lobby.participants.length === 1 ? 'spot' : 'spots'} available
                   </div>
-                  <p className="text-[11px] font-semibold text-orange-800 dark:text-orange-300">
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
                     {lobby.joinMode === 'OPEN'
                       ? 'Instant join: claim your spot in 1 tap'
                       : 'Host approval required'}
@@ -617,17 +585,17 @@ export function RoomDetailModal({
                   <button
                     type="button"
                     disabled={isLoadingAction}
-                    onClick={handleJoinOrRequest}
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shrink-0 inline-flex items-center gap-1.5"
+                    onClick={() => handleJoinOrRequest()}
+                    className="min-h-[38px] px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold transition active:scale-[0.98] shrink-0 inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <UserPlus className="w-4 h-4" />
-                    Join Now
+                    Join Spot
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setMobileSection('CHAT')}
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shrink-0"
+                    className="min-h-[38px] px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold transition active:scale-[0.98] shrink-0 cursor-pointer"
                   >
                     Request Spot
                   </button>
@@ -635,126 +603,82 @@ export function RoomDetailModal({
               </div>
             )}
 
-            {/* DOORDASH-STYLE 4-STEP LIVE ARRIVAL TRACKER */}
-            <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 space-y-3.5">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Meetup Progress
-                </span>
-                <span className="text-[11px] font-bold text-stone-700 dark:text-stone-300">
-                  {arrivedCount > 0
-                    ? `${arrivedCount} of ${lobby.maxParticipants} at spot`
-                    : onWayCount > 0
-                    ? `${onWayCount} of ${lobby.maxParticipants} en route`
-                    : `${lobby.participants.length} of ${lobby.maxParticipants} joined`}
-                </span>
-              </div>
-
-              {/* 4 Step Tracker */}
-              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-                {/* Step 1: Created */}
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                    <Check className="w-4 h-4 stroke-[2.8]" />
-                  </div>
-                  <span className="text-[11px] font-bold text-stone-900 dark:text-stone-100 mt-1 leading-tight">
-                    Created
-                  </span>
-                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
-                    Live
-                  </span>
+            {/* CARD 1: Location & Details */}
+            <div className="bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 rounded-2xl p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4" />
                 </div>
-
-                {/* Step 2: Filling Up */}
-                <div className="flex flex-col items-center text-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                      lobby.participants.length >= 1
-                        ? 'bg-orange-600 text-white shadow-xs'
-                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
-                    }`}
-                  >
-                    <Users className="w-4 h-4" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                    {lobby.venueName}
                   </div>
-                  <span className="text-[11px] font-bold text-stone-900 dark:text-stone-100 mt-1 leading-tight">
-                    Filling Up
-                  </span>
-                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
-                    {lobby.participants.length}/{lobby.maxParticipants} Joined
-                  </span>
-                </div>
-
-                {/* Step 3: On The Way */}
-                <div className="flex flex-col items-center text-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                      onWayCount > 0
-                        ? 'bg-amber-500 text-white shadow-xs animate-pulse'
-                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
-                    }`}
-                  >
-                    <Navigation className="w-4 h-4" />
+                  <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                    {lobby.venueAddress}
                   </div>
-                  <span className="text-[11px] font-bold text-stone-900 dark:text-stone-100 mt-1 leading-tight">
-                    On The Way
-                  </span>
-                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
-                    {onWayCount} En Route
-                  </span>
-                </div>
-
-                {/* Step 4: At Meetup Spot */}
-                <div className="flex flex-col items-center text-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                      arrivedCount >= lobby.maxParticipants
-                        ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/30'
-                        : arrivedCount > 0
-                        ? 'bg-emerald-600/80 text-white shadow-xs'
-                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
-                    }`}
-                  >
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <span
-                    className={`text-[11px] font-bold mt-1 leading-tight ${
-                      arrivedCount > 0
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-stone-900 dark:text-stone-100'
-                    }`}
-                  >
-                    At Meetup Spot
-                  </span>
-                  <span className="text-[9px] text-stone-500 dark:text-stone-400">
-                    {arrivedCount > 0
-                      ? `${arrivedCount}/${lobby.maxParticipants} Arrived`
-                      : `0/${lobby.maxParticipants} Here`}
-                  </span>
                 </div>
               </div>
 
-              {/* Continuous Progress Bar */}
-              <div className="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-orange-600 transition-all duration-500 rounded-full"
-                  style={{
-                    width: `${meetupProgressPercent}%`,
-                  }}
-                />
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${lobby.lat},${lobby.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700/80 text-xs font-medium inline-flex items-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
+                  Google Maps
+                </a>
+
+                <a
+                  href={`https://maps.apple.com/?ll=${lobby.lat},${lobby.lng}&q=${encodeURIComponent(
+                    lobby.venueName
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700/80 text-xs font-medium inline-flex items-center gap-1.5"
+                >
+                  <Navigation className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
+                  Apple Maps
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleCopyAddress}
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700/80 text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  {copiedAddress ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
+                      Copy Address
+                    </>
+                  )}
+                </button>
               </div>
+
+              {/* Host Note inside Location card if custom and non-generic */}
+              {hasCustomHostNote && (
+                <div className="pt-3 border-t border-stone-200/70 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                  <span className="font-semibold text-stone-700 dark:text-stone-200 mr-1.5">Note:</span>
+                  {lobby.equipmentNote}
+                </div>
+              )}
             </div>
 
-            {/* LIVE ARRIVAL CHECK-IN & VISUAL SPOT CLUE BAR (For Confirmed Participants) */}
+            {/* CARD 2: Arrival Check-In (For confirmed participants) */}
             {isParticipant && (
-              <div className="p-4 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 space-y-3">
+              <div className="bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                    Live Arrival Check-In
+                  <span className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Check-In Status
                   </span>
-                  <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
-                    Updates your status badge
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                    Let the group know where you are
                   </span>
                 </div>
 
@@ -769,10 +693,10 @@ export function RoomDetailModal({
                         type="button"
                         disabled={isLoadingAction}
                         onClick={() => handleCheckInUpdate(opt.status)}
-                        className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-extrabold border transition-all ${
+                        className={`min-h-[38px] px-3 py-1.5 rounded-xl text-xs border transition-all cursor-pointer ${
                           isCurrent
-                            ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                            : 'bg-white dark:bg-stone-900 hover:bg-emerald-100/60 text-stone-900 dark:text-stone-100 border-emerald-300 dark:border-emerald-700'
+                            ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-950 border-stone-900 dark:border-stone-100 font-semibold shadow-2xs'
+                            : 'bg-white dark:bg-stone-800/80 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700/80 font-medium'
                         }`}
                       >
                         {opt.label}
@@ -781,14 +705,14 @@ export function RoomDetailModal({
                   })}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2">
                   <input
                     type="text"
                     aria-label="Spot clue description"
                     value={spotClueInput}
                     onChange={(e) => setSpotClueInput(e.target.value)}
-                    placeholder='Spot clue (e.g. "Table 3, dark green hoodie")'
-                    className="min-h-[44px] flex-1 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-emerald-300 dark:border-emerald-700 text-xs font-semibold text-stone-950 dark:text-white placeholder:text-stone-500"
+                    placeholder='Spot clue (e.g. "Table 3, dark hoodie")'
+                    className="min-h-[38px] flex-1 bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl px-3 py-2 text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:border-stone-400"
                   />
                   <button
                     type="button"
@@ -799,271 +723,175 @@ export function RoomDetailModal({
                         spotClueInput
                       )
                     }
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-stone-900 dark:bg-orange-600 hover:bg-stone-800 text-white text-xs font-extrabold shrink-0"
+                    className="px-3.5 py-2 rounded-xl bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-700 text-white text-xs font-semibold border border-stone-700 shrink-0 cursor-pointer"
                   >
-                    Save Clue
+                    Save
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Real-Life Venue + Map Links */}
-            <div className="bg-stone-50 dark:bg-stone-800/70 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-xl bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-400 flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                    Meetup Location
-                  </div>
-                  <div className="text-sm font-extrabold text-stone-950 dark:text-white">
-                    {lobby.venueName}
-                  </div>
-                  <div className="text-xs font-semibold text-stone-700 dark:text-stone-300">
-                    {lobby.venueAddress}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${lobby.lat},${lobby.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 text-stone-950 dark:text-white border border-stone-300 dark:border-stone-700 text-xs font-extrabold shadow-sm"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                  Google Maps
-                </a>
-
-                <a
-                  href={`https://maps.apple.com/?ll=${lobby.lat},${lobby.lng}&q=${encodeURIComponent(
-                    lobby.venueName
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 text-stone-950 dark:text-white border border-stone-300 dark:border-stone-700 text-xs font-extrabold shadow-sm"
-                >
-                  <Navigation className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                  Apple Maps
-                </a>
-
-                <button
-                  type="button"
-                  onClick={handleCopyAddress}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 text-stone-900 dark:text-white border border-stone-300 dark:border-stone-700 text-xs font-extrabold"
-                >
-                  {copiedAddress ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" />
-                      Copy Address
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Equipment & Activity Note */}
+            {/* CARD 3: People — Single Clean List */}
             <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
-                Equipment & Activity Note
-              </h4>
-              <p className="text-sm text-stone-800 dark:text-stone-200 font-medium leading-relaxed bg-stone-50 dark:bg-stone-800/70 rounded-2xl p-4 border border-stone-200 dark:border-stone-700">
-                {lobby.equipmentNote}
-              </p>
-            </div>
-
-            {/* Players with Arrival Status, Spot Clues, Ratings & Host Ban */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
-                  Players ({lobby.participants.length}/{lobby.maxParticipants})
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                  People ({lobby.participants.length}/{lobby.maxParticipants})
                 </h4>
-                <span className="text-xs font-extrabold text-orange-700 dark:text-orange-400">
+                <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
                   {lobby.maxParticipants - lobby.participants.length === 0
-                    ? 'All Seats Filled'
-                    : `${lobby.maxParticipants - lobby.participants.length} Open`}
+                    ? 'Full'
+                    : `${lobby.maxParticipants - lobby.participants.length} spots open`}
                 </span>
               </div>
 
-              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 space-y-4">
-                <SeatBubbles
-                  participants={lobby.participants}
-                  maxParticipants={lobby.maxParticipants}
-                  hostId={lobby.hostId}
-                  activeUserId={activeUser.id}
-                  showSkillBadges
-                  onParticipantClick={(p) => onClickParticipant?.(p.id)}
-                />
+              <div className="bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/90 rounded-2xl overflow-hidden divide-y divide-stone-200/70 dark:divide-stone-800">
+                {lobby.participants.map((person) => {
+                  const personIsHost = person.id === lobby.hostId;
+                  const isSelf = person.id === activeUser.id;
+                  const isRegular = activeUser.regularPartnerIds?.includes(person.id);
 
-                <div className="pt-3 border-t border-stone-200 dark:border-stone-700 space-y-2.5">
-                  {lobby.participants.map((person) => {
-                    const personIsHost = person.id === lobby.hostId;
-                    const isSelf = person.id === activeUser.id;
-                    const isRegular = activeUser.regularPartnerIds?.includes(
-                      person.id
-                    );
+                  return (
+                    <div
+                      key={person.id}
+                      className="p-3.5 flex flex-col gap-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div
+                          onClick={() => {
+                            if (onClickParticipant) {
+                              onClickParticipant(person.id);
+                            } else if (onOpenLightbox) {
+                              onOpenLightbox(person.avatar, person.name, person.age, Boolean((person as any).photoVerified));
+                            }
+                          }}
+                          className={`flex items-center gap-3 min-w-0 ${
+                            onClickParticipant || onOpenLightbox
+                              ? 'cursor-pointer hover:opacity-80 transition-opacity'
+                              : ''
+                          }`}
+                        >
+                          <img
+                            src={person.avatar}
+                            alt={person.name}
+                            className="w-10 h-10 rounded-full object-cover shrink-0 border border-stone-200 dark:border-stone-700"
+                          />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                                {person.name}, {person.age}
+                              </span>
+                              {Boolean((person as any).photoVerified) && (
+                                <ShieldCheck className="w-3 h-3 text-stone-400 dark:text-stone-500 shrink-0" />
+                              )}
+                              {personIsHost && (
+                                <span className="px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[10px] font-semibold">
+                                  Host
+                                </span>
+                              )}
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800/90 text-stone-600 dark:text-stone-300 text-[10px] font-medium border border-stone-200/60 dark:border-stone-700/60">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    person.arrivalStatus === 'ARRIVED'
+                                      ? 'bg-emerald-400'
+                                      : 'bg-stone-400'
+                                  }`}
+                                />
+                                {person.arrivalStatus === 'ARRIVED'
+                                  ? 'Here'
+                                  : person.arrivalStatus === 'FIVE_MIN_OUT'
+                                  ? '5m away'
+                                  : person.arrivalStatus === 'LATE'
+                                  ? '10m late'
+                                  : 'On the way'}
+                              </span>
+                            </div>
 
-                    return (
-                      <div
-                        key={person.id}
-                        className="bg-white dark:bg-stone-900 rounded-xl p-3 border border-stone-200 dark:border-stone-800 space-y-2"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <div
-                            onClick={() => {
-                              if (onClickParticipant) {
-                                onClickParticipant(person.id);
-                              } else if (onOpenLightbox) {
-                                onOpenLightbox(person.avatar, person.name, person.age, Boolean((person as any).photoVerified));
-                              }
-                            }}
-                            className={`flex items-center gap-3 min-w-0 ${
-                              onClickParticipant || onOpenLightbox
-                                ? 'cursor-pointer hover:opacity-80 transition-opacity'
-                                : ''
-                            }`}
-                          >
-                            <img
-                              src={person.avatar}
-                              alt={person.name}
-                              className="w-11 h-11 rounded-full object-cover shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-sm font-extrabold text-stone-950 dark:text-white inline-flex items-center gap-1">
-                                  <span>{person.name}, {person.age}</span>
-                                  {Boolean((person as any).photoVerified) && (
-                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
-                                  )}
-                                </span>
-                                {personIsHost && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-900 dark:bg-orange-600 text-white text-[10px] font-extrabold uppercase">
-                                    <Crown className="w-2.5 h-2.5 text-amber-300" />
-                                    Host
-                                  </span>
-                                )}
-                                {person.arrivalStatus === 'ARRIVED' && (
-                                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold">
-                                    Arrived
-                                  </span>
-                                )}
-                                {person.arrivalStatus === 'FIVE_MIN_OUT' && (
-                                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[10px] font-extrabold">
-                                    5m Away
-                                  </span>
-                                )}
-                                {person.arrivalStatus === 'LATE' && (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-900 text-[10px] font-extrabold">
-                                    10m Late
-                                  </span>
-                                )}
-                              </div>
-
-                              <div className="flex items-center gap-2 text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
-                                <span className="text-emerald-700 dark:text-emerald-400">
-                                  {person.reliabilityScore ?? 98}% Shows Up
-                                </span>
-                                <span>•</span>
-                                <span className="inline-flex items-center gap-0.5 text-amber-700 dark:text-amber-400">
-                                  <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                                  {person.ratingAvg ?? 4.9}
-                                </span>
-                              </div>
+                            <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                              {person.reliabilityScore ?? 98}% show-up · ★ {person.ratingAvg ?? 5}
                             </div>
                           </div>
-
-                          {!isSelf && (
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {onQuickRatePlayer && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    onQuickRatePlayer(
-                                      person.id,
-                                      lobby.id,
-                                      person.name
-                                    )
-                                  }
-                                  title={`Give ${person.name} a 5-Star rating`}
-                                  className="min-h-[44px] px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 text-xs font-extrabold inline-flex items-center gap-1"
-                                >
-                                  <ThumbsUp className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
-                                  <span>5.0</span>
-                                </button>
-                              )}
-
-                              {onToggleRegularPartner && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    onToggleRegularPartner(
-                                      person.id,
-                                      person.name
-                                    )
-                                  }
-                                  title={
-                                    isRegular
-                                      ? 'Saved in Regular Partners'
-                                      : 'Save to Regular Partners'
-                                  }
-                                  className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-colors ${
-                                    isRegular
-                                      ? 'bg-orange-600 text-white border-orange-600'
-                                      : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 text-stone-700 dark:text-stone-200 border-stone-300 dark:border-stone-700'
-                                  }`}
-                                >
-                                  <Bookmark className="w-4 h-4" />
-                                </button>
-                              )}
-
-                              {isHost && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleBanParticipant(person.id)
-                                  }
-                                  title={`Kick and Ban ${person.name} from meetup`}
-                                  className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex items-center justify-center transition-colors"
-                                >
-                                  <ShieldBan className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          )}
                         </div>
 
-                        {person.spotClue && (
-                          <div className="text-xs font-bold text-orange-950 dark:text-orange-200 bg-orange-50/80 dark:bg-orange-950/60 rounded-lg px-3 py-1.5 border border-orange-200 dark:border-orange-800">
-                            Spot clue: &ldquo;{person.spotClue}&rdquo;
+                        {!isSelf && (
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {onQuickRatePlayer && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onQuickRatePlayer(
+                                    person.id,
+                                    lobby.id,
+                                    person.name
+                                  )
+                                }
+                                title={`Give ${person.name} a 5-Star rating`}
+                                className="min-h-[34px] px-2.5 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <ThumbsUp className="w-3 h-3 text-stone-500 dark:text-stone-400" />
+                                <span>5.0</span>
+                              </button>
+                            )}
+
+                            {onToggleRegularPartner && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onToggleRegularPartner(
+                                    person.id,
+                                    person.name
+                                  )
+                                }
+                                title={
+                                  isRegular
+                                    ? 'Saved in Regular Partners'
+                                    : 'Save to Regular Partners'
+                                }
+                                className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-colors cursor-pointer ${
+                                  isRegular
+                                    ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900 border-stone-900 dark:border-white'
+                                    : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
+                                }`}
+                              >
+                                <Bookmark className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+
+                            {isHost && (
+                              <button
+                                type="button"
+                                onClick={() => handleBanParticipant(person.id)}
+                                title={`Kick and Ban ${person.name} from meetup`}
+                                className="w-8 h-8 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700 flex items-center justify-center transition-colors cursor-pointer"
+                              >
+                                <ShieldBan className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
+
+                      {person.spotClue && (
+                        <div className="bg-stone-100 dark:bg-stone-800/80 text-stone-700 dark:text-stone-300 text-xs px-3 py-1.5 rounded-lg">
+                          Spot clue: &ldquo;{person.spotClue}&rdquo;
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             {/* HOST APPROVAL QUEUE */}
             {lobby.pendingRequests.length > 0 && (
-              <div className="bg-amber-50 dark:bg-amber-950/40 rounded-2xl p-4 border border-amber-300 dark:border-amber-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-amber-950 dark:text-amber-200">
-                    Pending Join Requests ({lobby.pendingRequests.length})
-                  </span>
-                </div>
+              <div className="bg-stone-50 dark:bg-stone-900/60 rounded-2xl p-4 border border-stone-200 dark:border-stone-800/90 space-y-3">
+                <span className="text-xs font-bold text-stone-900 dark:text-stone-100 block">
+                  Pending Join Requests ({lobby.pendingRequests.length})
+                </span>
 
                 {lobby.pendingRequests.map((req) => (
                   <div
                     key={req.id}
-                    className="bg-white dark:bg-stone-900 rounded-xl p-3.5 shadow-sm border border-amber-200 dark:border-amber-800 space-y-2.5"
+                    className="bg-white dark:bg-stone-800/80 rounded-xl p-3 border border-stone-200 dark:border-stone-700/80 space-y-2.5"
                   >
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div
@@ -1083,23 +911,16 @@ export function RoomDetailModal({
                         <img
                           src={req.user.avatar}
                           alt={req.user.name}
-                          className="w-11 h-11 rounded-full object-cover shrink-0"
+                          className="w-10 h-10 rounded-full object-cover shrink-0 border border-stone-200 dark:border-stone-700"
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-extrabold text-stone-950 dark:text-white truncate inline-flex items-center gap-1">
-                              <span>{req.user.name}, {req.user.age}</span>
-                              {Boolean((req.user as any).photoVerified) && (
-                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 inline ml-0.5" />
-                              )}
+                            <span className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                              {req.user.name}, {req.user.age}
                             </span>
                           </div>
-                          <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                            <span>
-                              {req.user.reliabilityScore ?? 96}% Reliable ·
-                            </span>
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                            <span>{req.user.ratingAvg ?? 4.9}</span>
+                          <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                            {req.user.reliabilityScore ?? 96}% show-up · ★ {req.user.ratingAvg ?? 4.9}
                           </div>
                         </div>
                       </div>
@@ -1112,9 +933,9 @@ export function RoomDetailModal({
                             onClick={() =>
                               handleHostDecision(req.id, 'ACCEPT_REQUEST')
                             }
-                            className="min-h-[44px] inline-flex items-center gap-1 px-3.5 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold shadow-sm"
+                            className="min-h-[34px] inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-900 dark:bg-stone-100 hover:opacity-90 text-white dark:text-stone-950 text-xs font-semibold cursor-pointer"
                           >
-                            <UserCheck className="w-4 h-4" />
+                            <UserCheck className="w-3.5 h-3.5" />
                             Accept
                           </button>
                           <button
@@ -1123,9 +944,9 @@ export function RoomDetailModal({
                             onClick={() =>
                               handleHostDecision(req.id, 'DECLINE_REQUEST')
                             }
-                            className="min-h-[44px] inline-flex items-center gap-1 px-3 py-2 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-800 dark:text-stone-200 text-xs font-extrabold"
+                            className="min-h-[34px] inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-semibold border border-stone-200 dark:border-stone-700 cursor-pointer"
                           >
-                            <UserX className="w-4 h-4" />
+                            <UserX className="w-3.5 h-3.5" />
                             Decline
                           </button>
                           <button
@@ -1133,16 +954,16 @@ export function RoomDetailModal({
                             disabled={isLoadingAction}
                             onClick={() => handleBanParticipant(req.user.id)}
                             title="Ban user"
-                            className="w-11 h-11 rounded-full bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-700 dark:text-rose-300 flex items-center justify-center"
+                            className="w-8 h-8 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-600 dark:text-stone-400 flex items-center justify-center border border-stone-200 dark:border-stone-700 cursor-pointer"
                           >
-                            <ShieldBan className="w-4 h-4" />
+                            <ShieldBan className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       )}
                     </div>
 
                     {req.note && (
-                      <p className="text-xs text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-800 rounded-lg px-3 py-2 font-medium">
+                      <p className="text-xs text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-900 rounded-lg px-3 py-2 font-medium">
                         &ldquo;{req.note}&rdquo;
                       </p>
                     )}
@@ -1151,15 +972,16 @@ export function RoomDetailModal({
               </div>
             )}
 
+            {/* FOOTER BUTTON: End & Close Meetup / Leave Meetup */}
             <div className="pt-1 flex items-center justify-between gap-3">
               {isHost ? (
                 <button
                   type="button"
                   onClick={handleDeleteLobby}
                   disabled={isLoadingAction}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-extrabold text-rose-700 dark:text-rose-400 hover:text-rose-800 px-4 py-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
+                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 px-3.5 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   End & Close Meetup
                 </button>
               ) : isParticipant || myPendingRequest ? (
@@ -1167,9 +989,9 @@ export function RoomDetailModal({
                   type="button"
                   onClick={handleLeaveLobby}
                   disabled={isLoadingAction}
-                  className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-extrabold text-stone-700 dark:text-stone-300 hover:text-rose-700 px-4 py-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 px-3.5 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   {isParticipant ? 'Leave Meetup' : 'Cancel Join Request'}
                 </button>
               ) : null}
@@ -1184,49 +1006,32 @@ export function RoomDetailModal({
           >
             <div className="flex px-4 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 items-center justify-between gap-2 shrink-0">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-brand-soft text-brand flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
+                  <MessageSquare className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-extrabold text-stone-950 dark:text-white truncate">
-                    Live Meetup Chat
+                  <h3 className="text-sm font-bold text-stone-950 dark:text-white truncate">
+                    Meetup Chat
                   </h3>
-                  <p className="text-xs font-semibold text-stone-700 dark:text-stone-300 truncate">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
                     {isParticipant
                       ? 'Coordinate exact table, court, or arrival'
                       : 'Join this meetup to coordinate'}
                   </p>
                 </div>
               </div>
-
-              {isParticipant && (
-                <button
-                  type="button"
-                  onClick={() => handleCheckInUpdate('ARRIVED')}
-                  disabled={isLoadingAction || myParticipantRecord?.arrivalStatus === 'ARRIVED'}
-                  className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 inline-flex items-center gap-1.5 ${
-                    myParticipantRecord?.arrivalStatus === 'ARRIVED'
-                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
-                      : 'bg-brand hover:bg-brand-hover active:scale-95 text-white shadow-sm'
-                  }`}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{myParticipantRecord?.arrivalStatus === 'ARRIVED' ? 'Checked In' : "I'm Here!"}</span>
-                </button>
-              )}
             </div>
 
             {isParticipant ? (
               <>
-                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
                   {messages.length === 0 ? (
                     <div className="text-center py-12 px-4">
-                      <p className="text-xs font-extrabold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">
                         No messages yet
                       </p>
-                      <p className="text-xs font-medium text-stone-600 dark:text-stone-400 mt-1">
-                        Say hello and let the group know what you are wearing or
-                        when you will arrive.
+                      <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                        Say hello and let the group know when you will arrive.
                       </p>
                     </div>
                   ) : (
@@ -1235,7 +1040,7 @@ export function RoomDetailModal({
                       if (msg.isSystem) {
                         return (
                           <div key={msg.id} className="flex justify-center">
-                            <span className="px-3.5 py-1 rounded-full bg-white dark:bg-stone-900 text-xs font-bold text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 shadow-sm text-center">
+                            <span className="px-3 py-1 rounded-full bg-white dark:bg-stone-900 text-[11px] font-medium text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-800 shadow-2xs text-center">
                               {msg.text}
                             </span>
                           </div>
@@ -1259,17 +1064,17 @@ export function RoomDetailModal({
                                 onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, false);
                               }
                             }}
-                            className={`w-8 h-8 rounded-full object-cover shrink-0 border border-white dark:border-stone-800 shadow-sm ${
+                            className={`w-8 h-8 rounded-full object-cover shrink-0 border border-stone-200 dark:border-stone-800 ${
                               onClickParticipant || onOpenLightbox
                                 ? 'cursor-pointer hover:scale-105 transition-transform'
                                 : ''
                             }`}
                           />
                           <div
-                            className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
+                            className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
                               isMine
-                                ? 'bg-orange-600 text-white rounded-br-sm shadow-sm'
-                                : 'bg-white dark:bg-stone-900 text-stone-950 dark:text-white rounded-bl-sm border border-stone-200 dark:border-stone-800 shadow-sm'
+                                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-950 rounded-br-sm shadow-2xs'
+                                : 'bg-white dark:bg-stone-900 text-stone-950 dark:text-white rounded-bl-sm border border-stone-200 dark:border-stone-800 shadow-2xs'
                             }`}
                           >
                             {!isMine && (
@@ -1282,7 +1087,7 @@ export function RoomDetailModal({
                                     onOpenLightbox(msg.senderAvatar, msg.senderName, undefined, false);
                                   }
                                 }}
-                                className={`text-[11px] font-extrabold text-orange-700 dark:text-orange-400 mb-0.5 text-left block ${
+                                className={`text-[10px] font-bold text-stone-500 dark:text-stone-400 mb-0.5 text-left block ${
                                   onClickParticipant || onOpenLightbox
                                     ? 'hover:underline cursor-pointer'
                                     : ''
@@ -1291,7 +1096,7 @@ export function RoomDetailModal({
                                 {msg.senderName}
                               </button>
                             )}
-                            <p className="font-medium">{msg.text}</p>
+                            <p className="font-normal">{msg.text}</p>
                           </div>
                         </div>
                       );
@@ -1300,13 +1105,14 @@ export function RoomDetailModal({
                   <div ref={chatEndRef} />
                 </div>
 
+                {/* Quick replies */}
                 <div className="px-4 py-2 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
                   {QUICK_COORDINATION_REPLIES.map((chip) => (
                     <button
                       key={chip}
                       type="button"
                       onClick={() => handleSendMessage(chip)}
-                      className="min-h-[38px] px-3.5 py-1.5 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-800 dark:hover:text-orange-300 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-800 dark:text-stone-200 whitespace-nowrap transition-colors shrink-0"
+                      className="min-h-[32px] px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700/80 text-xs font-medium whitespace-nowrap transition-colors shrink-0 cursor-pointer"
                     >
                       {chip}
                     </button>
@@ -1318,7 +1124,7 @@ export function RoomDetailModal({
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="p-3.5 sm:p-4 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 shrink-0"
+                  className="p-3 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center gap-2 shrink-0"
                 >
                   <input
                     type="text"
@@ -1326,13 +1132,13 @@ export function RoomDetailModal({
                     value={newMessageText}
                     onChange={(e) => setNewMessageText(e.target.value)}
                     placeholder={`Message as ${activeUser.name.split(' ')[0]}...`}
-                    className="min-h-[44px] flex-1 px-4 py-2.5 rounded-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
+                    className="min-h-[40px] flex-1 px-3.5 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400"
                   />
                   <button
                     type="submit"
                     aria-label="Send message"
                     disabled={!newMessageText.trim() || isSendingMsg}
-                    className="w-11 h-11 rounded-full bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition-all shrink-0"
+                    className="w-10 h-10 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white flex items-center justify-center transition active:scale-95 shrink-0 cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -1340,62 +1146,58 @@ export function RoomDetailModal({
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center">
-                <div className="w-14 h-14 rounded-full bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-400 flex items-center justify-center mb-4">
-                  {lobby.joinMode === 'OPEN' ? (
-                    <Zap className="w-7 h-7" />
-                  ) : (
-                    <ShieldCheck className="w-7 h-7" />
-                  )}
+                <div className="w-12 h-12 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center mb-3">
+                  <MessageSquare className="w-6 h-6" />
                 </div>
 
                 {myPendingRequest ? (
-                  <div className="max-w-sm space-y-3">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-950 text-xs font-extrabold">
+                  <div className="max-w-sm space-y-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 text-xs font-semibold">
                       <Check className="w-3.5 h-3.5" />
                       Request Sent to Host
                     </span>
-                    <h4 className="text-xl font-extrabold text-stone-950 dark:text-white">
+                    <h4 className="text-lg font-bold text-stone-950 dark:text-white">
                       Waiting for host approval
                     </h4>
-                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300 leading-relaxed">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
                       Your note: &ldquo;{myPendingRequest.note}&rdquo;.
                     </p>
                   </div>
                 ) : isFull ? (
                   <div className="max-w-sm space-y-2">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-900 text-xs font-extrabold">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700 text-xs font-semibold">
                       <Lock className="w-3.5 h-3.5" />
                       {isFinished
                         ? 'Meetup Finished'
                         : `${lobby.participants.length}/${lobby.maxParticipants} Full`}
                     </span>
-                    <h4 className="text-xl font-extrabold text-stone-950 dark:text-white">
+                    <h4 className="text-lg font-bold text-stone-950 dark:text-white">
                       {isFinished
                         ? 'This meetup has ended'
                         : 'This meetup is full'}
                     </h4>
-                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300">
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
                       {isFinished
-                        ? 'Check out Live or Upcoming meetups in Explore.'
+                        ? 'Check out other meetups in Explore.'
                         : `All ${lobby.maxParticipants} seats have been claimed.`}
                     </p>
                   </div>
                 ) : (
                   <form
                     onSubmit={handleJoinOrRequest}
-                    className="w-full max-w-sm space-y-4"
+                    className="w-full max-w-sm space-y-3"
                   >
-                    <h4 className="text-xl font-extrabold text-stone-950 dark:text-white">
+                    <h4 className="text-lg font-bold text-stone-950 dark:text-white">
                       {lobby.joinMode === 'OPEN'
-                        ? 'Claim an Open Seat Instantly'
-                        : 'Request a Seat from the Host'}
+                        ? 'Claim an Open Seat'
+                        : 'Request a Seat from Host'}
                     </h4>
-                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300 leading-relaxed">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
                       {lobby.joinMode === 'OPEN'
-                        ? `Tap below to claim seat ${
+                        ? `Claim seat ${
                             lobby.participants.length + 1
-                          } of ${lobby.maxParticipants} and unlock the group chat.`
-                        : 'Add a short note below and the host can 1-tap accept your request.'}
+                          } of ${lobby.maxParticipants} to unlock the group chat.`
+                        : 'Add an optional note to send to the host.'}
                     </p>
 
                     {lobby.joinMode === 'APPROVAL_REQUIRED' && (
@@ -1404,17 +1206,16 @@ export function RoomDetailModal({
                         aria-label="Optional note to the host"
                         value={requestNote}
                         onChange={(e) => setRequestNote(e.target.value)}
-                        placeholder="Optional note (e.g. 'Hey! I am 5 mins away and have extra balls')"
-                        className="w-full rounded-2xl p-3.5 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
+                        placeholder="Optional note (e.g. 'Hey, 5 mins away!')"
+                        className="w-full rounded-xl p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400"
                       />
                     )}
 
                     <button
                       type="submit"
                       disabled={isLoadingAction}
-                      className="min-h-[48px] w-full py-3.5 px-6 rounded-full bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-sm font-extrabold shadow-sm inline-flex items-center justify-center gap-2 transition-all"
+                      className="min-h-[42px] w-full py-2.5 px-5 rounded-xl bg-orange-600 hover:bg-orange-500 active:scale-[0.98] text-white text-xs font-semibold transition cursor-pointer"
                     >
-                      <UserPlus className="w-4 h-4" />
                       {lobby.joinMode === 'OPEN'
                         ? `Join Meetup (${lobby.participants.length}/${lobby.maxParticipants})`
                         : 'Send Join Request'}

@@ -96,47 +96,150 @@ export function ProfileView({
   return (
     <div className="space-y-5">
       {isSignedOut ? (
-        <div className="bg-white dark:bg-[#1C1917] rounded-[26px] p-8 text-center border border-stone-200 dark:border-stone-800 shadow-ambient space-y-4 max-w-md mx-auto mt-6">
-          <div className="flex justify-center">
-            <OpenDoorLogo className="w-14 h-14 drop-shadow-sm" size={56} />
+        <>
+          <div className="bg-white dark:bg-[#1C1917] rounded-2xl p-6 sm:p-7 text-center border border-stone-200 dark:border-stone-800/90 shadow-sm max-w-sm mx-auto mt-4 space-y-5">
+            <OpenDoorLogo className="w-12 h-12 mx-auto" size={48} />
+            <div>
+              <h1 className="text-lg font-bold text-stone-950 dark:text-stone-100">
+                Sign in to Leave The Room
+              </h1>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
+                Join local meetups, check in at spots, and chat with people nearby.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={onGoogleSignIn}
+                className="min-h-[44px] w-full rounded-xl bg-stone-900 dark:bg-white hover:opacity-90 text-white dark:text-stone-950 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+              >
+                <GoogleIcon className="w-4 h-4 shrink-0" />
+                <span>Continue with Google</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onAppleSignIn}
+                className="min-h-[44px] w-full rounded-xl bg-stone-100 dark:bg-stone-800/90 hover:bg-stone-200 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+              >
+                <AppleIcon className="w-4 h-4 shrink-0" />
+                <span>Continue with Apple</span>
+              </button>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-stone-950 dark:text-white">
-              Sign In to Leave The Room
-            </h1>
-            <p className="text-xs font-medium text-stone-600 dark:text-stone-300 mt-1">
-              Sign in to your account to join meetups, check in, and chat with
-              players nearby.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2.5 pt-2">
+
+          {/* Preferences for signed-out visitors */}
+          <section className="bg-white dark:bg-[#1C1917] rounded-2xl border border-stone-200 dark:border-stone-800/90 shadow-sm max-w-sm mx-auto divide-y divide-stone-100 dark:divide-stone-800/80 overflow-hidden">
+            {/* Appearance */}
+            <div className="p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
+                  {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Appearance
+                  </h2>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                    {isDarkMode ? 'Dark warm stone' : 'Light'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onToggleDarkMode(false)}
+                  className={`min-h-[30px] px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
+                    !isDarkMode
+                      ? 'bg-white text-stone-950 shadow-2xs'
+                      : 'text-stone-400 hover:text-stone-200'
+                  }`}
+                >
+                  <Sun className="w-3 h-3" />
+                  <span>Light</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onToggleDarkMode(true)}
+                  className={`min-h-[30px] px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
+                    isDarkMode
+                      ? 'bg-stone-950 text-white shadow-2xs'
+                      : 'text-stone-600 dark:text-stone-400'
+                  }`}
+                >
+                  <Moon className="w-3 h-3" />
+                  <span>Dark</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Language */}
             <button
               type="button"
-              onClick={onGoogleSignIn}
-              className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700/80 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              onClick={onOpenLanguageSheet}
+              className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
-              <GoogleIcon className="w-5 h-5 shrink-0" />
-              <span>Continue with Google</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs flex items-center justify-center shrink-0 uppercase">
+                  {currentLang.toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Language
+                  </h2>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    {SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.nativeName}{' '}
+                    <span className="text-stone-400">
+                      ({SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.name})
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className="w-4 h-4 text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-200 transition-colors shrink-0" />
             </button>
 
+            {/* Community Policies & Safety */}
             <button
               type="button"
-              onClick={onAppleSignIn}
-              className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              onClick={onOpenPoliciesModal}
+              className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
-              <AppleIcon className="w-5 h-5 shrink-0" />
-              <span>Continue with Apple</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Community Policies & Safety
+                  </h2>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    Rules & zero-tolerance flaking policy
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-200 transition-colors shrink-0" />
             </button>
 
-            <button
-              type="button"
-              onClick={onOpenAuthModal}
-              className="min-h-[44px] w-full py-3 rounded-full bg-stone-900 hover:bg-black dark:bg-white text-white dark:text-stone-900 text-xs font-extrabold shadow-sm transition-all"
-            >
-              More Sign In Options
-            </button>
-          </div>
-        </div>
+            {/* Footer Bar */}
+            <div className="p-3.5 bg-stone-50/70 dark:bg-stone-900/50 flex items-center justify-center gap-3 text-[11px] font-semibold text-stone-500 dark:text-stone-400 flex-wrap">
+              <a href="/privacy" className="hover:text-stone-900 dark:hover:text-stone-200 transition-colors">
+                Privacy Policy
+              </a>
+              <span>·</span>
+              <a href="/terms" className="hover:text-stone-900 dark:hover:text-stone-200 transition-colors">
+                Terms of Service
+              </a>
+              <span>·</span>
+              <a
+                href="mailto:contact@leavetheroom.tech"
+                className="hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
+              >
+                contact@leavetheroom.tech
+              </a>
+            </div>
+          </section>
+        </>
       ) : (
         /* Logged-In Profile Screen */
         <>
@@ -152,7 +255,7 @@ export function ProfileView({
                   <img
                     src={activeUser.avatar}
                     alt={activeUser.name}
-                    className="w-16 h-16 rounded-full object-cover ring-2 ring-orange-500 group-hover:ring-4 group-hover:ring-orange-400/50 shadow-[0_0_16px_rgba(234,88,12,0.3)] transition-all"
+                    className="w-16 h-16 rounded-full object-cover ring-1 ring-stone-200 dark:ring-stone-700 transition-all"
                   />
                   {Boolean(activeUser.photoVerified) && (
                     <span
@@ -196,12 +299,12 @@ export function ProfileView({
                     <button
                       type="button"
                       onClick={onOpenCitySelector}
-                      className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline inline-flex items-center gap-1 group cursor-pointer"
+                      className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 inline-flex items-center gap-1 group cursor-pointer"
                       title="Tap to change your city"
                     >
                       <MapPin className="w-3.5 h-3.5 shrink-0" />
                       <span>{activeUser.neighborhood || 'Select your city'}</span>
-                      <span className="text-[10px] text-stone-500 dark:text-stone-400 font-normal group-hover:text-stone-300">
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500 font-normal group-hover:text-stone-600 dark:group-hover:text-stone-300">
                         · Change
                       </span>
                     </button>
@@ -226,8 +329,8 @@ export function ProfileView({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
-              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                <div className="text-base font-bold text-emerald-700 dark:text-emerald-400">
+              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all">
+                <div className="text-base font-bold text-stone-950 dark:text-stone-100">
                   {activeUser.reliabilityScore}%
                 </div>
                 <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -235,9 +338,9 @@ export function ProfileView({
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                <div className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all">
+                <div className="text-base font-bold text-stone-950 dark:text-stone-100 flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-current text-stone-900 dark:text-stone-100" />
                   {activeUser.ratingAvg}
                 </div>
                 <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -245,8 +348,8 @@ export function ProfileView({
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                <div className="text-base font-bold text-orange-600 dark:text-orange-400 drop-shadow-[0_0_8px_rgba(234,88,12,0.25)]">
+              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all">
+                <div className="text-base font-bold text-stone-950 dark:text-stone-100">
                   {activeUser.meetupsAttended}
                 </div>
                 <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -254,8 +357,8 @@ export function ProfileView({
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-orange-500/30 transition-all">
-                <div className="text-base font-bold text-stone-900 dark:text-stone-100">
+              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#141210] border border-stone-200 dark:border-stone-800 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all">
+                <div className="text-base font-bold text-stone-950 dark:text-stone-100">
                   {activeUser.hoursPlayed}h
                 </div>
                 <div className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -274,7 +377,7 @@ export function ProfileView({
               className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
                   <Users className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -283,7 +386,7 @@ export function ProfileView({
                       Friends & Direct Messages
                     </h2>
                     {Boolean(((activeUser as any).incomingFriendRequestIds?.length || 0) > 0) && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-orange-600 text-white animate-pulse">
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-stone-900 dark:bg-white text-white dark:text-stone-950">
                         {(activeUser as any).incomingFriendRequestIds.length} new
                       </span>
                     )}
@@ -293,10 +396,7 @@ export function ProfileView({
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold text-xs shrink-0 group-hover:translate-x-0.5 transition-transform">
-                <span>Open</span>
-                <ChevronRight className="w-4 h-4" />
-              </div>
+              <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-200 transition-colors shrink-0" />
             </button>
 
             {/* Row 2: Appearance & Theme */}
@@ -333,7 +433,7 @@ export function ProfileView({
                   onClick={() => onToggleDarkMode(true)}
                   className={`min-h-[30px] px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all ${
                     isDarkMode
-                      ? 'bg-orange-600 text-white shadow-2xs'
+                      ? 'bg-stone-950 text-white shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400'
                   }`}
                 >
@@ -350,7 +450,7 @@ export function ProfileView({
               className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold text-xs flex items-center justify-center shrink-0 uppercase">
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs flex items-center justify-center shrink-0 uppercase">
                   {currentLang.toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -375,7 +475,7 @@ export function ProfileView({
               className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -394,7 +494,7 @@ export function ProfileView({
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center shrink-0">
                     <LogOut className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
@@ -410,7 +510,7 @@ export function ProfileView({
                 <button
                   type="button"
                   onClick={onSignOut}
-                  className="min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                  className="min-h-[34px] px-3 py-1.5 rounded-xl text-xs font-semibold text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out</span>
@@ -472,17 +572,17 @@ export function ProfileView({
 
             {/* Footer Bar */}
             <div className="p-3.5 bg-stone-50/70 dark:bg-stone-900/50 flex items-center justify-center gap-3 text-[11px] font-semibold text-stone-500 dark:text-stone-400 flex-wrap">
-              <a href="/privacy" className="hover:text-orange-500 transition-colors">
+              <a href="/privacy" className="hover:text-stone-900 dark:hover:text-stone-200 transition-colors">
                 Privacy Policy
               </a>
               <span>·</span>
-              <a href="/terms" className="hover:text-orange-500 transition-colors">
+              <a href="/terms" className="hover:text-stone-900 dark:hover:text-stone-200 transition-colors">
                 Terms of Service
               </a>
               <span>·</span>
               <a
                 href="mailto:contact@leavetheroom.tech"
-                className="hover:text-orange-500 transition-colors"
+                className="hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
               >
                 contact@leavetheroom.tech
               </a>

@@ -1303,17 +1303,17 @@ export default function LeaveTheRoomHomePage() {
       <ToastNotification message={toastMessage} />
 
       <main className={`w-full max-w-xl mx-auto flex-1 px-4 pt-3 ${activeNav === 'MAP' ? 'pb-20' : 'pb-24'}`}>
-        {/* Sleek sticky top guest bar when signed out */}
-        {isSignedOut && (
+        {/* Sleek sticky top guest bar when signed out (EXPLORE view only) */}
+        {isSignedOut && activeNav === 'EXPLORE' && (
           <div className="sticky top-2 z-40 mb-3 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-md">
             <div className="flex items-center gap-2.5 min-w-0">
               <OpenDoorLogo className="w-8 h-8 shrink-0" size={32} />
               <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-stone-100 truncate block">
-                  Leave The Room — Live Local Meetups
+                <span className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate block">
+                  Leave The Room
                 </span>
-                <span className="text-[10px] text-stone-500 dark:text-stone-400 truncate block">
-                  Sign in to join, host & unlock map
+                <span className="text-[11px] text-stone-500 dark:text-stone-400 truncate block">
+                  Browse live meetups nearby. Sign in to join or host.
                 </span>
               </div>
             </div>
@@ -1323,7 +1323,7 @@ export default function LeaveTheRoomHomePage() {
                 setAuthModalTab('LOGIN');
                 setIsAuthModalOpen(true);
               }}
-              className="shrink-0 min-h-[34px] px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer"
+              className="shrink-0 min-h-[32px] px-3.5 py-1.5 rounded-xl bg-stone-900 dark:bg-white hover:opacity-90 text-white dark:text-stone-950 text-xs font-semibold transition cursor-pointer"
             >
               Sign In
             </button>
@@ -1432,7 +1432,7 @@ export default function LeaveTheRoomHomePage() {
                       onClick={() => setSelectedBroadCategory(catName)}
                       className={`min-h-[38px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 border transition-all ${
                         isSelected
-                          ? 'bg-orange-600 text-white border-orange-500 shadow-xs'
+                          ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 border-stone-900 dark:border-white shadow-xs'
                           : 'bg-white dark:bg-[#1C1917] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800'
                       }`}
                     >
@@ -1440,7 +1440,7 @@ export default function LeaveTheRoomHomePage() {
                       <span
                         className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                           isSelected
-                            ? 'bg-white/20 text-white'
+                            ? 'bg-stone-800 text-stone-200 dark:bg-stone-200 dark:text-stone-800'
                             : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
                         }`}
                       >

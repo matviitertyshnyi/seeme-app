@@ -22,6 +22,7 @@ import {
 import { CityPreset, POPULAR_CITIES } from '@/lib/cities';
 import { PhotoLightboxModal } from '@/components/PhotoLightboxModal';
 import { verifyHumanFace } from '@/lib/face-detection';
+import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 
 interface AuthProfileModalProps {
   isOpen: boolean;
@@ -349,55 +350,51 @@ export function AuthProfileModal({
         role="dialog"
         aria-modal="true"
         aria-label="Profile Setup"
-        className="w-full max-w-xl bg-white dark:bg-stone-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-stone-200 dark:border-stone-800 overflow-hidden max-h-[92vh] flex flex-col"
+        className={`w-full ${activeTab === 'LOGIN' ? 'max-w-sm' : 'max-w-xl'} bg-white dark:bg-stone-900 rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg border border-stone-200 dark:border-stone-800 overflow-hidden max-h-[92vh] flex flex-col`}
       >
         {/* Top Header */}
         <div className="px-6 py-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-xl font-extrabold text-stone-950 dark:text-white">
-              {activeTab === 'EDIT' ? 'Edit Profile' : 'Sign In & Account'}
+              {activeTab === 'EDIT' ? 'Edit Profile' : 'Sign In'}
             </h2>
-            <p className="text-xs font-semibold text-stone-600 dark:text-stone-400">
-              {activeTab === 'EDIT'
-                ? activeUser?.onboarded === false
-                  ? 'Complete Your Profile Setup — Set your photo, age, and city to start using Leave The Room'
-                  : 'Update your photo, city, bio, and favorite activities'
-                : 'Switch account or sign in to Leave The Room'}
-            </p>
+            {activeTab === 'EDIT' && (
+              <p className="text-xs font-semibold text-stone-600 dark:text-stone-400">
+                {activeUser?.onboarded === false
+                  ? 'Complete Your Profile Setup - Set your photo, age, and city to start using Leave The Room'
+                  : 'Update your photo, city, bio, and favorite activities'}
+              </p>
+            )}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+            className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Authentication header when user is signed out or switching accounts */}
-        {activeTab !== 'EDIT' && (
-          <div className="px-6 pt-3 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 pb-3 shrink-0">
-            <p className="text-xs font-bold text-stone-600 dark:text-stone-400">
-              Sign in with your verified Google or Apple account
-            </p>
-          </div>
-        )}
-
         {/* Body Content */}
         <div className="p-6 overflow-y-auto space-y-6">
           {/* TAB 1: SIGN IN */}
           {activeTab === 'LOGIN' && (
-            <div className="space-y-5">
-              {/* Modern OAuth (Google & Apple) */}
-              <div className="space-y-2.5">
+            <div className="space-y-5 text-center">
+              <OpenDoorLogo className="w-11 h-11 mx-auto" size={44} />
+              <p className="text-xs text-center text-stone-500 dark:text-stone-400">
+                Continue with your Google or Apple account to join and host meetups.
+              </p>
+
+              {/* Cohesive OAuth (Google & Apple) */}
+              <div className="space-y-2.5 pt-1">
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleGoogleAuth}
-                  className="min-h-[48px] w-full rounded-2xl bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700/80 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+                  className="min-h-[44px] w-full rounded-xl bg-stone-900 dark:bg-white hover:opacity-90 text-white dark:text-stone-950 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2.5 shadow-sm transition-all cursor-pointer"
                 >
-                  <GoogleIcon className="w-5 h-5 shrink-0" />
+                  <GoogleIcon className="w-4 h-4 shrink-0" />
                   <span>Continue with Google</span>
                 </button>
 
@@ -405,44 +402,24 @@ export function AuthProfileModal({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleAppleAuth}
-                  className="min-h-[48px] w-full rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-3 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+                  className="min-h-[44px] w-full rounded-xl bg-stone-100 dark:bg-stone-800/90 hover:bg-stone-200 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer"
                 >
-                  <AppleIcon className="w-5 h-5 shrink-0" />
+                  <AppleIcon className="w-4 h-4 shrink-0" />
                   <span>Continue with Apple</span>
                 </button>
               </div>
 
               {loginError && (
-                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-bold">
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-bold text-left">
                   {loginError}
                 </div>
               )}
-
-              <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 flex items-center gap-2 text-[11px] font-bold text-stone-600 dark:text-stone-400">
-                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Verified 1-tap sign-in with your Google or Apple ID. Fast, secure, and permanent.</span>
-              </div>
             </div>
           )}
 
           {/* TAB 2: EDIT CURRENT PROFILE */}
           {activeTab === 'EDIT' && (
             <form onSubmit={handleEditSubmit} className="space-y-4">
-              {/* Trust & Verification Summary Strip */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                  <div>
-                    <div className="text-xs font-extrabold text-emerald-950 dark:text-emerald-200">
-                      Verified Player Profile · {activeUser.reliabilityScore}% Reliability
-                    </div>
-                    <div className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                      {activeUser.ratingAvg} Avg Rating across {activeUser.ratingCount} reviews
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Profile Photo Upload & Selfie Camera */}
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2">
@@ -453,7 +430,7 @@ export function AuthProfileModal({
                   <div
                     onClick={() => setIsLightboxOpen(true)}
                     title="Click to view full-screen photo"
-                    className="relative w-[72px] h-[72px] rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 shrink-0 shadow-sm cursor-pointer group hover:ring-2 hover:ring-orange-500 transition-all"
+                    className="relative w-[72px] h-[72px] rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 shrink-0 shadow-sm cursor-pointer group hover:ring-2 hover:ring-stone-400 dark:hover:ring-stone-600 transition-all"
                   >
                     <img
                       src={avatar || activeUser?.avatar}
@@ -468,7 +445,7 @@ export function AuthProfileModal({
                   <div className="flex flex-col gap-2 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Upload Photo Button */}
-                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-white text-xs font-extrabold border border-stone-300 dark:border-stone-700 transition-colors shadow-sm">
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-white text-xs font-semibold border border-stone-300 dark:border-stone-700 transition-colors shadow-sm">
                         <Upload className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" />
                         <span>Upload Photo</span>
                         <input
@@ -481,8 +458,8 @@ export function AuthProfileModal({
                       </label>
 
                       {/* Take Live Selfie Button */}
-                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-extrabold border border-orange-200 dark:border-orange-800 transition-colors shadow-sm">
-                        <Camera className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-white text-xs font-semibold border border-stone-300 dark:border-stone-700 transition-colors shadow-sm">
+                        <Camera className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" />
                         <span>Take Live Selfie (Camera)</span>
                         <input
                           ref={cameraInputRef}
@@ -578,7 +555,7 @@ export function AuthProfileModal({
                       className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                     />
                     <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mt-1">
-                      Set once — cannot be changed later
+                      Set once - cannot be changed later
                     </p>
                   </div>
                 )}
@@ -608,7 +585,7 @@ export function AuthProfileModal({
                     aria-label="City"
                     className="min-h-[44px] w-full pl-9 pr-10 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
-                  <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <MapPin className="w-4 h-4 text-stone-400 dark:text-stone-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <button
                     type="button"
                     onClick={() => setIsCityDropdownOpen((prev) => !prev)}
@@ -626,7 +603,7 @@ export function AuthProfileModal({
                         key={c.id}
                         type="button"
                         onClick={() => handleSelectCityPreset(c)}
-                        className="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-orange-50 dark:hover:bg-stone-700/70 flex items-center justify-between transition-colors text-stone-900 dark:text-white"
+                        className="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-stone-100 dark:hover:bg-stone-700/70 flex items-center justify-between transition-colors text-stone-900 dark:text-white"
                       >
                         <span className="flex items-center gap-2">
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300">
@@ -635,7 +612,7 @@ export function AuthProfileModal({
                           <span>{c.label}</span>
                         </span>
                         {cityInput === c.label && (
-                          <Check className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+                          <Check className="w-3.5 h-3.5 text-stone-900 dark:text-white shrink-0" />
                         )}
                       </button>
                     ))}
@@ -648,7 +625,7 @@ export function AuthProfileModal({
                           onClick={() => {
                             setIsCityDropdownOpen(false);
                           }}
-                          className="w-full px-3.5 py-2 text-left text-xs font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-stone-700/70 border-t border-stone-100 dark:border-stone-700"
+                          className="w-full px-3.5 py-2 text-left text-xs font-semibold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/70 border-t border-stone-100 dark:border-stone-700"
                         >
                           Use custom city: &ldquo;{cityInput.trim()}&rdquo;
                         </button>
@@ -678,7 +655,7 @@ export function AuthProfileModal({
                   {ACTIVITY_GROUPS.map((grp) => (
                     <div key={grp} className="space-y-1.5">
                       <div className="text-[11px] font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <CategoryIcon category={grp} className="w-3 h-3 text-orange-600 dark:text-orange-400" />
+                        <CategoryIcon category={grp} className="w-3 h-3 text-stone-500 dark:text-stone-400" />
                         <span>{grp}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">

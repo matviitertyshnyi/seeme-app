@@ -66,7 +66,7 @@ export function BottomNav({
         !isSignedOut && meetupsCount > 0 ? (
           <span
             aria-label={`${meetupsCount} meetups`}
-            className="absolute top-1 right-3 sm:right-4 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-orange-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.5)]"
+            className="absolute top-1 right-3 sm:right-4 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-stone-900 text-white dark:bg-white dark:text-stone-950"
           >
             {meetupsCount}
           </span>
@@ -84,25 +84,21 @@ export function BottomNav({
               alt={userName}
               className={`w-5 h-5 rounded-full object-cover transition-all ${
                 activeTab === 'PROFILE'
-                  ? 'ring-2 ring-orange-600 dark:ring-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]'
+                  ? 'ring-1.5 ring-stone-900 dark:ring-white'
                   : ''
               }`}
             />
           );
         }
         return (
-          <User
-            className={`w-5 h-5 ${
-              activeTab === 'PROFILE' ? 'drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]' : ''
-            }`}
-          />
+          <User className="w-5 h-5" />
         );
       },
       badge:
         !isSignedOut && unreadCount > 0 ? (
           <span
             aria-label={`${unreadCount} unread notifications`}
-            className="absolute top-1.5 right-5 sm:right-6 w-2 h-2 rounded-full bg-orange-600 ring-2 ring-white dark:ring-stone-900 shadow-[0_0_6px_rgba(234,88,12,0.8)]"
+            className="absolute top-1.5 right-5 sm:right-6 w-2 h-2 rounded-full bg-stone-900 dark:bg-white ring-2 ring-white dark:ring-stone-900"
           />
         ) : null,
     },
@@ -120,25 +116,21 @@ export function BottomNav({
         aria-selected={isActive}
         aria-current={isActive ? 'page' : undefined}
         onClick={() => onChangeTab(item.key)}
-        className={`relative min-h-[50px] min-w-[44px] flex flex-col items-center justify-center gap-1 rounded-xl text-xs transition-colors duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${
+        className={`relative min-h-[50px] min-w-[44px] flex flex-col items-center justify-center gap-1 rounded-xl text-xs transition-colors duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${
           isActive
-            ? 'text-orange-600 dark:text-orange-400 font-bold'
+            ? 'text-stone-950 dark:text-white font-semibold'
             : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-medium'
         }`}
       >
         {item.renderIcon ? (
           item.renderIcon()
         ) : (
-          <Icon
-            className={`w-5 h-5 stroke-[2.2] transition-all ${
-              isActive ? 'drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]' : ''
-            }`}
-          />
+          <Icon className="w-5 h-5 stroke-[2.2] transition-all" />
         )}
         <span className="leading-tight text-[11px] truncate max-w-[64px]">{item.label}</span>
         {item.badge}
         {isActive && (
-          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
+          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-stone-900 dark:bg-white" />
         )}
       </button>
     );

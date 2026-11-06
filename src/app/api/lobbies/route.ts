@@ -140,9 +140,7 @@ export async function POST(req: NextRequest) {
         category,
         mapPinLabel: getMapPinLabelForCategory(category),
         title: title.trim(),
-        equipmentNote: (
-          equipmentNote || 'All equipment ready. Drop a message in chat when you arrive.'
-        ).trim(),
+        equipmentNote: (equipmentNote || '').trim(),
         coverImage: coverImage || getDefaultCoverForCategory(category),
         venueName: venueName.trim(),
         venueAddress: (venueAddress || venueName).trim(),
