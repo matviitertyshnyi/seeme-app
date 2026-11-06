@@ -142,6 +142,18 @@ function readLocalDb(): DatabaseSchema {
     if (!Array.isArray(parsed.ratings)) parsed.ratings = [];
     if (!Array.isArray(parsed.notifications)) parsed.notifications = [];
     if (!Array.isArray(parsed.messages)) parsed.messages = [];
+
+    if (parsed.lobbies.length === 0 && INITIAL_SEED_DATA.lobbies.length > 0) {
+      parsed.lobbies = [...INITIAL_SEED_DATA.lobbies];
+      INITIAL_SEED_DATA.personas.forEach((p) => {
+        if (!parsed.personas.some((ep) => ep.id === p.id)) {
+          parsed.personas.push(p);
+        }
+      });
+      try {
+        writeLocalDb(parsed);
+      } catch {}
+    }
     return parsed;
   } catch {
     const seedClone = JSON.parse(JSON.stringify(INITIAL_SEED_DATA)) as DatabaseSchema;
@@ -221,6 +233,16 @@ export async function readDb(): Promise<DatabaseSchema> {
             if (!Array.isArray(parsed.ratings)) parsed.ratings = INITIAL_SEED_DATA.ratings || [];
             if (!Array.isArray(parsed.notifications)) parsed.notifications = INITIAL_SEED_DATA.notifications || [];
             if (!Array.isArray(parsed.messages)) parsed.messages = INITIAL_SEED_DATA.messages || [];
+
+            if (parsed.lobbies.length === 0 && INITIAL_SEED_DATA.lobbies.length > 0) {
+              parsed.lobbies = [...INITIAL_SEED_DATA.lobbies];
+              INITIAL_SEED_DATA.personas.forEach((p) => {
+                if (!parsed.personas.some((ep) => ep.id === p.id)) {
+                  parsed.personas.push(p);
+                }
+              });
+              await writeDb(parsed);
+            }
             return parsed;
           }
         }

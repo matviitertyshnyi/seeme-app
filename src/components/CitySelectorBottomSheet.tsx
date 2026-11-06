@@ -38,7 +38,13 @@ export function CitySelectorBottomSheet({
     let cities = customResults.length > 0 ? customResults : POPULAR_CITIES;
 
     if (selectedCountryCode !== 'ALL') {
-      cities = cities.filter((c) => c.countryCode === selectedCountryCode);
+      if (selectedCountryCode === 'EU') {
+        cities = cities.filter((c) => c.countryCode !== 'US');
+      } else if (selectedCountryCode === 'US') {
+        cities = cities.filter((c) => c.countryCode === 'US');
+      } else {
+        cities = cities.filter((c) => c.countryCode === selectedCountryCode);
+      }
     }
 
     if (searchQuery.trim()) {

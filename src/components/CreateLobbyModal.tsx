@@ -17,7 +17,7 @@ import {
   Check,
 } from 'lucide-react';
 import { OpenDoorLogo } from '@/components/OpenDoorLogo';
-import { getDefaultCoverForCategory, VIBEY_BACKGROUNDS } from '@/lib/geo';
+import { getDefaultCoverForCategory, VIBEY_BACKGROUNDS, formatCleanAddress } from '@/lib/geo';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
@@ -189,13 +189,34 @@ export function CreateLobbyModal({
           (data.display_name ? data.display_name.split(',').slice(0, 2).join(',').trim() : '') ||
           `Spot (${targetLat.toFixed(4)}, ${targetLng.toFixed(4)})`;
 
+        const houseNr = addr.house_number || '';
+        const road = addr.road || addr.pedestrian || addr.footway || addr.street || '';
+        const city =
+          addr.city ||
+          addr.town ||
+          addr.village ||
+          addr.municipality ||
+          addr.suburb ||
+          '';
+
+        let cleanAddress = '';
+        if (road && houseNr) {
+          cleanAddress = city ? `${road} ${houseNr}, ${city}` : `${road} ${houseNr}`;
+        } else if (road) {
+          cleanAddress = city ? `${road}, ${city}` : road;
+        } else if (data.display_name) {
+          cleanAddress = formatCleanAddress(data.display_name, label);
+        } else {
+          cleanAddress = label;
+        }
+
         setVenueName(label);
-        setVenueAddress(data.display_name || label);
+        setVenueAddress(cleanAddress);
         return;
       }
     } catch {}
     setVenueName(`Spot (${targetLat.toFixed(4)}, ${targetLng.toFixed(4)})`);
-    setVenueAddress(`Coords: ${targetLat.toFixed(4)}, ${targetLng.toFixed(4)}`);
+    setVenueAddress(`Spot (${targetLat.toFixed(4)}, ${targetLng.toFixed(4)})`);
   };
 
   const handleLocationChange = (newLat: number, newLng: number) => {

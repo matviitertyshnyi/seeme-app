@@ -24,7 +24,7 @@ import {
   UserSettings,
   hasRealProfilePhoto,
 } from '@/types/lobby';
-import { DEMO_PERSONAS, INITIAL_SEED_DATA } from '@/lib/seed';
+import { DEMO_PERSONAS, INITIAL_SEED_DATA, generateCityEvents } from '@/lib/seed';
 import { attachAndSortByDistance, DEFAULT_USER_COORDS, doesMeetupMatchAgeFilters } from '@/lib/geo';
 import {
   triggerSensoryFeedback,
@@ -1079,6 +1079,26 @@ export default function LeaveTheRoomHomePage() {
         });
       } catch {}
     }
+    // Ensure the selected city has at least 2 events happening
+    const nearby = attachAndSortByDistance(rawLobbies, city.lat, city.lng).filter((m) => m.distanceKm <= 35);
+    if (nearby.length < 2) {
+      const cityName = city.label.split(',')[0].trim();
+      const generated = generateCityEvents(
+        {
+          id: `city-custom-${Date.now()}`,
+          name: cityName,
+          country: city.label.split(',')[1]?.trim() || 'EU',
+          countryCode: 'EU',
+          lat: city.lat,
+          lng: city.lng,
+          label: city.label,
+          flag: '📍',
+        },
+        personas
+      );
+      setRawLobbies((prev) => [...generated, ...prev]);
+    }
+
     showToast(`Location set to ${city.label}`);
     triggerSensoryFeedback('TAP', activeUser.settings);
   };

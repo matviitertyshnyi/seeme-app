@@ -76,6 +76,72 @@ export function formatEventCreationDate(dateStr?: string): string {
   }
 }
 
+/**
+ * Formats raw address (e.g. from Nominatim display_name or database) into clean [street nr, city] format.
+ * Example input: "46, Świętojańska, Śródmieście, Gdynia, Pomeranian Voivodeship, 81-393, Poland"
+ * Example output: "Świętojańska 46, Gdynia"
+ */
+export function formatCleanAddress(rawAddress?: string, fallbackVenue?: string): string {
+  if (!rawAddress || !rawAddress.trim()) {
+    return fallbackVenue ? fallbackVenue.trim() : '';
+  }
+
+  const raw = rawAddress.trim();
+
+  // If already in clean short format like "Świętojańska 46, Gdynia" and has no noise keywords
+  const parts = raw.split(',').map((p) => p.trim()).filter(Boolean);
+  if (parts.length <= 2 && !/\b(voivodeship|województwo|poland|polska|united states|germany|france|district)\b/i.test(raw)) {
+    return raw;
+  }
+
+  // Filter out administrative noise, postal codes, and country names
+  const POSTAL_REGEX = /^(?:\d{2}-\d{3}|\d{4,5}|[A-Z]{1,2}\d{1,2}\s*\d[A-Z]{2})$/i;
+  const NOISE_REGEX = /\b(voivodeship|województwo|powiat|gmina|county|province|state|departement|region|borough|poland|polska|germany|deutschland|united states|usa|france|united kingdom|uk|great britain|spain|españa|italy|italia|ukraine|netherlands|czech republic|ceska|austria|österreich|switzerland|schweiz|portugal|belgium|sweden|norway|denmark|finland|ireland|greece|hungary|romania)\b/i;
+
+  const filtered = parts.filter((part) => {
+    if (POSTAL_REGEX.test(part)) return false;
+    if (NOISE_REGEX.test(part)) return false;
+    // Two-letter US state code
+    if (/^[A-Z]{2}$/.test(part)) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    return parts[0] || raw;
+  }
+
+  const isNumericOrHouse = (str: string) => /^\d+[a-zA-Z]?(?:\/\d+)?$/.test(str);
+
+  let streetNr = '';
+  let city = '';
+
+  if (filtered.length >= 2 && isNumericOrHouse(filtered[0])) {
+    const houseNumber = filtered[0];
+    const streetName = filtered[1];
+    streetNr = `${streetName} ${houseNumber}`;
+    city = filtered[filtered.length - 1];
+    if (city === streetName || isNumericOrHouse(city)) {
+      city = filtered.length > 2 ? filtered[2] : '';
+    }
+  } else if (filtered.length >= 2 && isNumericOrHouse(filtered[1])) {
+    const streetName = filtered[0];
+    const houseNumber = filtered[1];
+    streetNr = `${streetName} ${houseNumber}`;
+    city = filtered[filtered.length - 1];
+  } else {
+    streetNr = filtered[0];
+    if (filtered.length > 1) {
+      city = filtered[filtered.length - 1];
+    }
+  }
+
+  if (city && city !== streetNr) {
+    return `${streetNr}, ${city}`;
+  }
+  return streetNr || raw;
+}
+
+
 export function deriveRoomStatus(lobby: Lobby): RoomStatus {
   if (lobby.roomStatus === 'FINISHED') {
     return 'FINISHED';
@@ -98,7 +164,9 @@ export function deriveRoomStatus(lobby: Lobby): RoomStatus {
     lobby.id.startsWith('lobby-cowork') ||
     lobby.id.startsWith('lobby-run') ||
     lobby.id.startsWith('lobby-kyiv') ||
-    lobby.id.startsWith('lobby-warsaw');
+    lobby.id.startsWith('lobby-warsaw') ||
+    lobby.id.startsWith('lobby-city-') ||
+    lobby.id.startsWith('lobby-seed-');
 
   if (!isSeedLobby && lobby.createdAt) {
     const createdTime = new Date(lobby.createdAt).getTime();

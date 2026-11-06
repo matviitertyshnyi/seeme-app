@@ -23,6 +23,7 @@ import {
   Users,
   Edit3,
   Clock,
+  FileText,
 } from 'lucide-react';
 import {
   ArrivalStatus,
@@ -34,7 +35,7 @@ import {
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { StatusBadge } from '@/components/StatusBadge';
 import { triggerSensoryFeedback } from '@/lib/sound';
-import { resolveCoverImage, formatEventCreationDate } from '@/lib/geo';
+import { resolveCoverImage, formatEventCreationDate, formatCleanAddress } from '@/lib/geo';
 import dynamic from 'next/dynamic';
 
 const EventSpotMap = dynamic(() => import('@/components/EventSpotMap'), {
@@ -128,12 +129,10 @@ export function RoomDetailModal({
     return resolveCoverImage(lobby?.coverImage, lobby?.category || 'Coffee');
   }, [lobby?.coverImage, lobby?.category]);
 
-  const hasCustomHostNote = Boolean(
-    lobby?.equipmentNote &&
-    lobby.equipmentNote.trim().length > 0 &&
-    !lobby.equipmentNote.startsWith('I have extra gear for ') &&
-    !lobby.equipmentNote.startsWith('All equipment ready.')
-  );
+  const cleanWhere = useMemo(() => {
+    return lobby ? formatCleanAddress(lobby.venueAddress, lobby.venueName) : '';
+  }, [lobby?.venueAddress, lobby?.venueName]);
+
 
   const isCheckInActive = useMemo(() => {
     if (!lobby) return false;
@@ -323,8 +322,8 @@ export function RoomDetailModal({
   };
 
   const handleCopyAddress = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(`${lobby.venueName}, ${lobby.venueAddress}`);
+    if (typeof navigator !== 'undefined' && navigator.clipboard && lobby) {
+      navigator.clipboard.writeText(cleanWhere || lobby.venueAddress || lobby.venueName);
       setCopiedAddress(true);
       setTimeout(() => setCopiedAddress(false), 2000);
     }
@@ -525,21 +524,29 @@ export function RoomDetailModal({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20" />
 
-          {/* Top Row: Status + Distance, Actions */}
-          <div className="absolute top-3 left-3 right-3 sm:top-3.5 sm:left-4 sm:right-4 flex items-center justify-between gap-2 pointer-events-auto">
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink min-w-0 overflow-hidden">
-              <StatusBadge
-                status={lobby.computedStatus}
-                timeLabel={lobby.startTimeBadge}
-                variant="solid"
-              />
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-950/80 border border-white/15 text-[11px] font-semibold text-stone-200 backdrop-blur-md whitespace-nowrap shrink-0">
-                <Navigation className="w-3 h-3 text-stone-400" />
-                <span>{lobby.distanceLabel}</span>
-              </span>
+          {/* Top Row: Title & Category on left, Actions on right */}
+          <div className="absolute top-3 left-3 right-3 sm:top-3.5 sm:left-4 sm:right-4 flex items-start justify-between gap-3 pointer-events-auto">
+            {/* Top Left: Name of event and activity type */}
+            <div className="min-w-0 flex-1 pr-2">
+              <h2
+                id="meetup-detail-title"
+                className="text-lg sm:text-2xl font-bold text-white leading-tight truncate drop-shadow-md"
+              >
+                {lobby.title}
+              </h2>
+              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-200 mt-1 flex-wrap">
+                <CategoryIcon category={lobby.category} className="w-3.5 h-3.5 text-stone-300 shrink-0" />
+                <span className="font-semibold text-white">{lobby.category}</span>
+                {lobby.joinMode === 'APPROVAL_REQUIRED' && (
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-stone-900/80 border border-white/10 text-stone-300">
+                    Approval Required
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Top Right: Actions */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pt-0.5">
               {onToggleSave && (
                 <button
                   type="button"
@@ -603,24 +610,14 @@ export function RoomDetailModal({
             </div>
           </div>
 
-          {/* Bottom Row: Title on top, details on bottom */}
-          <div className="absolute bottom-3.5 left-4 right-4 text-white">
-            <h2
-              id="meetup-detail-title"
-              className="text-xl sm:text-2xl font-bold text-white leading-tight truncate mb-1"
-            >
-              {lobby.title}
-            </h2>
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-300 flex-wrap">
-              <CategoryIcon category={lobby.category} className="w-3.5 h-3.5 text-stone-300" />
-              <span className="font-semibold text-white">{lobby.category}</span>
-              {lobby.joinMode === 'APPROVAL_REQUIRED' && (
-                <span className="text-stone-300">· Approval Required</span>
-              )}
-              {lobby.createdAt && (
-                <span className="text-[11px] text-stone-400">· Created {formatEventCreationDate(lobby.createdAt)}</span>
-              )}
-            </div>
+          {/* Bottom Row: Just the km away badge */}
+          <div className="absolute bottom-3 left-3 sm:bottom-3.5 sm:left-4 pointer-events-auto">
+            {lobby.distanceLabel && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-950/80 border border-white/15 text-xs font-semibold text-stone-200 backdrop-blur-md shadow-xs">
+                <Navigation className="w-3.5 h-3.5 text-orange-400" />
+                <span>{lobby.distanceLabel}</span>
+              </span>
+            )}
           </div>
         </div>
 
@@ -736,11 +733,13 @@ export function RoomDetailModal({
                       Where
                     </span>
                     <span className="text-sm font-bold text-stone-950 dark:text-stone-100 block truncate">
-                      {lobby.venueName}
+                      {cleanWhere || lobby.venueAddress || lobby.venueName}
                     </span>
-                    <span className="text-xs text-stone-500 dark:text-stone-400 block line-clamp-1">
-                      {lobby.venueAddress}
-                    </span>
+                    {lobby.venueName && lobby.venueName !== cleanWhere && (
+                      <span className="text-xs text-stone-500 dark:text-stone-400 block truncate">
+                        {lobby.venueName}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -793,11 +792,18 @@ export function RoomDetailModal({
                 </button>
               </div>
 
-              {/* Host Description inside Location card if custom and non-generic */}
-              {hasCustomHostNote && (
-                <div className="pt-3 border-t border-stone-200/70 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                  <span className="font-semibold text-stone-700 dark:text-stone-200 mr-1.5">Description:</span>
-                  {lobby.equipmentNote}
+              {/* Host Description inside Location card - Highly Visible */}
+              {lobby.equipmentNote && lobby.equipmentNote.trim().length > 0 && (
+                <div className="pt-3 border-t border-stone-200/70 dark:border-stone-800">
+                  <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-br from-amber-500/[0.08] to-orange-500/[0.04] dark:from-amber-500/[0.14] dark:to-orange-500/[0.08] border border-amber-500/25 dark:border-amber-500/35 shadow-2xs">
+                    <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1.5">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Description</span>
+                    </div>
+                    <p className="text-sm font-medium text-stone-900 dark:text-stone-100 leading-relaxed">
+                      {lobby.equipmentNote}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -1104,8 +1110,8 @@ export function RoomDetailModal({
               </div>
             )}
 
-            {/* FOOTER BUTTON: End & Close Meetup / Leave Meetup */}
-            <div className="pt-1 flex items-center justify-between gap-3">
+            {/* FOOTER BUTTON: End & Close Meetup / Leave Meetup & Creation info */}
+            <div className="pt-2 flex items-center justify-between gap-3 flex-wrap">
               {isHost ? (
                 <button
                   type="button"
@@ -1126,7 +1132,15 @@ export function RoomDetailModal({
                   <LogOut className="w-3.5 h-3.5" />
                   {isParticipant ? 'Leave Meetup' : 'Cancel Join Request'}
                 </button>
-              ) : null}
+              ) : (
+                <div />
+              )}
+
+              {lobby.createdAt && (
+                <span className="text-[11px] text-stone-400 dark:text-stone-500 font-medium ml-auto">
+                  {formatEventCreationDate(lobby.createdAt)}
+                </span>
+              )}
             </div>
           </div>
 
