@@ -190,295 +190,812 @@ const toSvgDataUrl = (svg: string) => `data:image/svg+xml;utf8,${encodeURICompon
 
 /**
  * Vibey Digital Art Backgrounds for meetups & categories.
- * Atmospheric SVG graphics encoded as data URLs with dark warm obsidian (#141210 / #0c0a09),
- * neon/amber/cyan/emerald/violet gradients, synth grids, and glowing light beams.
+ * Atmospheric lowkey lo-fi cloudy colorful skyscapes with multi-stop twilight/dusk gradients,
+ * soft billowy cloud banks, glowing celestial orbs, and deep dark bases for optimal text legibility.
  */
 export const VIBEY_BACKGROUNDS: string[] = [
-  // 0: Chess (Obsidian & Ember Amber, Isometric perspective grid, diamond orbs)
+  // 0: Chess (Twilight Violet & Warm Sunset Peach Clouds)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
       <defs>
-        <linearGradient id="ch-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#141210" />
-          <stop offset="50%" stop-color="#1c1613" />
-          <stop offset="100%" stop-color="#0c0a09" />
+        <linearGradient id="c0-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1a162b" />
+          <stop offset="38%" stop-color="#3b234a" />
+          <stop offset="68%" stop-color="#d97757" />
+          <stop offset="100%" stop-color="#18131e" />
         </linearGradient>
-        <radialGradient id="ch-glow" cx="50%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3" />
-          <stop offset="60%" stop-color="#ea580c" stop-opacity="0.1" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
+        <linearGradient id="c0-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e89d82" stop-opacity="0.9" />
+          <stop offset="50%" stop-color="#7a4263" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#2a1a36" />
+        </linearGradient>
+        <linearGradient id="c0-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f6ad85" />
+          <stop offset="45%" stop-color="#8c4768" />
+          <stop offset="100%" stop-color="#21152a" />
+        </linearGradient>
+        <linearGradient id="c0-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#673656" />
+          <stop offset="40%" stop-color="#2b1a32" />
+          <stop offset="100%" stop-color="#141018" />
+        </linearGradient>
+        <linearGradient id="c0-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#18131e" stop-opacity="0" />
+          <stop offset="50%" stop-color="#18131e" stop-opacity="0.75" />
+          <stop offset="100%" stop-color="#141018" />
+        </linearGradient>
+        <radialGradient id="c0-moon-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.8" />
+          <stop offset="40%" stop-color="#d97757" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#3b234a" stop-opacity="0" />
         </radialGradient>
-        <linearGradient id="ch-line" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0" />
-          <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.35" />
-          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
-        </linearGradient>
+        <radialGradient id="c0-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#f59e82" stop-opacity="0.4" />
+          <stop offset="60%" stop-color="#9333ea" stop-opacity="0.15" />
+          <stop offset="100%" stop-color="#1a162b" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
-      <rect width="800" height="450" fill="url(#ch-bg)" />
-      <circle cx="400" cy="180" r="280" fill="url(#ch-glow)" />
-      <g stroke="#f59e0b" stroke-opacity="0.15" stroke-width="1.2">
-        <line x1="400" y1="80" x2="100" y2="450" />
-        <line x1="400" y1="80" x2="250" y2="450" />
-        <line x1="400" y1="80" x2="400" y2="450" />
-        <line x1="400" y1="80" x2="550" y2="450" />
-        <line x1="400" y1="80" x2="700" y2="450" />
-        <ellipse cx="400" cy="300" rx="220" ry="60" fill="none" stroke-dasharray="6 6" />
-        <ellipse cx="400" cy="360" rx="320" ry="80" fill="none" />
-        <ellipse cx="400" cy="220" rx="140" ry="38" fill="none" stroke-opacity="0.25" />
+      <rect width="800" height="450" fill="url(#c0-sky)" />
+      <ellipse cx="420" cy="220" rx="360" ry="140" fill="url(#c0-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="110" cy="55" r="1.5" opacity="0.5" />
+        <circle cx="190" cy="85" r="1.2" opacity="0.4" />
+        <circle cx="280" cy="40" r="1.6" opacity="0.65" />
+        <circle cx="370" cy="70" r="1.3" opacity="0.35" />
+        <circle cx="490" cy="45" r="1.8" opacity="0.55" />
+        <circle cx="560" cy="75" r="1.2" opacity="0.4" />
+        <circle cx="680" cy="35" r="1.5" opacity="0.6" />
+        <circle cx="740" cy="65" r="1.2" opacity="0.45" />
       </g>
-      <polygon points="400,120 440,180 400,240 360,180" fill="#f59e0b" fill-opacity="0.08" stroke="#f59e0b" stroke-width="1.5" stroke-opacity="0.5" />
-      <circle cx="400" cy="180" r="6" fill="#ea580c" />
-      <circle cx="340" cy="210" r="3" fill="#f59e0b" opacity="0.6" />
-      <circle cx="460" cy="210" r="3" fill="#f59e0b" opacity="0.6" />
-      <polygon points="380,0 420,0 490,450 310,450" fill="url(#ch-line)" opacity="0.18" />
-    </svg>
-  `),
-
-  // 1: Ping Pong (Midnight & Neon Orange / Cyan Duel, rapid velocity arcs)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="pp-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0c0a09" />
-          <stop offset="50%" stop-color="#141210" />
-          <stop offset="100%" stop-color="#0f172a" />
-        </linearGradient>
-        <radialGradient id="pp-orange" cx="30%" cy="40%" r="50%">
-          <stop offset="0%" stop-color="#ea580c" stop-opacity="0.35" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="pp-cyan" cx="70%" cy="45%" r="50%">
-          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.28" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#pp-bg)" />
-      <circle cx="240" cy="180" r="260" fill="url(#pp-orange)" />
-      <circle cx="560" cy="200" r="260" fill="url(#pp-cyan)" />
-      <polygon points="120,380 680,380 560,240 240,240" fill="#1c1917" fill-opacity="0.5" stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.2" />
-      <line x1="400" y1="230" x2="400" y2="380" stroke="#f97316" stroke-width="2" stroke-dasharray="4 4" stroke-opacity="0.7" />
-      <path d="M 160 320 Q 400 100 640 290" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" opacity="0.85" />
-      <path d="M 200 330 Q 400 130 600 300" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.6" />
-      <circle cx="400" cy="148" r="10" fill="#fed7aa" />
-      <circle cx="400" cy="148" r="22" fill="#ea580c" fill-opacity="0.3" />
-    </svg>
-  `),
-
-  // 2: Tennis (Dark Court Night & Neon Emerald / Lime glow, court geometry)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="tn-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#09140d" />
-          <stop offset="50%" stop-color="#141210" />
-          <stop offset="100%" stop-color="#0c0a09" />
-        </linearGradient>
-        <radialGradient id="tn-glow" cx="50%" cy="35%" r="60%">
-          <stop offset="0%" stop-color="#10b981" stop-opacity="0.28" />
-          <stop offset="50%" stop-color="#84cc16" stop-opacity="0.12" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#tn-bg)" />
-      <circle cx="400" cy="160" r="300" fill="url(#tn-glow)" />
-      <polygon points="140,420 660,420 540,190 260,190" fill="none" stroke="#10b981" stroke-width="1.8" stroke-opacity="0.35" />
-      <line x1="200" y1="305" x2="600" y2="305" stroke="#84cc16" stroke-width="1.5" stroke-opacity="0.4" />
-      <line x1="400" y1="190" x2="400" y2="420" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.4" />
-      <ellipse cx="400" cy="190" rx="180" ry="50" fill="none" stroke="#10b981" stroke-width="1" stroke-dasharray="8 6" stroke-opacity="0.25" />
-      <ellipse cx="400" cy="190" rx="300" ry="85" fill="none" stroke="#84cc16" stroke-width="1" stroke-opacity="0.15" />
-      <circle cx="400" cy="190" r="8" fill="#bef264" />
-      <circle cx="400" cy="190" r="24" fill="#10b981" fill-opacity="0.25" />
-    </svg>
-  `),
-
-  // 3: Board Games (Mystic Violet & Warm Amber, floating hex mesh, constellation nodes)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="bg-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#141210" />
-          <stop offset="50%" stop-color="#1d132b" />
-          <stop offset="100%" stop-color="#0c0a09" />
-        </linearGradient>
-        <radialGradient id="bg-purple" cx="45%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="#a855f7" stop-opacity="0.3" />
-          <stop offset="60%" stop-color="#ea580c" stop-opacity="0.12" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#bg-bg)" />
-      <circle cx="360" cy="190" r="290" fill="url(#bg-purple)" />
-      <g stroke="#c084fc" stroke-width="1.4" stroke-opacity="0.32" fill="#a855f7" fill-opacity="0.05">
-        <polygon points="400,140 440,163 440,209 400,232 360,209 360,163" />
-        <polygon points="440,163 480,186 480,232 440,255 400,232 400,186" />
-        <polygon points="360,163 400,186 400,232 360,255 320,232 320,186" />
-        <polygon points="400,232 440,255 440,301 400,324 360,301 360,255" />
-        <polygon points="320,94 360,117 360,163 320,186 280,163 280,117" stroke-opacity="0.15" />
-        <polygon points="480,94 520,117 520,163 480,186 440,163 440,117" stroke-opacity="0.15" />
+      <circle cx="630" cy="90" r="45" fill="url(#c0-moon-glow)" filter="url(#blur-sm)" />
+      <g transform="translate(630, 90)">
+        <circle cx="0" cy="0" r="22" fill="#fff5ea" opacity="0.92" />
+        <circle cx="8" cy="-5" r="19" fill="#1f1830" />
       </g>
-      <line x1="280" y1="140" x2="400" y2="186" stroke="#fb923c" stroke-width="1" stroke-dasharray="4 4" stroke-opacity="0.4" />
-      <line x1="520" y1="140" x2="400" y2="186" stroke="#fb923c" stroke-width="1" stroke-dasharray="4 4" stroke-opacity="0.4" />
-      <circle cx="400" cy="186" r="5" fill="#f59e0b" />
-      <circle cx="440" cy="209" r="4" fill="#c084fc" />
-      <circle cx="360" cy="209" r="4" fill="#c084fc" />
-      <circle cx="400" cy="280" r="3" fill="#fb923c" />
-    </svg>
-  `),
-
-  // 4: Basketball (Blaze Orange & Crimson Glow, kinetic hoop perspective rim)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="bb-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#180e0a" />
-          <stop offset="50%" stop-color="#141210" />
-          <stop offset="100%" stop-color="#0c0a09" />
-        </linearGradient>
-        <radialGradient id="bb-fire" cx="50%" cy="30%" r="65%">
-          <stop offset="0%" stop-color="#ea580c" stop-opacity="0.4" />
-          <stop offset="50%" stop-color="#dc2626" stop-opacity="0.15" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#bb-bg)" />
-      <circle cx="400" cy="140" r="320" fill="url(#bb-fire)" />
-      <ellipse cx="400" cy="190" rx="140" ry="42" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-opacity="0.85" />
-      <ellipse cx="400" cy="190" rx="220" ry="66" fill="none" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="10 8" />
-      <ellipse cx="400" cy="190" rx="340" ry="102" fill="none" stroke="#ea580c" stroke-width="1" stroke-opacity="0.2" />
-      <g stroke="#f97316" stroke-opacity="0.28" stroke-width="1.2">
-        <line x1="330" y1="210" x2="370" y2="340" />
-        <line x1="470" y1="210" x2="430" y2="340" />
-        <line x1="365" y1="225" x2="400" y2="345" />
-        <line x1="435" y1="225" x2="400" y2="345" />
-        <line x1="400" y1="230" x2="400" y2="350" />
+      <g fill="url(#c0-cloud-back)">
+        <circle cx="140" cy="245" r="60" />
+        <circle cx="220" cy="230" r="75" />
+        <circle cx="310" cy="240" r="65" />
+        <circle cx="480" cy="235" r="70" />
+        <circle cx="560" cy="225" r="80" />
+        <circle cx="650" cy="240" r="65" />
+        <path d="M-20,250 C70,225 150,220 220,230 C300,215 390,225 460,235 C540,215 640,220 720,235 C760,245 800,250 820,255 L820,450 L-20,450 Z" />
       </g>
-      <circle cx="400" cy="190" r="9" fill="#ffedd5" />
-      <circle cx="400" cy="190" r="28" fill="#ea580c" fill-opacity="0.35" />
-    </svg>
-  `),
-
-  // 5: Run Club (Midnight Cyber Skyline, Tangerine & Cyan speed trails)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="rc-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0a0a0f" />
-          <stop offset="50%" stop-color="#141210" />
-          <stop offset="100%" stop-color="#17120e" />
-        </linearGradient>
-        <radialGradient id="rc-sun" cx="50%" cy="52%" r="45%">
-          <stop offset="0%" stop-color="#f97316" stop-opacity="0.38" />
-          <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.12" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-        <linearGradient id="rc-speed" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0" />
-          <stop offset="50%" stop-color="#f97316" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#rc-bg)" />
-      <circle cx="400" cy="220" r="220" fill="url(#rc-sun)" />
-      <line x1="0" y1="240" x2="800" y2="240" stroke="url(#rc-speed)" stroke-width="2" />
-      <polygon points="390,240 410,240 550,450 250,450" fill="#1c1917" fill-opacity="0.4" stroke="#f97316" stroke-width="1.2" stroke-opacity="0.3" />
-      <line x1="400" y1="240" x2="400" y2="450" stroke="#f97316" stroke-width="2" stroke-dasharray="16 12" stroke-opacity="0.75" />
-      <line x1="395" y1="240" x2="330" y2="450" stroke="#06b6d4" stroke-width="1" stroke-opacity="0.3" />
-      <line x1="405" y1="240" x2="470" y2="450" stroke="#06b6d4" stroke-width="1" stroke-opacity="0.3" />
-      <line x1="100" y1="220" x2="320" y2="220" stroke="#06b6d4" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="24 16" />
-      <line x1="480" y1="220" x2="700" y2="220" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="20 14" />
-    </svg>
-  `),
-
-  // 6: Coffee (Warm Caramel Roast Night & Amber Glow, organic topo contour rings)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="cf-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#14100c" />
-          <stop offset="50%" stop-color="#1a1410" />
-          <stop offset="100%" stop-color="#0c0a09" />
-        </linearGradient>
-        <radialGradient id="cf-glow" cx="50%" cy="45%" r="55%">
-          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35" />
-          <stop offset="50%" stop-color="#d97706" stop-opacity="0.12" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#cf-bg)" />
-      <circle cx="400" cy="210" r="270" fill="url(#cf-glow)" />
-      <g fill="none" stroke="#f59e0b" stroke-width="1.2">
-        <ellipse cx="400" cy="220" rx="90" ry="50" stroke-opacity="0.55" />
-        <ellipse cx="400" cy="220" rx="160" ry="85" stroke-opacity="0.3" stroke-dasharray="8 6" />
-        <ellipse cx="400" cy="220" rx="250" ry="130" stroke-opacity="0.2" />
-        <ellipse cx="400" cy="220" rx="350" ry="175" stroke-opacity="0.1" />
+      <g fill="url(#c0-cloud-mid)">
+        <circle cx="80" cy="285" r="65" />
+        <circle cx="170" cy="275" r="80" />
+        <circle cx="270" cy="290" r="70" />
+        <circle cx="380" cy="270" r="90" />
+        <circle cx="480" cy="280" r="80" />
+        <circle cx="610" cy="270" r="85" />
+        <circle cx="720" cy="285" r="75" />
+        <path d="M-20,300 C60,270 160,265 240,285 C330,260 430,260 520,280 C600,260 700,265 820,295 L820,450 L-20,450 Z" />
       </g>
-      <path d="M 370 210 Q 350 140 380 90 Q 400 50 380 20" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-opacity="0.4" />
-      <path d="M 430 210 Q 450 140 420 90 Q 400 50 420 20" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-opacity="0.4" />
-      <circle cx="400" cy="220" r="7" fill="#fbbf24" />
-    </svg>
-  `),
-
-  // 7: Co-work (Deep Slate Midnight & Radiant Cyan / Violet synth grid)
-  toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
-      <defs>
-        <linearGradient id="cw-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0c0e14" />
-          <stop offset="50%" stop-color="#141210" />
-          <stop offset="100%" stop-color="#111827" />
-        </linearGradient>
-        <radialGradient id="cw-glow" cx="50%" cy="35%" r="60%">
-          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.3" />
-          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.14" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#cw-bg)" />
-      <circle cx="400" cy="180" r="300" fill="url(#cw-glow)" />
-      <g stroke="#06b6d4" stroke-opacity="0.2" stroke-width="1.2">
-        <line x1="400" y1="120" x2="80" y2="450" />
-        <line x1="400" y1="120" x2="240" y2="450" />
-        <line x1="400" y1="120" x2="400" y2="450" />
-        <line x1="400" y1="120" x2="560" y2="450" />
-        <line x1="400" y1="120" x2="720" y2="450" />
-        <line x1="200" y1="280" x2="600" y2="280" />
-        <line x1="140" y1="350" x2="660" y2="350" />
-        <line x1="80" y1="420" x2="720" y2="420" />
+      <g fill="url(#c0-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="220" cy="345" r="95" />
+        <circle cx="340" cy="355" r="85" />
+        <circle cx="460" cy="340" r="100" />
+        <circle cx="580" cy="350" r="90" />
+        <circle cx="700" cy="345" r="95" />
+        <path d="M-20,360 C80,335 180,330 290,355 C390,325 500,330 610,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
       </g>
-      <rect x="330" y="110" width="140" height="90" rx="12" fill="#1e293b" fill-opacity="0.4" stroke="#6366f1" stroke-width="1.6" stroke-opacity="0.6" />
-      <circle cx="400" cy="155" r="5" fill="#38bdf8" />
-      <circle cx="355" cy="130" r="3" fill="#6366f1" />
-      <circle cx="445" cy="130" r="3" fill="#6366f1" />
+      <rect y="310" width="800" height="140" fill="url(#c0-bottom-dark)" />
     </svg>
   `),
 
-  // 8: Spontaneous / Default (Atmospheric Obsidian & Dual Warm Amber / Violet nebula waves)
+  // 1: Ping Pong (Electric Dusk Coral & Periwinkle Clouds)
   toSvgDataUrl(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
       <defs>
-        <linearGradient id="df-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#141210" />
-          <stop offset="50%" stop-color="#1c1917" />
-          <stop offset="100%" stop-color="#0c0a09" />
+        <linearGradient id="c1-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#161b33" />
+          <stop offset="40%" stop-color="#353a66" />
+          <stop offset="70%" stop-color="#c85a7c" />
+          <stop offset="100%" stop-color="#14121f" />
         </linearGradient>
-        <radialGradient id="df-glow1" cx="35%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="#ea580c" stop-opacity="0.32" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
+        <linearGradient id="c1-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e8799e" stop-opacity="0.85" />
+          <stop offset="50%" stop-color="#64487b" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#241e3d" />
+        </linearGradient>
+        <linearGradient id="c1-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f492b3" />
+          <stop offset="50%" stop-color="#7e497a" />
+          <stop offset="100%" stop-color="#221830" />
+        </linearGradient>
+        <linearGradient id="c1-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#5a315e" />
+          <stop offset="45%" stop-color="#27182f" />
+          <stop offset="100%" stop-color="#12101b" />
+        </linearGradient>
+        <linearGradient id="c1-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#14121f" stop-opacity="0" />
+          <stop offset="50%" stop-color="#14121f" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#100f1a" />
+        </linearGradient>
+        <radialGradient id="c1-sun-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fecdd3" stop-opacity="0.85" />
+          <stop offset="45%" stop-color="#fb7185" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#353a66" stop-opacity="0" />
         </radialGradient>
-        <radialGradient id="df-glow2" cx="65%" cy="45%" r="55%">
-          <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="#141210" stop-opacity="0" />
+        <radialGradient id="c1-aurora" cx="50%" cy="50%" r="55%">
+          <stop offset="0%" stop-color="#f472b6" stop-opacity="0.35" />
+          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="#161b33" stop-opacity="0" />
         </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
       </defs>
-      <rect width="800" height="450" fill="url(#df-bg)" />
-      <circle cx="280" cy="190" r="280" fill="url(#df-glow1)" />
-      <circle cx="520" cy="210" r="280" fill="url(#df-glow2)" />
-      <ellipse cx="400" cy="225" rx="110" ry="45" fill="none" stroke="#ea580c" stroke-width="2" stroke-opacity="0.65" />
-      <ellipse cx="400" cy="225" rx="210" ry="85" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-opacity="0.35" stroke-dasharray="10 8" />
-      <ellipse cx="400" cy="225" rx="330" ry="135" fill="none" stroke="#8b5cf6" stroke-width="1" stroke-opacity="0.2" />
-      <polygon points="370,50 430,50 480,400 320,400" fill="#ea580c" fill-opacity="0.05" />
-      <circle cx="400" cy="225" r="9" fill="#f97316" />
-      <circle cx="400" cy="225" r="24" fill="#ea580c" fill-opacity="0.25" />
+      <rect width="800" height="450" fill="url(#c1-sky)" />
+      <ellipse cx="400" cy="210" rx="380" ry="130" fill="url(#c1-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="95" cy="50" r="1.5" opacity="0.5" />
+        <circle cx="170" cy="75" r="1.3" opacity="0.45" />
+        <circle cx="260" cy="45" r="1.6" opacity="0.6" />
+        <circle cx="340" cy="80" r="1.2" opacity="0.35" />
+        <circle cx="480" cy="35" r="1.8" opacity="0.65" />
+        <circle cx="570" cy="65" r="1.3" opacity="0.4" />
+        <circle cx="690" cy="45" r="1.5" opacity="0.5" />
+        <circle cx="730" cy="85" r="1.2" opacity="0.4" />
+      </g>
+      <circle cx="370" cy="205" r="60" fill="url(#c1-sun-glow)" filter="url(#blur-sm)" />
+      <circle cx="370" cy="205" r="28" fill="#fff1f2" opacity="0.9" />
+      <g fill="url(#c1-cloud-back)">
+        <circle cx="160" cy="240" r="70" />
+        <circle cx="250" cy="225" r="85" />
+        <circle cx="350" cy="235" r="75" />
+        <circle cx="510" cy="230" r="80" />
+        <circle cx="600" cy="220" r="85" />
+        <circle cx="680" cy="240" r="70" />
+        <path d="M-20,245 C80,220 180,225 260,230 C350,215 440,220 530,230 C620,215 710,225 820,245 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c1-cloud-mid)">
+        <circle cx="90" cy="285" r="75" />
+        <circle cx="190" cy="270" r="85" />
+        <circle cx="300" cy="285" r="75" />
+        <circle cx="420" cy="265" r="95" />
+        <circle cx="530" cy="280" r="85" />
+        <circle cx="640" cy="270" r="90" />
+        <circle cx="740" cy="285" r="75" />
+        <path d="M-20,295 C70,265 170,260 270,280 C360,255 470,260 560,275 C650,255 740,265 820,290 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c1-cloud-fore)">
+        <circle cx="120" cy="355" r="85" />
+        <circle cx="240" cy="340" r="100" />
+        <circle cx="360" cy="350" r="90" />
+        <circle cx="490" cy="335" r="105" />
+        <circle cx="610" cy="345" r="95" />
+        <circle cx="720" cy="340" r="95" />
+        <path d="M-20,355 C90,330 190,325 310,350 C410,325 520,325 630,345 C720,330 780,340 820,355 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="315" width="800" height="135" fill="url(#c1-bottom-dark)" />
+    </svg>
+  `),
+
+  // 2: Tennis / Pickleball (Lo-Fi Golden Hour & Sage Twilight Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c2-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#132226" />
+          <stop offset="36%" stop-color="#264649" />
+          <stop offset="68%" stop-color="#d4845a" />
+          <stop offset="100%" stop-color="#101819" />
+        </linearGradient>
+        <linearGradient id="c2-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f0a579" stop-opacity="0.88" />
+          <stop offset="50%" stop-color="#556c60" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#192829" />
+        </linearGradient>
+        <linearGradient id="c2-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f5b88a" />
+          <stop offset="45%" stop-color="#6e6d5e" />
+          <stop offset="100%" stop-color="#162223" />
+        </linearGradient>
+        <linearGradient id="c2-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#464e47" />
+          <stop offset="40%" stop-color="#202b2a" />
+          <stop offset="100%" stop-color="#0e1516" />
+        </linearGradient>
+        <linearGradient id="c2-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#101819" stop-opacity="0" />
+          <stop offset="50%" stop-color="#101819" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#0c1314" />
+        </linearGradient>
+        <radialGradient id="c2-sun-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.85" />
+          <stop offset="50%" stop-color="#f97316" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#264649" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c2-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#fb923c" stop-opacity="0.38" />
+          <stop offset="55%" stop-color="#2dd4bf" stop-opacity="0.14" />
+          <stop offset="100%" stop-color="#132226" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c2-sky)" />
+      <ellipse cx="440" cy="220" rx="370" ry="135" fill="url(#c2-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="120" cy="60" r="1.4" opacity="0.45" />
+        <circle cx="210" cy="35" r="1.6" opacity="0.6" />
+        <circle cx="290" cy="85" r="1.2" opacity="0.35" />
+        <circle cx="430" cy="45" r="1.8" opacity="0.65" />
+        <circle cx="530" cy="70" r="1.3" opacity="0.4" />
+        <circle cx="650" cy="40" r="1.5" opacity="0.55" />
+        <circle cx="720" cy="80" r="1.2" opacity="0.4" />
+      </g>
+      <circle cx="450" cy="195" r="55" fill="url(#c2-sun-glow)" filter="url(#blur-sm)" />
+      <circle cx="450" cy="195" r="26" fill="#fff7ed" opacity="0.9" />
+      <g fill="url(#c2-cloud-back)">
+        <circle cx="150" cy="245" r="65" />
+        <circle cx="240" cy="230" r="80" />
+        <circle cx="340" cy="240" r="70" />
+        <circle cx="500" cy="230" r="80" />
+        <circle cx="590" cy="225" r="85" />
+        <circle cx="680" cy="245" r="70" />
+        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c2-cloud-mid)">
+        <circle cx="90" cy="285" r="70" />
+        <circle cx="180" cy="275" r="85" />
+        <circle cx="290" cy="290" r="75" />
+        <circle cx="400" cy="270" r="90" />
+        <circle cx="510" cy="285" r="80" />
+        <circle cx="630" cy="275" r="85" />
+        <circle cx="730" cy="290" r="75" />
+        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c2-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="230" cy="340" r="100" />
+        <circle cx="350" cy="355" r="85" />
+        <circle cx="470" cy="340" r="100" />
+        <circle cx="590" cy="350" r="90" />
+        <circle cx="710" cy="345" r="95" />
+        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c2-bottom-dark)" />
+    </svg>
+  `),
+
+  // 3: Board Games / Card Games (Dreamy Lavender & Dusty Rose Nightfall Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c3-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#181224" />
+          <stop offset="38%" stop-color="#3d2652" />
+          <stop offset="70%" stop-color="#9e4770" />
+          <stop offset="100%" stop-color="#140f1c" />
+        </linearGradient>
+        <linearGradient id="c3-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d88ca5" stop-opacity="0.88" />
+          <stop offset="50%" stop-color="#693c6f" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#241733" />
+        </linearGradient>
+        <linearGradient id="c3-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e8a2b8" />
+          <stop offset="45%" stop-color="#7e4175" />
+          <stop offset="100%" stop-color="#1f142b" />
+        </linearGradient>
+        <linearGradient id="c3-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#552752" />
+          <stop offset="40%" stop-color="#27152c" />
+          <stop offset="100%" stop-color="#110c17" />
+        </linearGradient>
+        <linearGradient id="c3-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#140f1c" stop-opacity="0" />
+          <stop offset="50%" stop-color="#140f1c" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#0f0b15" />
+        </linearGradient>
+        <radialGradient id="c3-moon-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f5d0fe" stop-opacity="0.85" />
+          <stop offset="45%" stop-color="#c084fc" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#3d2652" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c3-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#f472b6" stop-opacity="0.35" />
+          <stop offset="55%" stop-color="#a855f7" stop-opacity="0.16" />
+          <stop offset="100%" stop-color="#181224" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c3-sky)" />
+      <ellipse cx="400" cy="215" rx="360" ry="135" fill="url(#c3-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="100" cy="45" r="1.4" opacity="0.5" />
+        <circle cx="180" cy="70" r="1.2" opacity="0.4" />
+        <circle cx="310" cy="40" r="1.7" opacity="0.65" />
+        <circle cx="420" cy="75" r="1.3" opacity="0.4" />
+        <circle cx="510" cy="45" r="1.8" opacity="0.6" />
+        <circle cx="620" cy="65" r="1.2" opacity="0.4" />
+        <circle cx="710" cy="35" r="1.6" opacity="0.55" />
+        <circle cx="760" cy="80" r="1.2" opacity="0.4" />
+      </g>
+      <circle cx="210" cy="85" r="46" fill="url(#c3-moon-glow)" filter="url(#blur-sm)" />
+      <g transform="translate(210, 85)">
+        <circle cx="0" cy="0" r="21" fill="#faf5ff" opacity="0.92" />
+        <circle cx="-7" cy="-4" r="18" fill="#241735" />
+      </g>
+      <g fill="url(#c3-cloud-back)">
+        <circle cx="130" cy="240" r="65" />
+        <circle cx="220" cy="225" r="80" />
+        <circle cx="320" cy="235" r="70" />
+        <circle cx="480" cy="230" r="80" />
+        <circle cx="570" cy="220" r="85" />
+        <circle cx="670" cy="240" r="70" />
+        <path d="M-20,245 C70,220 160,220 240,230 C330,215 430,220 520,230 C610,215 710,225 820,245 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c3-cloud-mid)">
+        <circle cx="80" cy="285" r="70" />
+        <circle cx="170" cy="270" r="85" />
+        <circle cx="280" cy="285" r="75" />
+        <circle cx="390" cy="265" r="95" />
+        <circle cx="500" cy="280" r="85" />
+        <circle cx="620" cy="270" r="90" />
+        <circle cx="730" cy="285" r="75" />
+        <path d="M-20,295 C70,265 160,260 260,280 C350,255 450,260 550,275 C640,255 730,265 820,290 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c3-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="230" cy="340" r="100" />
+        <circle cx="350" cy="355" r="90" />
+        <circle cx="480" cy="335" r="105" />
+        <circle cx="600" cy="345" r="95" />
+        <circle cx="710" cy="340" r="95" />
+        <path d="M-20,355 C80,330 190,325 300,350 C400,325 510,325 620,345 C710,330 770,340 820,355 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c3-bottom-dark)" />
+    </svg>
+  `),
+
+  // 4: Basketball (Sunset Crimson, Amber & Deep Indigo Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c4-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#19121c" />
+          <stop offset="36%" stop-color="#4f1d35" />
+          <stop offset="68%" stop-color="#d96b38" />
+          <stop offset="100%" stop-color="#150f17" />
+        </linearGradient>
+        <linearGradient id="c4-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f5945c" stop-opacity="0.9" />
+          <stop offset="50%" stop-color="#7c2847" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#281525" />
+        </linearGradient>
+        <linearGradient id="c4-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fba76d" />
+          <stop offset="45%" stop-color="#903051" />
+          <stop offset="100%" stop-color="#231222" />
+        </linearGradient>
+        <linearGradient id="c4-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#641e3d" />
+          <stop offset="40%" stop-color="#2a1020" />
+          <stop offset="100%" stop-color="#130d14" />
+        </linearGradient>
+        <linearGradient id="c4-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#150f17" stop-opacity="0" />
+          <stop offset="50%" stop-color="#150f17" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#100b12" />
+        </linearGradient>
+        <radialGradient id="c4-sun-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fde047" stop-opacity="0.85" />
+          <stop offset="45%" stop-color="#ea580c" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#4f1d35" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c4-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#f97316" stop-opacity="0.4" />
+          <stop offset="55%" stop-color="#dc2626" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="#19121c" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c4-sky)" />
+      <ellipse cx="480" cy="210" rx="370" ry="130" fill="url(#c4-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="110" cy="50" r="1.5" opacity="0.5" />
+        <circle cx="190" cy="80" r="1.2" opacity="0.4" />
+        <circle cx="280" cy="35" r="1.6" opacity="0.6" />
+        <circle cx="410" cy="65" r="1.3" opacity="0.35" />
+        <circle cx="540" cy="40" r="1.8" opacity="0.65" />
+        <circle cx="660" cy="60" r="1.4" opacity="0.45" />
+        <circle cx="730" cy="40" r="1.2" opacity="0.4" />
+      </g>
+      <circle cx="500" cy="200" r="58" fill="url(#c4-sun-glow)" filter="url(#blur-sm)" />
+      <circle cx="500" cy="200" r="27" fill="#fffbeb" opacity="0.9" />
+      <g fill="url(#c4-cloud-back)">
+        <circle cx="150" cy="240" r="70" />
+        <circle cx="240" cy="225" r="85" />
+        <circle cx="340" cy="235" r="75" />
+        <circle cx="500" cy="225" r="85" />
+        <circle cx="600" cy="220" r="85" />
+        <circle cx="690" cy="240" r="70" />
+        <path d="M-20,245 C80,220 170,220 250,230 C340,215 440,220 530,230 C620,215 720,225 820,245 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c4-cloud-mid)">
+        <circle cx="90" cy="285" r="70" />
+        <circle cx="180" cy="270" r="85" />
+        <circle cx="290" cy="285" r="75" />
+        <circle cx="410" cy="265" r="95" />
+        <circle cx="520" cy="280" r="85" />
+        <circle cx="630" cy="270" r="90" />
+        <circle cx="730" cy="285" r="75" />
+        <path d="M-20,295 C70,265 170,260 270,280 C360,255 460,260 550,275 C640,255 730,265 820,290 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c4-cloud-fore)">
+        <circle cx="120" cy="355" r="85" />
+        <circle cx="240" cy="340" r="100" />
+        <circle cx="360" cy="355" r="90" />
+        <circle cx="480" cy="335" r="105" />
+        <circle cx="600" cy="345" r="95" />
+        <circle cx="720" cy="340" r="95" />
+        <path d="M-20,355 C90,330 190,325 310,350 C410,325 520,325 630,345 C720,330 780,340 820,355 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c4-bottom-dark)" />
+    </svg>
+  `),
+
+  // 5: Run Club / Park Walk (Early Dawn Pastel Sky & Misty Horizon Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c5-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#151c2e" />
+          <stop offset="38%" stop-color="#383b66" />
+          <stop offset="68%" stop-color="#cf7663" />
+          <stop offset="100%" stop-color="#121622" />
+        </linearGradient>
+        <linearGradient id="c5-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e89885" stop-opacity="0.88" />
+          <stop offset="50%" stop-color="#675578" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#22233b" />
+        </linearGradient>
+        <linearGradient id="c5-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f5ae9c" />
+          <stop offset="45%" stop-color="#745c7b" />
+          <stop offset="100%" stop-color="#1e1e32" />
+        </linearGradient>
+        <linearGradient id="c5-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#4e3f5c" />
+          <stop offset="40%" stop-color="#241e30" />
+          <stop offset="100%" stop-color="#10141d" />
+        </linearGradient>
+        <linearGradient id="c5-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#121622" stop-opacity="0" />
+          <stop offset="50%" stop-color="#121622" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#0e111a" />
+        </linearGradient>
+        <radialGradient id="c5-dawn-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fde68a" stop-opacity="0.8" />
+          <stop offset="45%" stop-color="#f43f5e" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#383b66" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c5-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#fb7185" stop-opacity="0.35" />
+          <stop offset="55%" stop-color="#38bdf8" stop-opacity="0.14" />
+          <stop offset="100%" stop-color="#151c2e" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c5-sky)" />
+      <ellipse cx="400" cy="220" rx="380" ry="135" fill="url(#c5-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="105" cy="55" r="1.5" opacity="0.55" />
+        <circle cx="185" cy="35" r="1.3" opacity="0.4" />
+        <circle cx="270" cy="75" r="1.6" opacity="0.6" />
+        <circle cx="410" cy="45" r="1.8" opacity="0.65" />
+        <circle cx="530" cy="65" r="1.2" opacity="0.35" />
+        <circle cx="640" cy="35" r="1.6" opacity="0.55" />
+        <circle cx="730" cy="70" r="1.3" opacity="0.4" />
+      </g>
+      <circle cx="390" cy="205" r="56" fill="url(#c5-dawn-glow)" filter="url(#blur-sm)" />
+      <circle cx="390" cy="205" r="26" fill="#fffbeb" opacity="0.88" />
+      <g fill="url(#c5-cloud-back)">
+        <circle cx="140" cy="245" r="65" />
+        <circle cx="230" cy="230" r="80" />
+        <circle cx="330" cy="240" r="70" />
+        <circle cx="490" cy="230" r="80" />
+        <circle cx="580" cy="225" r="85" />
+        <circle cx="680" cy="240" r="70" />
+        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c5-cloud-mid)">
+        <circle cx="90" cy="285" r="70" />
+        <circle cx="180" cy="275" r="85" />
+        <circle cx="290" cy="290" r="75" />
+        <circle cx="400" cy="270" r="90" />
+        <circle cx="510" cy="285" r="80" />
+        <circle cx="630" cy="275" r="85" />
+        <circle cx="730" cy="290" r="75" />
+        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c5-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="230" cy="340" r="100" />
+        <circle cx="350" cy="355" r="85" />
+        <circle cx="470" cy="340" r="100" />
+        <circle cx="590" cy="350" r="90" />
+        <circle cx="710" cy="345" r="95" />
+        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c5-bottom-dark)" />
+    </svg>
+  `),
+
+  // 6: Coffee (Cozy Lo-Fi Café Dusk — Warm Caramel, Cinnamon Rose & Twilight Violet Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c6-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1c141d" />
+          <stop offset="38%" stop-color="#4a2839" />
+          <stop offset="68%" stop-color="#c97a53" />
+          <stop offset="100%" stop-color="#161017" />
+        </linearGradient>
+        <linearGradient id="c6-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e29b7a" stop-opacity="0.9" />
+          <stop offset="50%" stop-color="#734354" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#2a1924" />
+        </linearGradient>
+        <linearGradient id="c6-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f0ae8c" />
+          <stop offset="45%" stop-color="#8a4d62" />
+          <stop offset="100%" stop-color="#22141f" />
+        </linearGradient>
+        <linearGradient id="c6-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#5a2d3e" />
+          <stop offset="40%" stop-color="#291421" />
+          <stop offset="100%" stop-color="#130d13" />
+        </linearGradient>
+        <linearGradient id="c6-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#161017" stop-opacity="0" />
+          <stop offset="50%" stop-color="#161017" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#110b12" />
+        </linearGradient>
+        <radialGradient id="c6-sun-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fde68a" stop-opacity="0.85" />
+          <stop offset="45%" stop-color="#f97316" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#4a2839" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c6-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.38" />
+          <stop offset="55%" stop-color="#e11d48" stop-opacity="0.16" />
+          <stop offset="100%" stop-color="#1c141d" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c6-sky)" />
+      <ellipse cx="420" cy="210" rx="370" ry="135" fill="url(#c6-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="115" cy="50" r="1.4" opacity="0.5" />
+        <circle cx="195" cy="80" r="1.2" opacity="0.4" />
+        <circle cx="295" cy="35" r="1.6" opacity="0.6" />
+        <circle cx="425" cy="70" r="1.3" opacity="0.35" />
+        <circle cx="535" cy="45" r="1.8" opacity="0.65" />
+        <circle cx="655" cy="65" r="1.3" opacity="0.4" />
+        <circle cx="735" cy="35" r="1.5" opacity="0.55" />
+      </g>
+      <circle cx="410" cy="190" r="56" fill="url(#c6-sun-glow)" filter="url(#blur-sm)" />
+      <circle cx="410" cy="190" r="27" fill="#fffbeb" opacity="0.9" />
+      <g fill="url(#c6-cloud-back)">
+        <circle cx="140" cy="245" r="65" />
+        <circle cx="230" cy="230" r="80" />
+        <circle cx="330" cy="240" r="70" />
+        <circle cx="490" cy="230" r="80" />
+        <circle cx="580" cy="225" r="85" />
+        <circle cx="680" cy="240" r="70" />
+        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c6-cloud-mid)">
+        <circle cx="90" cy="285" r="70" />
+        <circle cx="180" cy="275" r="85" />
+        <circle cx="290" cy="290" r="75" />
+        <circle cx="400" cy="270" r="90" />
+        <circle cx="510" cy="285" r="80" />
+        <circle cx="630" cy="275" r="85" />
+        <circle cx="730" cy="290" r="75" />
+        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c6-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="230" cy="340" r="100" />
+        <circle cx="350" cy="355" r="85" />
+        <circle cx="470" cy="340" r="100" />
+        <circle cx="590" cy="350" r="90" />
+        <circle cx="710" cy="345" r="95" />
+        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c6-bottom-dark)" />
+    </svg>
+  `),
+
+  // 7: Co-work / Study / Video Games (Midnight Lo-Fi Beats — Deep Indigo, Cyan-Violet Aurora & Soft Night Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c7-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#111629" />
+          <stop offset="38%" stop-color="#282c54" />
+          <stop offset="68%" stop-color="#6c3b6e" />
+          <stop offset="100%" stop-color="#0e111d" />
+        </linearGradient>
+        <linearGradient id="c7-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#937ec8" stop-opacity="0.88" />
+          <stop offset="50%" stop-color="#463768" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#1b1c36" />
+        </linearGradient>
+        <linearGradient id="c7-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#a78bfa" />
+          <stop offset="45%" stop-color="#553a70" />
+          <stop offset="100%" stop-color="#18182d" />
+        </linearGradient>
+        <linearGradient id="c7-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#3d2c56" />
+          <stop offset="40%" stop-color="#1c1a2e" />
+          <stop offset="100%" stop-color="#0c0f18" />
+        </linearGradient>
+        <linearGradient id="c7-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0e111d" stop-opacity="0" />
+          <stop offset="50%" stop-color="#0e111d" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#0a0c16" />
+        </linearGradient>
+        <radialGradient id="c7-moon-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.85" />
+          <stop offset="45%" stop-color="#818cf8" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#282c54" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c7-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35" />
+          <stop offset="50%" stop-color="#818cf8" stop-opacity="0.2" />
+          <stop offset="100%" stop-color="#111629" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c7-sky)" />
+      <ellipse cx="420" cy="210" rx="380" ry="135" fill="url(#c7-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="90" cy="45" r="1.4" opacity="0.5" />
+        <circle cx="170" cy="75" r="1.2" opacity="0.4" />
+        <circle cx="260" cy="35" r="1.7" opacity="0.65" />
+        <circle cx="360" cy="70" r="1.3" opacity="0.35" />
+        <circle cx="480" cy="40" r="1.8" opacity="0.6" />
+        <circle cx="550" cy="80" r="1.2" opacity="0.4" />
+        <circle cx="680" cy="40" r="1.5" opacity="0.55" />
+        <circle cx="750" cy="70" r="1.3" opacity="0.4" />
+      </g>
+      <circle cx="620" cy="90" r="45" fill="url(#c7-moon-glow)" filter="url(#blur-sm)" />
+      <g transform="translate(620, 90)">
+        <circle cx="0" cy="0" r="21" fill="#f0f9ff" opacity="0.92" />
+        <circle cx="7" cy="-5" r="18" fill="#181c34" />
+      </g>
+      <g fill="url(#c7-cloud-back)">
+        <circle cx="140" cy="245" r="65" />
+        <circle cx="230" cy="230" r="80" />
+        <circle cx="330" cy="240" r="70" />
+        <circle cx="490" cy="230" r="80" />
+        <circle cx="580" cy="225" r="85" />
+        <circle cx="680" cy="240" r="70" />
+        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c7-cloud-mid)">
+        <circle cx="90" cy="285" r="70" />
+        <circle cx="180" cy="275" r="85" />
+        <circle cx="290" cy="290" r="75" />
+        <circle cx="400" cy="270" r="90" />
+        <circle cx="510" cy="285" r="80" />
+        <circle cx="630" cy="275" r="85" />
+        <circle cx="730" cy="290" r="75" />
+        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c7-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="230" cy="340" r="100" />
+        <circle cx="350" cy="355" r="85" />
+        <circle cx="470" cy="340" r="100" />
+        <circle cx="590" cy="350" r="90" />
+        <circle cx="710" cy="345" r="95" />
+        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c7-bottom-dark)" />
+    </svg>
+  `),
+
+  // 8: Spontaneous / Default (Velvet Sunset & Cotton-Candy Dusk Clouds)
+  toSvgDataUrl(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" data-theme="lofi-cloudy">
+      <defs>
+        <linearGradient id="c8-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#171426" />
+          <stop offset="38%" stop-color="#45274d" />
+          <stop offset="68%" stop-color="#c96f53" />
+          <stop offset="100%" stop-color="#14101d" />
+        </linearGradient>
+        <linearGradient id="c8-cloud-back" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e89283" stop-opacity="0.88" />
+          <stop offset="50%" stop-color="#724164" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#26172e" />
+        </linearGradient>
+        <linearGradient id="c8-cloud-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f6a492" />
+          <stop offset="45%" stop-color="#82476d" />
+          <stop offset="100%" stop-color="#211227" />
+        </linearGradient>
+        <linearGradient id="c8-cloud-fore" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#58294e" />
+          <stop offset="40%" stop-color="#261327" />
+          <stop offset="100%" stop-color="#120e18" />
+        </linearGradient>
+        <linearGradient id="c8-bottom-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#14101d" stop-opacity="0" />
+          <stop offset="50%" stop-color="#14101d" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#0f0b16" />
+        </linearGradient>
+        <radialGradient id="c8-sun-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.85" />
+          <stop offset="45%" stop-color="#f43f5e" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#45274d" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="c8-aurora" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#fb7185" stop-opacity="0.38" />
+          <stop offset="55%" stop-color="#c084fc" stop-opacity="0.16" />
+          <stop offset="100%" stop-color="#171426" stop-opacity="0" />
+        </radialGradient>
+        <filter id="blur-lg"><feGaussianBlur stdDeviation="32" /></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="10" /></filter>
+      </defs>
+      <rect width="800" height="450" fill="url(#c8-sky)" />
+      <ellipse cx="400" cy="215" rx="380" ry="135" fill="url(#c8-aurora)" filter="url(#blur-lg)" />
+      <g fill="#ffffff">
+        <circle cx="110" cy="50" r="1.5" opacity="0.5" />
+        <circle cx="190" cy="80" r="1.2" opacity="0.4" />
+        <circle cx="280" cy="35" r="1.6" opacity="0.6" />
+        <circle cx="410" cy="70" r="1.3" opacity="0.35" />
+        <circle cx="520" cy="45" r="1.8" opacity="0.65" />
+        <circle cx="640" cy="65" r="1.3" opacity="0.4" />
+        <circle cx="730" cy="35" r="1.5" opacity="0.55" />
+      </g>
+      <circle cx="380" cy="205" r="56" fill="url(#c8-sun-glow)" filter="url(#blur-sm)" />
+      <circle cx="380" cy="205" r="27" fill="#fff7ed" opacity="0.9" />
+      <g fill="url(#c8-cloud-back)">
+        <circle cx="140" cy="245" r="65" />
+        <circle cx="230" cy="230" r="80" />
+        <circle cx="330" cy="240" r="70" />
+        <circle cx="490" cy="230" r="80" />
+        <circle cx="580" cy="225" r="85" />
+        <circle cx="680" cy="240" r="70" />
+        <path d="M-20,250 C80,225 170,225 250,235 C340,215 440,220 530,230 C620,215 720,225 820,250 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c8-cloud-mid)">
+        <circle cx="90" cy="285" r="70" />
+        <circle cx="180" cy="275" r="85" />
+        <circle cx="290" cy="290" r="75" />
+        <circle cx="400" cy="270" r="90" />
+        <circle cx="510" cy="285" r="80" />
+        <circle cx="630" cy="275" r="85" />
+        <circle cx="730" cy="290" r="75" />
+        <path d="M-20,295 C70,265 170,265 260,285 C350,260 450,265 540,280 C630,260 720,270 820,295 L820,450 L-20,450 Z" />
+      </g>
+      <g fill="url(#c8-cloud-fore)">
+        <circle cx="110" cy="355" r="85" />
+        <circle cx="230" cy="340" r="100" />
+        <circle cx="350" cy="355" r="85" />
+        <circle cx="470" cy="340" r="100" />
+        <circle cx="590" cy="350" r="90" />
+        <circle cx="710" cy="345" r="95" />
+        <path d="M-20,360 C80,335 190,330 300,355 C400,330 510,330 620,350 C710,335 770,345 820,360 L820,450 L-20,450 Z" />
+      </g>
+      <rect y="310" width="800" height="140" fill="url(#c8-bottom-dark)" />
     </svg>
   `),
 ];
@@ -518,7 +1035,11 @@ export function resolveCoverImage(
   coverImage: string | undefined,
   category: ActivityCategory
 ): string {
-  if (!coverImage || coverImage.includes('unsplash.com')) {
+  if (
+    !coverImage ||
+    coverImage.includes('unsplash.com') ||
+    (coverImage.startsWith('data:image/svg+xml') && !coverImage.includes('lofi-cloudy'))
+  ) {
     return getDefaultCoverForCategory(category);
   }
   return coverImage;

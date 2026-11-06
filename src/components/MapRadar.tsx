@@ -14,7 +14,7 @@ import {
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SeatBubbles } from '@/components/SeatBubbles';
 import { StatusBadge } from '@/components/StatusBadge';
-import { getDefaultCoverForCategory } from '@/lib/geo';
+import { resolveCoverImage } from '@/lib/geo';
 
 function escapeHtml(str: string): string {
   return str
@@ -83,10 +83,7 @@ export default function MapRadar({
 
   const previewCoverUrl = useMemo(() => {
     if (!selectedPreviewLobby) return '';
-    if (!selectedPreviewLobby.coverImage || selectedPreviewLobby.coverImage.includes('unsplash.com')) {
-      return getDefaultCoverForCategory(selectedPreviewLobby.category);
-    }
-    return selectedPreviewLobby.coverImage;
+    return resolveCoverImage(selectedPreviewLobby.coverImage, selectedPreviewLobby.category);
   }, [selectedPreviewLobby]);
 
   useEffect(() => {

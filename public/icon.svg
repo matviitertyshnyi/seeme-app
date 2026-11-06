@@ -1,6 +1,6 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <!-- App Icon Base (Rich Dark Warm Background) -->
-  <rect width="512" height="512" rx="115" fill="#141210" />
+  <!-- App Icon Base (Matches Card & Pin Background #1C1917) -->
+  <rect width="512" height="512" rx="115" fill="#1C1917" />
 
   <!-- Animated-style Radar Waves (Brand Page Orange #EA580C) -->
   <circle cx="256" cy="220" r="170" fill="none" stroke="#EA580C" stroke-width="2" opacity="0.25" stroke-dasharray="8 12" />

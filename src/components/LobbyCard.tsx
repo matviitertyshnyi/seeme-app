@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
-import { getDefaultCoverForCategory } from '@/lib/geo';
+import { resolveCoverImage } from '@/lib/geo';
 
 interface LobbyCardProps {
   lobby: LobbyWithDistance;
@@ -49,10 +49,7 @@ export function LobbyCard({
     lobby.participants.find((p) => p.id === lobby.hostId) ||
     lobby.participants[0];
 
-  const coverSrc =
-    !lobby.coverImage || lobby.coverImage.includes('unsplash.com')
-      ? getDefaultCoverForCategory(lobby.category)
-      : lobby.coverImage;
+  const coverSrc = resolveCoverImage(lobby.coverImage, lobby.category);
 
   const otherCount = Math.max(0, lobby.participants.length - 1);
 

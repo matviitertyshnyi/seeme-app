@@ -9,7 +9,7 @@ interface OpenDoorLogoProps {
 
 /**
  * Modern "Leave The Room" Brand Mark & App Icon
- * - High-contrast #141210 dark squircle canvas
+ * - Seamless transparent background so it blends into any card/page surface
  * - Brand warm orange (#EA580C / orange-600) radar waves and outer pulses
  * - Location map pin framing the open door
  * - Clean geometric vector icon
@@ -26,9 +26,6 @@ export function OpenDoorLogo({ className = 'w-16 h-16', size }: OpenDoorLogoProp
       {...dimensionProps}
       aria-label="Leave The Room Logo"
     >
-      {/* App Icon Base (Rich Dark Warm Background) */}
-      <rect width="512" height="512" rx="115" fill="#141210" />
-
       {/* Animated-style Radar Waves (Brand Page Orange #EA580C) */}
       <circle
         cx="256"
@@ -60,19 +57,11 @@ export function OpenDoorLogo({ className = 'w-16 h-16', size }: OpenDoorLogoProp
         strokeLinecap="round"
         opacity="0.4"
       />
-      <path
-        d="M 146 220 A 110 110 0 0 1 366 220"
-        fill="none"
-        stroke="#EA580C"
-        strokeWidth="10"
-        strokeLinecap="round"
-        opacity="0.8"
-      />
 
-      {/* Core Location Map Pin */}
+      {/* Core Location Map Pin (Blends with surface) */}
       <path
         d="M 256 70 C 173 70 106 137 106 220 C 106 335 256 450 256 450 C 256 450 406 335 406 220 C 406 137 339 70 256 70 Z"
-        fill="#1C1917"
+        fill="none"
         stroke="#EA580C"
         strokeWidth="14"
         strokeLinejoin="round"

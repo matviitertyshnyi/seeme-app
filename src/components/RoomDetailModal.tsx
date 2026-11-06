@@ -32,7 +32,15 @@ import {
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { StatusBadge } from '@/components/StatusBadge';
 import { triggerSensoryFeedback } from '@/lib/sound';
-import { getDefaultCoverForCategory } from '@/lib/geo';
+import { resolveCoverImage } from '@/lib/geo';
+import dynamic from 'next/dynamic';
+
+const EventSpotMap = dynamic(() => import('@/components/EventSpotMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-40 sm:h-44 rounded-xl bg-stone-200/60 dark:bg-stone-800/60 animate-pulse" />
+  ),
+});
 
 interface RoomDetailModalProps {
   lobby: LobbyWithDistance | null;
@@ -115,10 +123,7 @@ export function RoomDetailModal({
     : false;
 
   const coverImageUrl = useMemo(() => {
-    if (!lobby?.coverImage || lobby.coverImage.includes('unsplash.com')) {
-      return getDefaultCoverForCategory(lobby?.category || 'Coffee');
-    }
-    return lobby.coverImage;
+    return resolveCoverImage(lobby?.coverImage, lobby?.category || 'Coffee');
   }, [lobby?.coverImage, lobby?.category]);
 
   const hasCustomHostNote = Boolean(
@@ -618,6 +623,12 @@ export function RoomDetailModal({
                   </div>
                 </div>
               </div>
+
+              <EventSpotMap
+                lat={lobby.lat}
+                lng={lobby.lng}
+                venueName={lobby.venueName}
+              />
 
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <a
