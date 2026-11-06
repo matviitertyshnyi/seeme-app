@@ -13,7 +13,9 @@ export interface ExploreViewProps {
   onSearchChange: (query: string) => void;
   onClearSearch: () => void;
   selectedBroadCategory: string;
+  selectedCategory?: string;
   categoryCounts: Record<string, number>;
+  activityCounts?: Record<string, number>;
   totalLobbiesCount: number;
   onOpenCategorySheet: () => void;
   userLocationLabel: string;
@@ -54,7 +56,9 @@ export function ExploreView({
   onSearchChange,
   onClearSearch,
   selectedBroadCategory,
+  selectedCategory = 'All',
   categoryCounts,
+  activityCounts = {},
   totalLobbiesCount,
   onOpenCategorySheet,
   userLocationLabel,
@@ -189,12 +193,16 @@ export function ExploreView({
             className="min-h-[40px] px-2.5 sm:px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-all dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] cursor-pointer"
           >
             <span className="truncate max-w-[105px] sm:max-w-none">
-              {selectedBroadCategory === 'All Categories'
+              {selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories'
+                ? selectedCategory
+                : selectedBroadCategory === 'All Categories'
                 ? t('all_activities') || 'All Meetups'
                 : selectedBroadCategory}
             </span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200">
-              {categoryCounts[selectedBroadCategory] ?? totalLobbiesCount}
+              {selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories'
+                ? activityCounts[selectedCategory] ?? 0
+                : categoryCounts[selectedBroadCategory] ?? totalLobbiesCount}
             </span>
             <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
           </button>

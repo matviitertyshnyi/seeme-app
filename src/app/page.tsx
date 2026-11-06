@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import {
   Plus,
   Map as MapIcon,
+  ChevronDown,
 } from 'lucide-react';
 import { OpenDoorLogo } from '@/components/OpenDoorLogo';
 import {
@@ -30,6 +31,7 @@ import {
 import {
   GROUPED_ACTIVITIES,
   getBroadCategory,
+  CategoryIcon,
 } from '@/components/CategoryIcon';
 import {
   SupportedLanguage,
@@ -656,6 +658,17 @@ export default function LeaveTheRoomHomePage() {
     return counts;
   }, [lobbiesWithDistance]);
 
+  const activityCounts: Record<string, number> = useMemo(() => {
+    const counts: Record<string, number> = {};
+    lobbiesWithDistance.forEach((lobby) => {
+      if (lobby.distanceKm <= radiusKm) {
+        const cat = lobby.category;
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [lobbiesWithDistance, radiusKm]);
+
   // Filtered meetups for Explore and Map
   const filteredLobbies: LobbyWithDistance[] = useMemo(() => {
     const bannedIds = activeUser.bannedUserIds || [];
@@ -690,8 +703,26 @@ export default function LeaveTheRoomHomePage() {
         return false;
       }
 
-      // Broad Category filter
-      if (selectedBroadCategory !== 'All Categories') {
+      // Activity or Category filter
+      if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') {
+        const isBroad = [
+          'Sports & Fitness',
+          'Gaming & Strategy',
+          'Social & Hangout',
+          'Co-Working',
+        ].includes(selectedCategory);
+        if (isBroad) {
+          if (getBroadCategory(lobby.category) !== selectedCategory) {
+            return false;
+          }
+        } else {
+          const target = selectedCategory.toLowerCase().trim();
+          const lobbyCat = lobby.category.toLowerCase().trim();
+          if (lobbyCat !== target && !lobbyCat.includes(target) && !target.includes(lobbyCat)) {
+            return false;
+          }
+        }
+      } else if (selectedBroadCategory !== 'All Categories') {
         const broad = getBroadCategory(lobby.category);
         if (broad !== selectedBroadCategory) {
           return false;
@@ -1375,7 +1406,9 @@ export default function LeaveTheRoomHomePage() {
             onSearchChange={setSearchQuery}
             onClearSearch={() => setSearchQuery('')}
             selectedBroadCategory={selectedBroadCategory}
+            selectedCategory={selectedCategory}
             categoryCounts={categoryCounts}
+            activityCounts={activityCounts}
             totalLobbiesCount={lobbiesWithDistance.length}
             onOpenCategorySheet={() => setIsCategorySheetOpen(true)}
             userLocationLabel={userCoords.label}
@@ -1454,9 +1487,41 @@ export default function LeaveTheRoomHomePage() {
         {activeNav === 'MAP' && (
           <div className="space-y-3.5">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+              <button
+                type="button"
+                onClick={() => setIsCategorySheetOpen(true)}
+                className={`min-h-[38px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 border transition-all cursor-pointer ${
+                  selectedCategory !== 'All' || selectedBroadCategory !== 'All Categories'
+                    ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700/80 hover:bg-stone-200 dark:hover:bg-stone-700'
+                }`}
+                title="Filter by Activity"
+              >
+                <CategoryIcon
+                  category={
+                    selectedCategory && selectedCategory !== 'All'
+                      ? selectedCategory
+                      : selectedBroadCategory !== 'All Categories'
+                      ? selectedBroadCategory
+                      : 'All Rooms'
+                  }
+                  className="w-3.5 h-3.5 shrink-0"
+                />
+                <span>
+                  {selectedCategory && selectedCategory !== 'All'
+                    ? selectedCategory
+                    : selectedBroadCategory !== 'All Categories'
+                    ? selectedBroadCategory
+                    : 'All Activities'}
+                </span>
+                <ChevronDown className="w-3 h-3 text-stone-400 shrink-0" />
+              </button>
+
               {(['All Categories', 'Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'] as const).map(
                 (catName) => {
-                  const isSelected = selectedBroadCategory === catName;
+                  const isSelected =
+                    (selectedCategory === catName || (selectedCategory === 'All' && selectedBroadCategory === catName)) &&
+                    (catName === 'All Categories' ? selectedBroadCategory === 'All Categories' : true);
                   const count =
                     catName === 'All Categories'
                       ? lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length
@@ -1468,7 +1533,10 @@ export default function LeaveTheRoomHomePage() {
                     <button
                       key={catName}
                       type="button"
-                      onClick={() => setSelectedBroadCategory(catName)}
+                      onClick={() => {
+                        setSelectedBroadCategory(catName);
+                        setSelectedCategory(catName === 'All Categories' ? 'All' : catName);
+                      }}
                       className={`min-h-[38px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 border transition-all ${
                         isSelected
                           ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-950 border-stone-900 dark:border-white shadow-xs'
@@ -1498,6 +1566,14 @@ export default function LeaveTheRoomHomePage() {
               radiusKm={radiusKm}
               activeUser={activeUser}
               isSignedOut={isSignedOut}
+              selectedActivity={
+                selectedCategory !== 'All'
+                  ? selectedCategory
+                  : selectedBroadCategory !== 'All Categories'
+                  ? selectedBroadCategory
+                  : 'All'
+              }
+              onOpenActivitySelector={() => setIsCategorySheetOpen(true)}
               onRequestSignIn={() => {
                 setAuthModalTab('LOGIN');
                 setIsAuthModalOpen(true);
@@ -1810,11 +1886,24 @@ export default function LeaveTheRoomHomePage() {
         isOpen={isCategorySheetOpen}
         onClose={() => setIsCategorySheetOpen(false)}
         selectedBroadCategory={selectedBroadCategory}
-        onSelectCategory={(catName) => {
-          setSelectedBroadCategory(catName);
+        selectedCategory={selectedCategory}
+        onSelectCategory={(item) => {
+          if (item === 'All' || item === 'All Categories') {
+            setSelectedCategory('All');
+            setSelectedBroadCategory('All Categories');
+          } else if (
+            ['Sports & Fitness', 'Gaming & Strategy', 'Social & Hangout', 'Co-Working'].includes(item)
+          ) {
+            setSelectedCategory(item);
+            setSelectedBroadCategory(item);
+          } else {
+            setSelectedCategory(item);
+            setSelectedBroadCategory(getBroadCategory(item));
+          }
           triggerSensoryFeedback('TAP', activeUser.settings);
         }}
         categoryCounts={categoryCounts}
+        activityCounts={activityCounts}
         currentLang={currentLang}
       />
 

@@ -22,7 +22,7 @@ export function StatusBadge({
   if (status === 'LIVE') {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight ${containerStyle}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight whitespace-nowrap shrink-0 ${containerStyle}`}
       >
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
         <span>{timeLabel && timeLabel !== 'Live Now' ? timeLabel : 'Live'}</span>
@@ -33,7 +33,7 @@ export function StatusBadge({
   if (status === 'UPCOMING') {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight ${containerStyle}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight whitespace-nowrap shrink-0 ${containerStyle}`}
       >
         <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
         <span>{timeLabel || 'Upcoming'}</span>
@@ -43,7 +43,7 @@ export function StatusBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight ${containerStyle}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight whitespace-nowrap shrink-0 ${containerStyle}`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-stone-500" />
       <span>Ended</span>

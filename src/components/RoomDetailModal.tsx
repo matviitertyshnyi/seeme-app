@@ -442,34 +442,34 @@ export function RoomDetailModal({
           <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20" />
 
           {/* Top Row: Status + Distance, Actions */}
-          <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="absolute top-3 left-3 right-3 sm:top-3.5 sm:left-4 sm:right-4 flex items-center justify-between gap-2 pointer-events-auto">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink min-w-0 overflow-hidden">
               <StatusBadge
                 status={lobby.computedStatus}
                 timeLabel={lobby.startTimeBadge}
                 variant="solid"
               />
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-950/80 border border-white/15 text-[11px] font-semibold text-stone-200 backdrop-blur-md">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-950/80 border border-white/15 text-[11px] font-semibold text-stone-200 backdrop-blur-md whitespace-nowrap shrink-0">
                 <Navigation className="w-3 h-3 text-stone-400" />
-                {lobby.distanceLabel}
+                <span>{lobby.distanceLabel}</span>
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {onToggleSave && (
                 <button
                   type="button"
                   onClick={() => onToggleSave(lobby.id)}
                   aria-label={isSaved ? 'Remove saved meetup' : 'Save meetup'}
                   title={isSaved ? 'Remove saved meetup' : 'Save meetup'}
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors backdrop-blur-md border border-white/15 cursor-pointer ${
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors backdrop-blur-md border border-white/15 cursor-pointer shrink-0 ${
                     isSaved
                       ? 'bg-white text-stone-950'
                       : 'bg-stone-950/80 hover:bg-stone-900 text-stone-200'
                   }`}
                 >
                   <Bookmark
-                    className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`}
+                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSaved ? 'fill-current' : ''}`}
                   />
                 </button>
               )}
@@ -479,10 +479,11 @@ export function RoomDetailModal({
                   type="button"
                   onClick={() => onOpenEditMeetup(lobby)}
                   aria-label="Edit meetup details"
-                  className="h-9 sm:h-10 px-3 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md cursor-pointer"
+                  title="Edit meetup details"
+                  className="h-8 sm:h-9 px-2 sm:px-3 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md cursor-pointer shrink-0"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-stone-200" />
-                  <span>Edit</span>
+                  <span className="hidden sm:inline">Edit</span>
                 </button>
               )}
 
@@ -490,17 +491,18 @@ export function RoomDetailModal({
                 type="button"
                 onClick={handleShareMeetup}
                 aria-label="Share meetup link"
-                className="h-9 sm:h-10 px-3 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md cursor-pointer"
+                title="Share meetup link"
+                className="h-8 sm:h-9 px-2 sm:px-3 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md cursor-pointer shrink-0"
               >
                 {copiedShareLink ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied</span>
+                    <span className="hidden sm:inline">Copied</span>
                   </>
                 ) : (
                   <>
                     <ExternalLink className="w-3.5 h-3.5 text-stone-200" />
-                    <span>Share</span>
+                    <span className="hidden sm:inline">Share</span>
                   </>
                 )}
               </button>
@@ -509,7 +511,8 @@ export function RoomDetailModal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close meetup details"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 flex items-center justify-center transition-colors cursor-pointer"
+                title="Close"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4 text-stone-200" />
               </button>
