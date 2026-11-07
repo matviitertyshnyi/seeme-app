@@ -30,12 +30,23 @@ body {
   color: var(--text-ink) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
 html.dark,
 .dark body {
   background-color: #141210 !important;
   color: #faf8f5 !important;
+}
+
+/* Prevent iOS Safari auto-zoom on input focus when font-size is < 16px */
+@media screen and (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* Antislop Human R-39: Explicit Interactive Cursor Affordances */

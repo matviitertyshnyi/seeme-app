@@ -24,7 +24,8 @@ export function SeatBubbles({
   onParticipantClick,
 }: SeatBubblesProps) {
   const actualHostId = hostId || participants[0]?.id || '';
-  const openSeatsCount = Math.max(0, maxParticipants - participants.length);
+  const isUnlimited = maxParticipants >= 999 || maxParticipants === 0;
+  const openSeatsCount = isUnlimited ? 0 : Math.max(0, maxParticipants - participants.length);
   const openSeatsArray = Array.from({ length: openSeatsCount });
 
   return (
@@ -92,24 +93,43 @@ export function SeatBubbles({
         );
       })}
 
-      {openSeatsArray.map((_, idx) => (
-        <div key={`open-seat-${idx}`} className="flex flex-col items-center">
+      {isUnlimited ? (
+        <div className="flex flex-col items-center">
           <button
             type="button"
             onClick={onEmptySeatClick}
-            aria-label={`Claim open seat ${idx + 1}`}
-            title="Tap to claim open seat"
+            aria-label="Claim open seat"
+            title="Open to all players (No player limit)"
             className="w-10 h-10 rounded-full border border-dashed border-stone-300 dark:border-stone-700 bg-stone-100/50 dark:bg-stone-800/40 hover:border-stone-400 dark:hover:border-stone-500 text-stone-400 dark:text-stone-500 flex items-center justify-center transition-colors"
           >
             <Plus className="w-4 h-4 stroke-[2]" />
           </button>
           {showSkillBadges && (
-            <span className="mt-1 text-[10px] font-medium text-stone-400 dark:text-stone-500">
-              Open
+            <span className="mt-1 text-[10px] font-bold text-stone-400 dark:text-stone-500">
+              No limit
             </span>
           )}
         </div>
-      ))}
+      ) : (
+        openSeatsArray.map((_, idx) => (
+          <div key={`open-seat-${idx}`} className="flex flex-col items-center">
+            <button
+              type="button"
+              onClick={onEmptySeatClick}
+              aria-label={`Claim open seat ${idx + 1}`}
+              title="Tap to claim open seat"
+              className="w-10 h-10 rounded-full border border-dashed border-stone-300 dark:border-stone-700 bg-stone-100/50 dark:bg-stone-800/40 hover:border-stone-400 dark:hover:border-stone-500 text-stone-400 dark:text-stone-500 flex items-center justify-center transition-colors"
+            >
+              <Plus className="w-4 h-4 stroke-[2]" />
+            </button>
+            {showSkillBadges && (
+              <span className="mt-1 text-[10px] font-medium text-stone-400 dark:text-stone-500">
+                Open
+              </span>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { I18nProvider } from '@/lib/i18n';
@@ -7,6 +7,15 @@ const inter = Inter({
   subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#141210',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://leavetheroom.tech'),

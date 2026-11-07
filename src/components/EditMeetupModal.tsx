@@ -169,9 +169,9 @@ export function EditMeetupModal({
             type="button"
             onClick={onClose}
             aria-label="Close edit meetup"
-            className="w-9 h-9 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-11 h-11 -mr-2 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -316,7 +316,7 @@ export function EditMeetupModal({
             />
           </div>
 
-          {/* 6. Max Group Size (2 to 16) */}
+          {/* 6. Max Group Size */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-extrabold uppercase tracking-wider text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
@@ -324,20 +324,79 @@ export function EditMeetupModal({
                 <span>Max Group Size</span>
               </label>
               <span className="text-xs font-black text-orange-600 dark:text-orange-400 px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800">
-                {maxParticipants} Players
+                {maxParticipants >= 999 ? 'No limit (∞)' : `${maxParticipants} Players`}
               </span>
             </div>
-            <input
-              type="range"
-              min={minAllowedCapacity}
-              max={16}
-              value={maxParticipants}
-              onChange={(e) => setMaxParticipants(parseInt(e.target.value, 10))}
-              className="w-full accent-orange-600 cursor-pointer"
-            />
-            <div className="flex justify-between text-[11px] text-stone-500 mt-1">
-              <span>Min: {minAllowedCapacity} (currently {currentCount} joined)</span>
-              <span>Max: 16</span>
+
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {[2, 4, 6, 8, 12].map((cap) => (
+                <button
+                  key={cap}
+                  type="button"
+                  disabled={cap < currentCount}
+                  onClick={() => setMaxParticipants(cap)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                    maxParticipants === cap
+                      ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-200'
+                  } disabled:opacity-40 disabled:cursor-not-allowed`}
+                >
+                  {cap}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setMaxParticipants(999)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                  maxParticipants >= 999
+                    ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                ∞ No limit
+              </button>
+            </div>
+
+            {maxParticipants < 999 && (
+              <div className="space-y-1">
+                <input
+                  type="range"
+                  min={minAllowedCapacity}
+                  max={Math.max(30, maxParticipants)}
+                  value={Math.min(maxParticipants, 30)}
+                  onChange={(e) => setMaxParticipants(parseInt(e.target.value, 10))}
+                  className="w-full accent-orange-600 cursor-pointer"
+                />
+                <div className="flex justify-between text-[11px] text-stone-500">
+                  <span>Min: {minAllowedCapacity} (currently {currentCount} joined)</span>
+                  <span>Set custom:</span>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-stone-600 dark:text-stone-400 font-semibold">
+                Custom number:
+              </span>
+              <input
+                type="number"
+                min={minAllowedCapacity}
+                max={500}
+                value={maxParticipants >= 999 ? '' : maxParticipants}
+                placeholder="e.g. 25"
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val) && val >= minAllowedCapacity) {
+                    setMaxParticipants(val);
+                  }
+                }}
+                className="w-24 min-h-[38px] px-3 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-orange-500"
+              />
+              {maxParticipants >= 999 && (
+                <span className="text-[11px] text-orange-600 font-semibold">
+                  (Currently Unlimited)
+                </span>
+              )}
             </div>
           </div>
 

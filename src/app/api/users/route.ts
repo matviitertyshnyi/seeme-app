@@ -115,20 +115,26 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      let sanitizedName = name.trim();
+      if (sanitizedName.length > 30) {
+        sanitizedName = sanitizedName.length > 50 ? 'bozo' : sanitizedName.slice(0, 30);
+      }
+      const sanitizedTagline = (
+        tagline || 'New on Leave The Room! Excited to connect for spontaneous games and meetups.'
+      ).trim().slice(0, 200);
+
       const newUserId = `user-${crypto.randomUUID()}`;
       const newPersona: UserPersona = {
         id: newUserId,
         email: cleanEmail,
         password: password ? password.trim() : undefined,
-        name: name.trim(),
+        name: sanitizedName,
         age: Math.max(18, Math.min(99, Number(age) || 25)),
         avatar:
           avatar?.trim() ||
           'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
         skillBadge: (skillBadge || 'New Member').trim(),
-        tagline: (
-          tagline || 'New on Leave The Room! Excited to connect for spontaneous games and meetups.'
-        ).trim(),
+        tagline: sanitizedTagline,
         neighborhood: (neighborhood || 'Greenwich Village').trim(),
         onboarded: true,
         verified: false,
@@ -549,7 +555,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
-      if (name?.trim()) persona.name = name.trim();
+      if (name?.trim()) {
+        const cleanName = name.trim();
+        persona.name = cleanName.length > 30 ? (cleanName.length > 50 ? 'bozo' : cleanName.slice(0, 30)) : cleanName;
+      }
       if (persona.onboarded === true) {
         // Locked age once onboarded: ignore any attempt to change age
       } else {
@@ -563,7 +572,7 @@ export async function POST(req: NextRequest) {
       }
       if (avatar?.trim()) persona.avatar = avatar.trim();
       if (skillBadge?.trim()) persona.skillBadge = skillBadge.trim();
-      if (tagline?.trim()) persona.tagline = tagline.trim();
+      if (tagline !== undefined) persona.tagline = tagline.trim().slice(0, 200);
       if (neighborhood?.trim()) persona.neighborhood = neighborhood.trim();
       if (Array.isArray(favoriteActivities) && favoriteActivities.length > 0) {
         persona.favoriteActivities = favoriteActivities;

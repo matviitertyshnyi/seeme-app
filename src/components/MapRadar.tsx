@@ -10,6 +10,7 @@ import {
   UserPlus,
   LocateFixed,
   Lock,
+  X,
 } from 'lucide-react';
 import { LobbyWithDistance, UserPersona } from '@/types/lobby';
 import { SeatBubbles } from '@/components/SeatBubbles';
@@ -55,9 +56,7 @@ export default function MapRadar({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
-  const [hoveredLobbyId, setHoveredLobbyId] = useState<string | null>(
-    lobbies[0]?.id || null
-  );
+  const [hoveredLobbyId, setHoveredLobbyId] = useState<string | null>(null);
   const [mapStatusFilter, setMapStatusFilter] = useState<'ALL' | 'LIVE' | 'UPCOMING'>('ALL');
 
   const activeLobbies = useMemo(() => {
@@ -78,8 +77,10 @@ export default function MapRadar({
     [lobbies]
   );
 
-  const selectedPreviewLobby =
-    activeLobbies.find((l) => l.id === hoveredLobbyId) || activeLobbies[0] || null;
+  const selectedPreviewLobby = useMemo(() => {
+    if (!hoveredLobbyId) return null;
+    return activeLobbies.find((l) => l.id === hoveredLobbyId) || null;
+  }, [activeLobbies, hoveredLobbyId]);
 
   const previewCoverUrl = useMemo(() => {
     if (!selectedPreviewLobby) return '';
@@ -89,12 +90,8 @@ export default function MapRadar({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const initialCenterLat = selectedPreviewLobby
-      ? selectedPreviewLobby.lat - 0.0022
-      : userLat;
-    const initialCenterLng = selectedPreviewLobby
-      ? selectedPreviewLobby.lng
-      : userLng;
+    const initialCenterLat = userLat;
+    const initialCenterLng = userLng;
 
     const map = L.map(mapContainerRef.current, {
       center: [initialCenterLat, initialCenterLng],
@@ -108,6 +105,11 @@ export default function MapRadar({
     }).addTo(map);
 
     L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // Dismiss preview card when user clicks on empty map space
+    map.on('click', () => {
+      setHoveredLobbyId(null);
+    });
 
     const layerGroup = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
@@ -201,7 +203,7 @@ export default function MapRadar({
             <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;transition:all 0.18s ease;${bgStyle}">
               <span style="width:6px;height:6px;border-radius:9999px;background:${statusDotHex};display:inline-block;flex-shrink:0;"></span>
               <span>${escapeHtml(lobby.mapPinLabel || '')}</span>
-              <span style="opacity:0.8;font-weight:500;font-size:10px;padding-left:2px;border-left:1px solid currentColor;">${lobby.participants.length}/${lobby.maxParticipants}</span>
+              <span style="opacity:0.8;font-weight:500;font-size:10px;padding-left:2px;border-left:1px solid currentColor;">${lobby.participants.length}/${lobby.maxParticipants >= 999 ? '∞' : lobby.maxParticipants}</span>
             </div>
             <div style="width:6px;height:6px;background:${isSelected ? '#EA580C' : '#FFFFFF'};transform:rotate(45deg);margin-top:-3px;border-right:1.5px solid ${borderHex};border-bottom:1.5px solid ${borderHex};"></div>
           </div>
@@ -215,7 +217,10 @@ export default function MapRadar({
         zIndexOffset: isSelected ? 1000 : 500,
       }).addTo(layerGroup);
 
-      marker.on('click', () => {
+      marker.on('click', (e: any) => {
+        if (e?.originalEvent) {
+          e.originalEvent.stopPropagation();
+        }
         setHoveredLobbyId(lobby.id);
         const map = mapInstanceRef.current;
         if (map) {
@@ -361,9 +366,22 @@ export default function MapRadar({
       {!isSignedOut && selectedPreviewLobby && (
         <div
           onClick={() => onSelectLobby(selectedPreviewLobby)}
-          className="absolute bottom-6 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[430px] z-[1000] bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-stone-200 dark:border-stone-800 cursor-pointer"
+          className="absolute bottom-6 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[430px] z-[1000] bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-stone-200 dark:border-stone-800 cursor-pointer animate-fade-in"
         >
-          <div className="flex items-start gap-3">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setHoveredLobbyId(null);
+            }}
+            aria-label="Dismiss event preview"
+            title="Dismiss"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center transition-colors cursor-pointer z-10 shadow-xs"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="flex items-start gap-3 pr-7">
             <img
               src={previewCoverUrl}
               alt={selectedPreviewLobby.title}

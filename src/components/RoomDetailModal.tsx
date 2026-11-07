@@ -505,7 +505,7 @@ export function RoomDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] bg-stone-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-[1000] bg-stone-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 cursor-pointer touch-manipulation animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -513,7 +513,7 @@ export function RoomDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="meetup-detail-title"
-        className="w-full max-w-5xl bg-white dark:bg-[#1C1917] rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg overflow-hidden border border-stone-200 dark:border-stone-800 flex flex-col max-h-[92vh]"
+        className="w-full max-w-5xl bg-white dark:bg-[#1C1917] rounded-t-[28px] sm:rounded-[28px] shadow-ambient-lg overflow-hidden border border-stone-200 dark:border-stone-800 flex flex-col max-h-[92vh] cursor-default"
       >
         {/* TOP HERO BANNER */}
         <div className="relative h-40 sm:h-48 w-full shrink-0 bg-stone-900">
@@ -603,9 +603,9 @@ export function RoomDetailModal({
                 onClick={onClose}
                 aria-label="Close meetup details"
                 title="Close"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-stone-950/80 hover:bg-stone-900 text-stone-200 border border-white/15 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                className="w-11 h-11 rounded-full bg-stone-950/90 active:scale-95 hover:bg-stone-900 text-white border border-white/25 flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md"
               >
-                <X className="w-4 h-4 text-stone-200" />
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
           </div>
@@ -634,7 +634,7 @@ export function RoomDetailModal({
           >
             <Users className="w-4 h-4" />
             <span>
-              Details ({lobby.participants.length}/{lobby.maxParticipants})
+              Details ({lobby.participants.length}/{lobby.maxParticipants >= 999 ? '∞' : lobby.maxParticipants})
             </span>
           </button>
 
@@ -873,10 +873,12 @@ export function RoomDetailModal({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                  People ({lobby.participants.length}/{lobby.maxParticipants})
+                  People ({lobby.participants.length}/{lobby.maxParticipants >= 999 ? '∞' : lobby.maxParticipants})
                 </h4>
                 <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
-                  {lobby.maxParticipants - lobby.participants.length === 0
+                  {lobby.maxParticipants >= 999
+                    ? 'No limit'
+                    : lobby.maxParticipants - lobby.participants.length <= 0
                     ? 'Full'
                     : `${lobby.maxParticipants - lobby.participants.length} spots open`}
                 </span>
@@ -1110,37 +1112,46 @@ export function RoomDetailModal({
               </div>
             )}
 
-            {/* FOOTER BUTTON: End & Close Meetup / Leave Meetup & Creation info */}
+            {/* FOOTER BUTTON: End & Close Meetup / Leave Meetup & Creation info & Close button */}
             <div className="pt-2 flex items-center justify-between gap-3 flex-wrap">
-              {isHost ? (
-                <button
-                  type="button"
-                  onClick={handleDeleteLobby}
-                  disabled={isLoadingAction}
-                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 px-3.5 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  End & Close Meetup
-                </button>
-              ) : isParticipant || myPendingRequest ? (
-                <button
-                  type="button"
-                  onClick={handleLeaveLobby}
-                  disabled={isLoadingAction}
-                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 px-3.5 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  {isParticipant ? 'Leave Meetup' : 'Cancel Join Request'}
-                </button>
-              ) : (
-                <div />
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {isHost ? (
+                  <button
+                    type="button"
+                    onClick={handleDeleteLobby}
+                    disabled={isLoadingAction}
+                    className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 px-3.5 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors inline-flex items-center gap-1.5 cursor-pointer border border-rose-200/50 dark:border-rose-900/40"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    End & Close Meetup
+                  </button>
+                ) : isParticipant || myPendingRequest ? (
+                  <button
+                    type="button"
+                    onClick={handleLeaveLobby}
+                    disabled={isLoadingAction}
+                    className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 px-3.5 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    {isParticipant ? 'Leave Meetup' : 'Cancel Join Request'}
+                  </button>
+                ) : null}
 
-              {lobby.createdAt && (
-                <span className="text-[11px] text-stone-400 dark:text-stone-500 font-medium ml-auto">
-                  {formatEventCreationDate(lobby.createdAt)}
-                </span>
-              )}
+                {lobby.createdAt && (
+                  <span className="text-[11px] text-stone-400 dark:text-stone-500 font-medium">
+                    {formatEventCreationDate(lobby.createdAt)}
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer ml-auto"
+              >
+                <X className="w-3.5 h-3.5" />
+                Close Meetup
+              </button>
             </div>
           </div>
 

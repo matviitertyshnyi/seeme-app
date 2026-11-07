@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users, MapPin, Globe2 } from 'lucide-react';
+import { Search, X, ChevronDown, SearchX, Plus, Bookmark, ShieldCheck, Users, MapPin, Globe2, Navigation } from 'lucide-react';
 import { LobbyWithDistance, RoomStatus, UserPersona } from '@/types/lobby';
 import { SupportedLanguage, getTranslation } from '@/lib/i18n';
 import { LobbyCard } from '@/components/LobbyCard';
@@ -475,14 +475,25 @@ export function ExploreView({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onOpenCitySelector}
-            className="w-full min-h-[46px] px-5 py-3 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-md shadow-orange-600/20 inline-flex items-center justify-center gap-2 transition active:scale-[0.99] cursor-pointer"
-          >
-            <Globe2 className="w-4 h-4" />
-            <span>Select City from List</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={onNearMeGps}
+              className="w-full min-h-[46px] px-5 py-3 rounded-2xl bg-stone-900 dark:bg-white hover:opacity-90 text-white dark:text-stone-950 text-xs font-bold shadow-md inline-flex items-center justify-center gap-2 transition active:scale-[0.99] cursor-pointer"
+            >
+              <Navigation className="w-4 h-4 text-orange-500 fill-current" />
+              <span>Use GPS Location</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenCitySelector}
+              className="w-full min-h-[46px] px-5 py-3 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-md shadow-orange-600/20 inline-flex items-center justify-center gap-2 transition active:scale-[0.99] cursor-pointer"
+            >
+              <Globe2 className="w-4 h-4" />
+              <span>Select City from List</span>
+            </button>
+          </div>
 
           <div className="pt-3 border-t border-stone-100 dark:border-stone-800/80">
             <p className="text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2.5">

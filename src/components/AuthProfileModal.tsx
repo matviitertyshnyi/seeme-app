@@ -99,6 +99,7 @@ export function AuthProfileModal({
   const [favoriteActivities, setFavoriteActivities] = useState<ActivityCategory[]>(
     activeUser.favoriteActivities || ['Coffee', 'Park Walk']
   );
+  const [customHobbyInput, setCustomHobbyInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [faceChecking, setFaceChecking] = useState(false);
   const [faceError, setFaceError] = useState<string | null>(null);
@@ -178,6 +179,25 @@ export function AuthProfileModal({
     setFavoriteActivities((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
+  };
+
+  const handleAddCustomHobby = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = customHobbyInput.trim();
+    if (!trimmed) return;
+    if (trimmed.length > 30) {
+      setEditError('Custom hobby must be 30 characters or less');
+      return;
+    }
+    if (!favoriteActivities.includes(trimmed)) {
+      setFavoriteActivities((prev) => [...prev, trimmed]);
+    }
+    setCustomHobbyInput('');
+    setEditError(null);
+  };
+
+  const handleRemoveCustomHobby = (hobby: string) => {
+    setFavoriteActivities((prev) => prev.filter((c) => c !== hobby));
   };
 
   const handleGoogleAuth = async () => {
@@ -554,13 +574,20 @@ export function AuthProfileModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
-                    Full Name
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                      Full Name
+                    </label>
+                    <span className={`text-[10px] font-bold ${name.length > 25 ? 'text-amber-500' : 'text-stone-400'}`}>
+                      {name.length}/30
+                    </span>
+                  </div>
                   <input
                     type="text"
+                    maxLength={30}
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.slice(0, 30))}
+                    placeholder="Your name or nickname"
                     aria-label="Full Name"
                     className="min-h-[44px] w-full px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-bold text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                   />
@@ -675,16 +702,84 @@ export function AuthProfileModal({
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
-                  Bio & Tagline
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                    Bio & Tagline
+                  </label>
+                  <span className={`text-[10px] font-bold ${tagline.length > 180 ? 'text-amber-500' : 'text-stone-400'}`}>
+                    {tagline.length}/200
+                  </span>
+                </div>
                 <textarea
                   rows={2}
+                  maxLength={200}
                   value={tagline}
-                  onChange={(e) => setTagline(e.target.value)}
+                  onChange={(e) => setTagline(e.target.value.slice(0, 200))}
+                  placeholder="Share a short bio, what you enjoy doing, or who you'd like to meet..."
                   aria-label="Bio and Tagline"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
                 />
+              </div>
+
+              {/* Custom Hobbies Section */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                    Custom Hobbies & Interests
+                  </label>
+                  <span className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">
+                    Add your own tags
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    maxLength={30}
+                    value={customHobbyInput}
+                    onChange={(e) => setCustomHobbyInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomHobby();
+                      }
+                    }}
+                    placeholder="Add custom hobby (e.g. Bouldering, Pottery, Anime, Volleyball...)"
+                    className="min-h-[40px] flex-1 px-3.5 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-semibold text-stone-950 dark:text-white placeholder:text-stone-400 focus:outline-none focus:border-orange-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomHobby}
+                    disabled={!customHobbyInput.trim()}
+                    className="min-h-[40px] px-4 py-2 rounded-xl bg-stone-900 dark:bg-white hover:opacity-90 text-white dark:text-stone-950 text-xs font-bold transition disabled:opacity-40 cursor-pointer shrink-0"
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                {/* Render Custom Added Hobbies */}
+                {favoriteActivities.filter((act) => !Object.values(GROUPED_ACTIVITIES).flat().includes(act)).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {favoriteActivities
+                      .filter((act) => !Object.values(GROUPED_ACTIVITIES).flat().includes(act))
+                      .map((customHobby) => (
+                        <span
+                          key={customHobby}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-orange-600 text-white shadow-sm border border-orange-600"
+                        >
+                          <CategoryIcon category={customHobby} className="w-3.5 h-3.5 text-white" />
+                          <span>{customHobby}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomHobby(customHobby)}
+                            aria-label={`Remove ${customHobby}`}
+                            className="w-4 h-4 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center transition-colors cursor-pointer"
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </span>
+                      ))}
+                  </div>
+                )}
               </div>
 
               <div>

@@ -25,7 +25,7 @@ import {
   hasRealProfilePhoto,
 } from '@/types/lobby';
 import { DEMO_PERSONAS, INITIAL_SEED_DATA, generateCityEvents } from '@/lib/seed';
-import { attachAndSortByDistance, DEFAULT_USER_COORDS, doesMeetupMatchAgeFilters } from '@/lib/geo';
+import { attachAndSortByDistance, DEFAULT_USER_COORDS, doesMeetupMatchAgeFilters, calculateHaversineDistanceKm } from '@/lib/geo';
 import {
   triggerSensoryFeedback,
   fireNativeNotificationIfPermitted,
@@ -44,7 +44,7 @@ import { ExploreView } from '@/components/ExploreView';
 import { ProfileView } from '@/components/ProfileView';
 import { RadiusSelectorBottomSheet } from '@/components/RadiusSelectorBottomSheet';
 import { CitySelectorBottomSheet } from '@/components/CitySelectorBottomSheet';
-import { POPULAR_CITIES } from '@/lib/cities';
+import { CityPreset, POPULAR_CITIES } from '@/lib/cities';
 import { CategoryFilterBottomSheet } from '@/components/CategoryFilterBottomSheet';
 import { CommunityPoliciesModal } from '@/components/CommunityPoliciesModal';
 import { LanguageSelectorBottomSheet } from '@/components/LanguageSelectorBottomSheet';
@@ -818,6 +818,7 @@ export default function LeaveTheRoomHomePage() {
   }, [
     lobbiesWithDistance,
     selectedBroadCategory,
+    selectedCategory,
     searchQuery,
     selectedAgeFilters,
     radiusKm,
@@ -1134,7 +1135,7 @@ export default function LeaveTheRoomHomePage() {
       } catch {}
     }
     // Ensure the selected city has at least 2 events happening within radius
-    const nearby = attachAndSortByDistance(rawLobbies, city.lat, city.lng).filter((m) => m.distanceKm <= 35);
+    const nearby = attachAndSortByDistance(rawLobbies, city.lat, city.lng).filter((m) => m.distanceKm <= Math.max(radiusKm, 15));
     if (nearby.length < 2) {
       const cityName = city.label.split(',')[0].trim().toLowerCase();
       const matchedPreset = POPULAR_CITIES.find(
@@ -1143,23 +1144,21 @@ export default function LeaveTheRoomHomePage() {
           p.label.toLowerCase().includes(cityName) ||
           (p.aliases && p.aliases.some((a) => a.toLowerCase() === cityName))
       );
-      const generated = generateCityEvents(
-        matchedPreset || {
-          id: `city-custom-${city.lat.toFixed(2)}-${city.lng.toFixed(2)}`,
-          name: city.label.split(',')[0].trim(),
-          country: city.label.split(',')[1]?.trim() || 'EU',
-          countryCode: 'EU',
-          lat: city.lat,
-          lng: city.lng,
-          label: city.label,
-          flag: '📍',
-        },
-        personas
-      );
+      const targetPreset: CityPreset = {
+        id: matchedPreset?.id || `city-custom-${city.lat.toFixed(2)}-${city.lng.toFixed(2)}`,
+        name: city.label.split(',')[0].trim(),
+        country: city.label.split(',')[1]?.trim() || 'EU',
+        countryCode: matchedPreset?.countryCode || 'EU',
+        lat: city.lat,
+        lng: city.lng,
+        label: city.label,
+        flag: matchedPreset?.flag || '📍',
+      };
+      const generated = generateCityEvents(targetPreset, personas);
       setRawLobbies((prev) => {
-        const existingIds = new Set(prev.map((l) => l.id));
-        const toAdd = generated.filter((g) => !existingIds.has(g.id));
-        return [...toAdd, ...prev];
+        const genIds = new Set(generated.map((g) => g.id));
+        const rest = prev.filter((l) => !genIds.has(l.id));
+        return [...generated, ...rest];
       });
     }
 
@@ -1183,7 +1182,7 @@ export default function LeaveTheRoomHomePage() {
     }
 
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      showToast('Centered on Greenwich Village, NYC');
+      showToast('GPS unavailable on this browser. You can choose your city from the list.');
       return;
     }
 
@@ -1192,10 +1191,27 @@ export default function LeaveTheRoomHomePage() {
       (pos) => {
         setIsLocating(false);
         const { latitude, longitude } = pos.coords;
+
+        // Resolve closest preset city name if within 40km
+        let gpsLabel = 'Current GPS Location';
+        let matchedCity: CityPreset | null = null;
+        let shortestDist = Infinity;
+        for (const city of POPULAR_CITIES) {
+          const dist = calculateHaversineDistanceKm(latitude, longitude, city.lat, city.lng);
+          if (dist < shortestDist) {
+            shortestDist = dist;
+            matchedCity = city;
+          }
+        }
+
+        if (matchedCity && shortestDist <= 40) {
+          gpsLabel = `${matchedCity.name} (GPS)`;
+        }
+
         const newCoords = {
           lat: latitude,
           lng: longitude,
-          label: 'Current GPS Location',
+          label: gpsLabel,
           isLiveGps: true,
         };
         setUserCoords(newCoords);
@@ -1203,13 +1219,35 @@ export default function LeaveTheRoomHomePage() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('leavetheroom_user_location', JSON.stringify(newCoords));
         }
-        showToast('Updated to your current GPS location');
+
+        // Ensure 2 happening meetups right around GPS location
+        const nearby = attachAndSortByDistance(rawLobbies, latitude, longitude).filter((m) => m.distanceKm <= Math.max(radiusKm, 15));
+        if (nearby.length < 2) {
+          const gpsPreset: CityPreset = {
+            id: matchedCity && shortestDist <= 40 ? matchedCity.id : `city-gps-${latitude.toFixed(2)}-${longitude.toFixed(2)}`,
+            name: matchedCity && shortestDist <= 40 ? matchedCity.name : 'Local Area',
+            country: matchedCity && shortestDist <= 40 ? matchedCity.country : 'Nearby',
+            countryCode: matchedCity && shortestDist <= 40 ? matchedCity.countryCode : 'EU',
+            lat: latitude,
+            lng: longitude,
+            label: gpsLabel,
+            flag: '📍',
+          };
+          const generated = generateCityEvents(gpsPreset, personas);
+          setRawLobbies((prev) => {
+            const genIds = new Set(generated.map((g) => g.id));
+            const rest = prev.filter((l) => !genIds.has(l.id));
+            return [...generated, ...rest];
+          });
+        }
+
+        showToast(`Updated to GPS location: ${gpsLabel}`);
       },
       () => {
         setIsLocating(false);
-        showToast('GPS unavailable. You can choose your city manually.');
+        showToast('GPS access denied or unavailable. Please pick a city.');
       },
-      { timeout: 6000 }
+      { timeout: 8000, enableHighAccuracy: true }
     );
   };
 

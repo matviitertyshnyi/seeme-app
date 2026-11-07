@@ -98,7 +98,7 @@ export function LobbyCard({
 
         <div className="absolute top-3 right-3 flex items-center gap-1.5">
           <div className="px-2 py-0.5 rounded-full bg-stone-950/75 border border-white/10 backdrop-blur-md text-stone-200 text-[11px] font-semibold">
-            {lobby.participants.length}/{lobby.maxParticipants}
+            {lobby.participants.length}/{lobby.maxParticipants >= 999 ? '∞' : lobby.maxParticipants}
           </div>
 
           {onToggleSave && (

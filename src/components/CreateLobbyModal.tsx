@@ -96,6 +96,17 @@ function formatExactTime(dateStr: string, timeStr: string): string {
   }
 }
 
+function getDayNameFromDateStr(dateStr: string): string {
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dateObj.getDay()] || 'Friday';
+  } catch {
+    return 'Friday';
+  }
+}
+
 export function CreateLobbyModal({
   isOpen,
   onClose,
@@ -149,11 +160,22 @@ export function CreateLobbyModal({
   const geocodeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
+  const [isCustomParticipants, setIsCustomParticipants] = useState<boolean>(false);
+  const [customParticipantsInput, setCustomParticipantsInput] = useState<string>('4');
   const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
   const [preferredAgeRange, setPreferredAgeRange] = useState<string>('No preference');
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
-  const [recurringDay, setRecurringDay] = useState<string>('Friday');
-  const [recurringTime, setRecurringTime] = useState<string>('20:00');
+  const [recurringDay, setRecurringDay] = useState<string>(() => {
+    const d = new Date();
+    return getDayNameFromDateStr(d.toISOString().split('T')[0]);
+  });
+  const [recurringTime, setRecurringTime] = useState<string>(() => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() + 15);
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${mins}`;
+  });
   const [showPinMap, setShowPinMap] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -291,11 +313,22 @@ export function CreateLobbyModal({
   const handleExactDateChange = (newDate: string) => {
     setExactDate(newDate);
     setStartTime(formatExactTime(newDate, exactTime));
+    setRecurringDay(getDayNameFromDateStr(newDate));
   };
 
   const handleExactTimeChange = (newTime: string) => {
     setExactTime(newTime);
     setStartTime(formatExactTime(exactDate, newTime));
+    setRecurringTime(newTime);
+  };
+
+  const handleToggleRecurring = () => {
+    const next = !isRecurring;
+    if (next) {
+      setRecurringDay(getDayNameFromDateStr(exactDate));
+      setRecurringTime(exactTime);
+    }
+    setIsRecurring(next);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -757,18 +790,28 @@ export function CreateLobbyModal({
             </div>
 
             <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-                5. Group Size ({maxParticipants} Players)
+              <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                  5. Group Size ({maxParticipants >= 999 ? 'No limit' : `${maxParticipants} Players`})
+                </span>
+                {maxParticipants >= 999 && (
+                  <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800">
+                    Unlimited Capacity
+                  </span>
+                )}
               </label>
-              <div className="grid grid-cols-6 gap-1.5">
-                {PLAYER_CAPS.map((cap) => (
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                {[2, 4, 6, 8, 12].map((cap) => (
                   <button
                     key={cap}
                     type="button"
-                    onClick={() => setMaxParticipants(cap)}
-                    className={`min-h-[44px] py-2.5 rounded-xl text-xs font-extrabold border transition-all ${
-                      maxParticipants === cap
+                    onClick={() => {
+                      setIsCustomParticipants(false);
+                      setMaxParticipants(cap);
+                    }}
+                    className={`min-h-[44px] py-2 rounded-xl text-xs font-extrabold border transition-all ${
+                      !isCustomParticipants && maxParticipants === cap
                         ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                         : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
                     }`}
@@ -776,7 +819,67 @@ export function CreateLobbyModal({
                     {cap}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomParticipants(false);
+                    setMaxParticipants(999);
+                  }}
+                  className={`min-h-[44px] py-2 px-1 rounded-xl text-xs font-extrabold border transition-all ${
+                    !isCustomParticipants && maxParticipants >= 999
+                      ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
+                      : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
+                  }`}
+                >
+                  ∞ No limit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomParticipants(true);
+                    if (maxParticipants >= 999) {
+                      setMaxParticipants(10);
+                      setCustomParticipantsInput('10');
+                    } else {
+                      setCustomParticipantsInput(String(maxParticipants));
+                    }
+                  }}
+                  className={`min-h-[44px] py-2 px-1 rounded-xl text-xs font-extrabold border transition-all ${
+                    isCustomParticipants
+                      ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
+                      : 'bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700'
+                  }`}
+                >
+                  Custom
+                </button>
               </div>
+
+              {isCustomParticipants && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">
+                    Max players:
+                  </span>
+                  <input
+                    type="number"
+                    min={2}
+                    max={500}
+                    value={customParticipantsInput}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomParticipantsInput(val);
+                      const parsed = parseInt(val, 10);
+                      if (!isNaN(parsed) && parsed >= 2) {
+                        setMaxParticipants(parsed);
+                      }
+                    }}
+                    placeholder="Enter limit"
+                    className="w-28 min-h-[40px] px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800 border border-orange-500 text-sm font-bold text-stone-900 dark:text-white focus:outline-none shadow-2xs"
+                  />
+                  <span className="text-[11px] text-stone-500">
+                    (Any number from 2 to 500)
+                  </span>
+                </div>
+              )}
 
               <div className="mt-3 p-3 rounded-xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700">
                 <SeatBubbles
@@ -803,7 +906,7 @@ export function CreateLobbyModal({
               </div>
               <button
                 type="button"
-                onClick={() => setIsRecurring(!isRecurring)}
+                onClick={handleToggleRecurring}
                 className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   isRecurring
                     ? 'bg-orange-600 text-white shadow-sm'

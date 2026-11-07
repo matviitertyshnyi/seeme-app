@@ -159,6 +159,17 @@ function readLocalDb(): DatabaseSchema {
         localNeedsSave = true;
       }
     }
+    // Limit name to 30 chars (if > 30 / 999999 chars, rename to bozo), bio/tagline to 200 chars
+    for (const p of parsed.personas) {
+      if (p.name && p.name.length > 30) {
+        p.name = 'bozo';
+        localNeedsSave = true;
+      }
+      if (p.tagline && p.tagline.length > 200) {
+        p.tagline = p.tagline.slice(0, 200);
+        localNeedsSave = true;
+      }
+    }
     if (localNeedsSave) {
       try {
         writeLocalDb(parsed);
@@ -257,6 +268,17 @@ export async function readDb(): Promise<DatabaseSchema> {
             for (const p of INITIAL_SEED_DATA.personas) {
               if (!existingPersonaIds.has(p.id)) {
                 parsed.personas.push(p);
+                cloudNeedsSave = true;
+              }
+            }
+            // Limit name to 30 chars (if > 30 / 999999 chars, rename to bozo), bio/tagline to 200 chars
+            for (const p of parsed.personas) {
+              if (p.name && p.name.length > 30) {
+                p.name = 'bozo';
+                cloudNeedsSave = true;
+              }
+              if (p.tagline && p.tagline.length > 200) {
+                p.tagline = p.tagline.slice(0, 200);
                 cloudNeedsSave = true;
               }
             }
