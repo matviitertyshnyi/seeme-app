@@ -74,26 +74,43 @@ function parseSessionCookieValue(rawValue?: string): string | null {
  * 3. Header: `x-user-id: <userId>` (gated strictly to non-production dev/test environments)
  */
 export function extractSessionUserId(req: NextRequest): string | null {
-  // 1. Check HTTP cookies (new brand prioritized, falling back to legacy brand)
-  const ltrCookieId = parseSessionCookieValue(
-    req.cookies.get('ltr_session')?.value || req.cookies.get('leavetheroom_session')?.value
-  );
-  if (ltrCookieId) return ltrCookieId;
+  // 1. Verify HMAC-signed session token cookie (`ltr_user_token`) first
+  const signedCookieToken = req.cookies.get('ltr_user_token')?.value;
+  if (signedCookieToken) {
+    const verified = verifyUserSessionToken(signedCookieToken);
+    if (verified?.id && verified.id !== 'signed_out') {
+      return verified.id;
+    }
+    if (process.env.NODE_ENV === 'production') {
+      return null;
+    }
+  }
 
-  const seemeCookieId = parseSessionCookieValue(req.cookies.get('seeme_session')?.value);
-  if (seemeCookieId) return seemeCookieId;
-
-  // 2. Check Authorization header
+  // 2. Check Authorization Bearer header (supports signed token in prod, or userId in dev/test)
   const authHeader = req.headers.get('authorization');
   if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.slice(7).trim();
     if (token && token !== 'null' && token !== 'undefined' && token !== 'signed_out') {
-      return token;
+      if (token.includes('.')) {
+        const verified = verifyUserSessionToken(token);
+        if (verified?.id) return verified.id;
+        if (process.env.NODE_ENV === 'production') return null;
+      } else if (process.env.NODE_ENV !== 'production') {
+        return token;
+      }
     }
   }
 
-  // 3. Check x-user-id header (strictly development simulation, Postman, and automated tests only)
+  // 3. Non-production fallback cookies and headers (local dev and E2E test harness)
   if (process.env.NODE_ENV !== 'production') {
+    const ltrCookieId = parseSessionCookieValue(
+      req.cookies.get('ltr_session')?.value || req.cookies.get('leavetheroom_session')?.value
+    );
+    if (ltrCookieId) return ltrCookieId;
+
+    const seemeCookieId = parseSessionCookieValue(req.cookies.get('seeme_session')?.value);
+    if (seemeCookieId) return seemeCookieId;
+
     const xUserId = req.headers.get('x-user-id');
     if (xUserId && xUserId.trim()) {
       const trimmed = xUserId.trim();

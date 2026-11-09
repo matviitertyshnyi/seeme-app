@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(authUrl);
   res.cookies.set('oauth_state_apple', state, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: 60 * 10, // 10 minutes

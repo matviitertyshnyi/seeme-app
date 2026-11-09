@@ -27,9 +27,11 @@ export function getAppBaseUrl(req?: NextRequest | Request): string {
 const SESSION_SECRET =
   process.env.SESSION_SECRET ||
   process.env.GOOGLE_CLIENT_SECRET ||
+  process.env.UPSTASH_REDIS_REST_TOKEN ||
+  process.env.KV_REST_API_TOKEN ||
   'ltr-signed-session-fallback-secret';
 
-export function signUserSessionToken(persona: UserPersona): string {
+export function signUserSessionToken(persona: Partial<UserPersona> & { id: string }): string {
   const safeAvatar =
     persona.avatar && !persona.avatar.startsWith('data:') && persona.avatar.length < 1024
       ? persona.avatar
@@ -58,7 +60,11 @@ export function verifyUserSessionToken(token?: string): Partial<UserPersona> | n
     if (!b64 || !sig) return null;
     const crypto = require('crypto') as typeof import('crypto');
     const expected = crypto.createHmac('sha256', SESSION_SECRET).update(b64).digest('base64url');
-    if (sig !== expected) return null;
+    const sigBuf = Buffer.from(sig, 'utf8');
+    const expBuf = Buffer.from(expected, 'utf8');
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return null;
+    }
     return JSON.parse(Buffer.from(b64, 'base64url').toString('utf8'));
   } catch {
     return null;
@@ -68,7 +74,7 @@ export function verifyUserSessionToken(token?: string): Partial<UserPersona> | n
 export function setSessionCookies(
   response: NextResponse,
   userId: string,
-  persona?: UserPersona
+  persona?: Partial<UserPersona>
 ) {
   const cookieOptions = {
     httpOnly: true,
@@ -80,9 +86,11 @@ export function setSessionCookies(
   response.cookies.set('ltr_session', userId, cookieOptions);
   response.cookies.set('leavetheroom_session', userId, cookieOptions);
   response.cookies.set('seeme_session', userId, cookieOptions);
-  if (persona) {
-    response.cookies.set('ltr_user_token', signUserSessionToken(persona), cookieOptions);
-  }
+  response.cookies.set(
+    'ltr_user_token',
+    signUserSessionToken({ ...persona, id: userId }),
+    cookieOptions
+  );
 }
 
 export function buildGoogleAuthUrl(baseUrl: string, state: string): string {
@@ -182,6 +190,48 @@ export function parseAppleIdToken(idToken: string): { email?: string; sub: strin
     if (parts.length < 2) return null;
     const payloadJson = Buffer.from(parts[1], 'base64url').toString('utf8');
     const payload = JSON.parse(payloadJson);
+    return {
+      email: payload.email,
+      sub: payload.sub,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function verifyAppleIdToken(
+  idToken: string
+): Promise<{ email?: string; sub: string } | null> {
+  try {
+    const parts = idToken.split('.');
+    if (parts.length !== 3) return null;
+    const [headerB64, payloadB64, signatureB64] = parts;
+    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf8'));
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+
+    if (!header?.kid || header.alg !== 'RS256') return null;
+    if (payload.iss !== 'https://appleid.apple.com') return null;
+    if (process.env.APPLE_CLIENT_ID && payload.aud !== process.env.APPLE_CLIENT_ID) return null;
+    if (payload.exp && Date.now() / 1000 >= Number(payload.exp)) return null;
+
+    const jwksRes = await fetch('https://appleid.apple.com/auth/keys', {
+      next: { revalidate: 3600 },
+    });
+    if (!jwksRes.ok) return null;
+    const { keys } = (await jwksRes.json()) as { keys?: Array<Record<string, unknown>> };
+    const jwk = keys?.find((k) => k.kid === header.kid);
+    if (!jwk) return null;
+
+    const crypto = require('crypto') as typeof import('crypto');
+    const publicKey = crypto.createPublicKey({ key: jwk as any, format: 'jwk' });
+    const isValid = crypto.verify(
+      'RSA-SHA256',
+      Buffer.from(`${headerB64}.${payloadB64}`, 'utf8'),
+      publicKey,
+      Buffer.from(signatureB64, 'base64url')
+    );
+
+    if (!isValid || !payload.sub) return null;
     return {
       email: payload.email,
       sub: payload.sub,

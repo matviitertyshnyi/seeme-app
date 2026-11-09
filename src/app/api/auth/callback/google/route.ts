@@ -31,6 +31,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/?oauth_error=missing_credentials', baseUrl));
   }
 
+  const expectedState = req.cookies.get('oauth_state_google')?.value;
+  const state = searchParams.get('state');
+  if (isProduction && expectedState && state !== expectedState) {
+    console.error('[Google OAuth] OAuth state mismatch');
+    return NextResponse.redirect(new URL('/?auth_error=Invalid+OAuth+state', baseUrl));
+  }
+
   try {
     let userDetails = null;
 

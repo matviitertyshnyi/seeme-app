@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getAppBaseUrl,
   parseAppleIdToken,
+  verifyAppleIdToken,
   provisionOrFindOAuthUser,
   setSessionCookies,
 } from '@/lib/oauth';
@@ -13,7 +14,9 @@ async function handleAppleAuth(
   idToken?: string | null,
   userJson?: string | null,
   error?: string | null,
-  isMock: boolean = false
+  isMock: boolean = false,
+  state?: string | null,
+  expectedState?: string | null
 ) {
   if (error) {
     console.error('[Apple OAuth] Error received from Apple callback:', error);
@@ -29,6 +32,11 @@ async function handleAppleAuth(
     return NextResponse.redirect(new URL('/?oauth_error=missing_credentials', baseUrl));
   }
 
+  if (isProduction && expectedState && state !== expectedState) {
+    console.error('[Apple OAuth] OAuth state mismatch');
+    return NextResponse.redirect(new URL('/?auth_error=Invalid+OAuth+state', baseUrl));
+  }
+
   try {
     let email: string | null = null;
     let name = 'Apple Member';
@@ -36,7 +44,9 @@ async function handleAppleAuth(
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
 
     if (!isMock && idToken) {
-      const parsed = parseAppleIdToken(idToken);
+      const parsed = isProduction
+        ? await verifyAppleIdToken(idToken)
+        : (await verifyAppleIdToken(idToken)) || parseAppleIdToken(idToken);
       if (parsed) {
         if (parsed.email) {
           email = parsed.email;
@@ -95,32 +105,37 @@ async function handleAppleAuth(
 
 export async function POST(req: NextRequest) {
   const baseUrl = getAppBaseUrl(req);
+  const expectedState = req.cookies.get('oauth_state_apple')?.value;
   try {
     const formData = await req.formData();
     const idToken = formData.get('id_token') as string | null;
     const userJson = formData.get('user') as string | null;
     const error = formData.get('error') as string | null;
+    const state = formData.get('state') as string | null;
     const isMock = req.nextUrl.searchParams.get('mock') === 'true';
 
-    return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock);
+    return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock, state, expectedState);
   } catch {
     const searchParams = req.nextUrl.searchParams;
     const idToken = searchParams.get('id_token');
     const userJson = searchParams.get('user');
     const error = searchParams.get('error');
+    const state = searchParams.get('state');
     const isMock = searchParams.get('mock') === 'true';
 
-    return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock);
+    return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock, state, expectedState);
   }
 }
 
 export async function GET(req: NextRequest) {
   const baseUrl = getAppBaseUrl(req);
+  const expectedState = req.cookies.get('oauth_state_apple')?.value;
   const searchParams = req.nextUrl.searchParams;
   const idToken = searchParams.get('id_token');
   const userJson = searchParams.get('user');
   const error = searchParams.get('error');
+  const state = searchParams.get('state');
   const isMock = searchParams.get('mock') === 'true';
 
-  return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock);
+  return await handleAppleAuth(baseUrl, idToken, userJson, error, isMock, state, expectedState);
 }

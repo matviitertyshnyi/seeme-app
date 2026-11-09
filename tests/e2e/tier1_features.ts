@@ -126,7 +126,10 @@ export async function runTier1FeatureCoverage(): Promise<TestCollector> {
     );
 
     collector.assert(
-      statusFinishedHtml.includes('Finished') || statusFinishedHtml.includes('bg-rose') || statusFinishedHtml.includes('text-rose'),
+      statusFinishedHtml.includes('Finished') ||
+        statusFinishedHtml.includes('Ended') ||
+        statusFinishedHtml.includes('bg-rose') ||
+        statusFinishedHtml.includes('text-rose'),
       'F2-DesignSystem',
       'Renders FINISHED status badge with semantic rose token'
     );

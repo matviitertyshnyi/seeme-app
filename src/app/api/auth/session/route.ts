@@ -1,22 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, withDbMutation } from '@/lib/db';
 import { optionalAuth, errorResponse, sanitizePersona } from '@/lib/auth-guard';
+import { setSessionCookies } from '@/lib/oauth';
 import { UserPersona } from '@/types/lobby';
 
 export const dynamic = 'force-dynamic';
-
-function setSessionCookie(response: NextResponse, userId: string) {
-  const cookieOptions = {
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-  };
-  response.cookies.set('ltr_session', userId, cookieOptions);
-  response.cookies.set('leavetheroom_session', userId, cookieOptions);
-  response.cookies.set('seeme_session', userId, cookieOptions);
-}
 
 function clearSessionCookie(response: NextResponse) {
   const cookieOptions = {
@@ -73,6 +61,9 @@ export async function POST(req: NextRequest) {
 
     // 2. SWITCH_DEMO_USER
     if (action === 'SWITCH_DEMO_USER') {
+      if (process.env.NODE_ENV === 'production') {
+        return errorResponse('Demo user switching is disabled in production', 403, 'FORBIDDEN');
+      }
       const { userId } = body as { userId: string };
       if (!userId) {
         return errorResponse('User ID is required', 400);
@@ -98,12 +89,15 @@ export async function POST(req: NextRequest) {
         persona: safeTarget,
         success: true,
       });
-      setSessionCookie(res, target.id);
+      setSessionCookies(res, target.id, target);
       return res;
     }
 
     // 3. GOOGLE_AUTH & APPLE_AUTH
     if (action === 'GOOGLE_AUTH' || action === 'APPLE_AUTH') {
+      if (process.env.NODE_ENV === 'production') {
+        return errorResponse('Direct OAuth simulation is disabled in production', 403, 'FORBIDDEN');
+      }
       const { email, name, avatar } = body as {
         email?: string;
         name?: string;
@@ -183,7 +177,7 @@ export async function POST(req: NextRequest) {
         persona: safePersona,
         success: true,
       });
-      setSessionCookie(res, safePersona.id);
+      setSessionCookies(res, safePersona.id, mutationResult.persona!);
       return res;
     }
 
@@ -220,9 +214,9 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // If user had a password set, strictly require it and verify
-      if (persona.password) {
-        if (!password || persona.password !== password.trim()) {
+      // If user had a password set (or in production), strictly require it and verify
+      if (persona.password || process.env.NODE_ENV === 'production') {
+        if (!persona.password || !password || persona.password !== password.trim()) {
           return errorResponse('Incorrect password', 401);
         }
       }
@@ -234,7 +228,7 @@ export async function POST(req: NextRequest) {
         persona: safePersona,
         success: true,
       });
-      setSessionCookie(res, safePersona.id);
+      setSessionCookies(res, safePersona.id, persona);
       return res;
     }
 
