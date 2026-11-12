@@ -96,7 +96,7 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type UserRole = 'ADMIN' | 'USER';
+export type UserRole = 'ADMIN' | 'USER' | 'BUSINESS' | 'ORGANIZER';
 export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
 
 export interface DirectMessage {
@@ -127,6 +127,9 @@ export interface UserPersona {
   verificationRequestedAt?: string;
   verificationNote?: string;
   role?: UserRole;
+  isOrganizer?: boolean;
+  businessName?: string;
+  website?: string;
   isBanned?: boolean;
   banReason?: string;
   favoriteActivities: ActivityCategory[];
@@ -204,6 +207,8 @@ export interface Lobby {
   preferredAgeRange?: string; // e.g., 'All Ages', '18-25', '20s & 30s', '25-35', '30+'
   isRecurring?: boolean;
   recurringSchedule?: string; // e.g., 'Every Friday at 20:00'
+  isVenueEvent?: boolean;
+  eventUrl?: string;
   maxParticipants: number;
   joinMode: JoinMode;
   hostId: string;
@@ -239,9 +244,10 @@ export interface DatabaseSchema {
  * Rejects Unsplash placeholders, SVG letter fallbacks, empty strings, and unverified avatars.
  */
 export function hasRealProfilePhoto(
-  user?: { avatar?: string; photoVerified?: boolean } | null
+  user?: { avatar?: string; photoVerified?: boolean; isOrganizer?: boolean; role?: UserRole } | null
 ): boolean {
   if (!user || !user.avatar) return false;
+  if (user.isOrganizer || user.role === 'BUSINESS' || user.role === 'ORGANIZER') return true;
   const avatar = user.avatar.trim();
   if (!avatar) return false;
   if (avatar.includes('unsplash.com')) return false;

@@ -598,6 +598,18 @@ export async function POST(req: NextRequest) {
       if (body.selfieVerificationUrl) {
         persona.selfieVerificationUrl = body.selfieVerificationUrl;
       }
+      if (body.isOrganizer !== undefined) {
+        persona.isOrganizer = Boolean(body.isOrganizer);
+        if (persona.isOrganizer && persona.role !== 'ADMIN') {
+          persona.role = 'BUSINESS';
+        }
+      }
+      if (body.businessName !== undefined) {
+        persona.businessName = String(body.businessName).trim().slice(0, 80);
+      }
+      if (body.website !== undefined) {
+        persona.website = String(body.website).trim().slice(0, 200);
+      }
       if (Array.isArray(body.savedLobbyIds)) {
         persona.savedLobbyIds = body.savedLobbyIds;
       }

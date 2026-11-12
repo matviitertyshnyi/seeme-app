@@ -55,7 +55,7 @@ export const SkillCompatibilitySchema = z.enum([
 
 export const JoinModeSchema = z.enum(['OPEN', 'APPROVAL_REQUIRED']);
 
-export const UserRoleSchema = z.enum(['ADMIN', 'USER']);
+export const UserRoleSchema = z.enum(['ADMIN', 'USER', 'BUSINESS', 'ORGANIZER']);
 
 export const VerificationStatusSchema = z.enum([
   'UNVERIFIED',
@@ -124,6 +124,9 @@ export const UserSchema = z.object({
   verificationRequestedAt: z.string().optional(),
   verificationNote: z.string().optional(),
   role: UserRoleSchema.default('USER'),
+  isOrganizer: z.boolean().optional().default(false),
+  businessName: z.string().optional(),
+  website: z.string().optional(),
   isBanned: z.boolean().default(false),
   banReason: z.string().optional(),
   favoriteActivities: z.array(z.string()).default([]),
@@ -165,6 +168,10 @@ export const UpdateProfileInputSchema = z.object({
   tagline: z.string().trim().max(200).optional(),
   neighborhood: z.string().trim().max(80).optional(),
   onboarded: z.boolean().optional(),
+  isOrganizer: z.boolean().optional(),
+  businessName: z.string().trim().max(80).optional(),
+  website: z.string().trim().max(200).optional(),
+  role: UserRoleSchema.optional(),
   favoriteActivities: z.array(z.string()).max(20).optional(),
   photoVerified: z.boolean().optional(),
   selfieVerificationUrl: z.string().optional(),
@@ -200,37 +207,49 @@ export const AGE_RANGE_OPTIONS: AgeRangeOption[] = [
 ];
 
 // Meetup schemas
-export const CreateMeetupInputSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(3, 'Title must be at least 3 characters')
-    .max(100, 'Title cannot exceed 100 characters'),
-  category: ActivityCategorySchema,
-  preferredAgeRange: z.string().optional().default('No preference'),
-  equipmentNote: z
-    .string()
-    .trim()
-    .max(500)
-    .optional()
-    .default('All equipment ready. Drop a message in chat when you arrive.'),
-  venueName: z.string().trim().min(2, 'Venue name is required').max(120),
-  venueAddress: z.string().trim().max(200).optional(),
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-  startTime: StartTimeOptionSchema.default('Now'),
-  isRecurring: z.boolean().optional().default(false),
-  recurringSchedule: z.string().optional(),
-  maxParticipants: z.number().int().min(2).max(16).default(4),
-  joinMode: JoinModeSchema.default('OPEN'),
-  skillCompatibility: SkillCompatibilitySchema.default('ALL_LEVELS'),
-  spotClue: z.string().trim().max(200).optional(),
-  coverImage: z.string().optional(),
-  host: ParticipantSchema.optional(),
-  hostId: z.string().optional(),
-  coHost: ParticipantSchema.nullable().optional(),
-  coHostId: z.string().nullable().optional(),
-});
+export const CreateMeetupInputSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(3, 'Title must be at least 3 characters')
+      .max(100, 'Title cannot exceed 100 characters'),
+    category: ActivityCategorySchema,
+    preferredAgeRange: z.string().optional().default('No preference'),
+    equipmentNote: z
+      .string()
+      .trim()
+      .max(500)
+      .optional()
+      .default('All equipment ready. Drop a message in chat when you arrive.'),
+    venueName: z.string().trim().min(2, 'Venue name is required').max(120),
+    venueAddress: z.string().trim().max(200).optional(),
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+    startTime: StartTimeOptionSchema.default('Now'),
+    isRecurring: z.boolean().optional().default(false),
+    recurringSchedule: z.string().optional(),
+    isVenueEvent: z.boolean().optional().default(false),
+    eventUrl: z.string().optional(),
+    maxParticipants: z.number().int().min(2).max(500).default(4),
+    joinMode: JoinModeSchema.default('OPEN'),
+    skillCompatibility: SkillCompatibilitySchema.default('ALL_LEVELS'),
+    spotClue: z.string().trim().max(200).optional(),
+    coverImage: z.string().optional(),
+    host: ParticipantSchema.optional(),
+    hostId: z.string().optional(),
+    coHost: ParticipantSchema.nullable().optional(),
+    coHostId: z.string().nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.isVenueEvent && data.maxParticipants > 16) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Maximum 16 participants for casual meetups',
+        path: ['maxParticipants'],
+      });
+    }
+  });
 export type CreateMeetupInput = z.infer<typeof CreateMeetupInputSchema>;
 
 export const UpdateMeetupInputSchema = z.object({
@@ -246,10 +265,12 @@ export const UpdateMeetupInputSchema = z.object({
   lat: z.number().min(-90).max(90).optional(),
   lng: z.number().min(-180).max(180).optional(),
   startTime: StartTimeOptionSchema.optional(),
-  maxParticipants: z.number().int().min(2, 'Minimum 2 participants').max(16, 'Maximum 16 participants').optional(),
+  maxParticipants: z.number().int().min(2, 'Minimum 2 participants').max(500, 'Maximum 500 participants').optional(),
   joinMode: JoinModeSchema.optional(),
   skillCompatibility: SkillCompatibilitySchema.optional(),
   preferredAgeRange: z.string().optional(),
+  isVenueEvent: z.boolean().optional(),
+  eventUrl: z.string().optional(),
   roomStatus: RoomStatusSchema.optional(),
   status: RoomStatusSchema.optional(),
   spotClue: z.string().trim().max(200).optional(),
@@ -273,7 +294,9 @@ export const MeetupSchema = z.object({
   startTimeBadge: z.string(),
   roomStatus: RoomStatusSchema.default('LIVE'),
   skillCompatibility: SkillCompatibilitySchema.default('ALL_LEVELS'),
-  maxParticipants: z.number().int().min(2).max(16),
+  isVenueEvent: z.boolean().optional().default(false),
+  eventUrl: z.string().optional(),
+  maxParticipants: z.number().int().min(2).max(500),
   joinMode: JoinModeSchema.default('OPEN'),
   hostId: z.string().min(1),
   participants: z.array(ParticipantSchema),

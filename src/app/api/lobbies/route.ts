@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
       joinMode,
       coHost,
       coverImage,
+      isVenueEvent,
+      eventUrl,
     } = body as {
       category: ActivityCategory;
       title: string;
@@ -81,6 +83,8 @@ export async function POST(req: NextRequest) {
       joinMode?: JoinMode;
       coHost?: Participant | null;
       coverImage?: string;
+      isVenueEvent?: boolean;
+      eventUrl?: string;
     };
 
     if (
@@ -96,7 +100,14 @@ export async function POST(req: NextRequest) {
     return await withDbMutation(async (db) => {
       const nowIso = new Date().toISOString();
       const lobbyId = `lobby-${crypto.randomUUID()}`;
-      const clampedMax = Math.max(2, Math.min(16, Number(maxParticipants) || 4));
+      const isVenue = Boolean(
+        isVenueEvent ||
+        authUser.isOrganizer ||
+        authUser.role === 'BUSINESS' ||
+        authUser.role === 'ORGANIZER'
+      );
+      const maxAllowedCap = isVenue ? 500 : 16;
+      const clampedMax = Math.max(2, Math.min(maxAllowedCap, Number(maxParticipants) || 4));
       const chosenStart = startTime || 'Now';
 
       const hostPersona = db.personas.find((p) => p.id === authUser.id) || authUser;
@@ -152,6 +163,8 @@ export async function POST(req: NextRequest) {
         preferredAgeRange: (body as { preferredAgeRange?: AgeRangeOption | string }).preferredAgeRange || 'All Ages (18+)',
         isRecurring: (body as { isRecurring?: boolean }).isRecurring ?? false,
         recurringSchedule: (body as { recurringSchedule?: string }).recurringSchedule || undefined,
+        isVenueEvent: isVenue,
+        eventUrl: eventUrl?.trim() || undefined,
         skillCompatibility: skillCompatibility || 'ALL_LEVELS',
         maxParticipants: clampedMax,
         joinMode: joinMode || 'OPEN',

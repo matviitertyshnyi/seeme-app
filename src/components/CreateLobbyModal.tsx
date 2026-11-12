@@ -132,6 +132,10 @@ export function CreateLobbyModal({
   const [title, setTitle] = useState('');
   const [equipmentNote, setEquipmentNote] = useState('');
   const [spotClue, setSpotClue] = useState('');
+  const [eventUrl, setEventUrl] = useState('');
+  const [isVenueEvent, setIsVenueEvent] = useState(
+    Boolean(activeUser?.isOrganizer || activeUser?.role === 'BUSINESS' || activeUser?.role === 'ORGANIZER')
+  );
   const [skillCompatibility, setSkillCompatibility] =
     useState<SkillCompatibility>('ALL_LEVELS');
   const [venueName, setVenueName] = useState('Meetup Location');
@@ -372,6 +376,8 @@ export function CreateLobbyModal({
           recurringSchedule: isRecurring
             ? `Every ${recurringDay} at ${recurringTime}`
             : undefined,
+          isVenueEvent: isVenueEvent || maxParticipants > 16 || maxParticipants >= 999,
+          eventUrl: eventUrl.trim() || undefined,
           maxParticipants,
           joinMode,
           preferredAgeRange,
@@ -655,13 +661,13 @@ export function CreateLobbyModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">
-                  Description
+                  Event Details & Info
                 </label>
                 <textarea
                   rows={2}
                   value={equipmentNote}
                   onChange={(e) => setEquipmentNote(e.target.value)}
-                  placeholder="e.g., Meetup description, what to bring, or spot details..."
+                  placeholder="e.g., Event details, what to bring, entry fee, or schedule..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
                 />
               </div>
@@ -678,6 +684,20 @@ export function CreateLobbyModal({
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5 flex items-center justify-between">
+                <span>Event Link / Tickets (Optional)</span>
+                <span className="text-[10px] text-stone-500 font-normal">Instagram, website, ticketing</span>
+              </label>
+              <input
+                type="url"
+                value={eventUrl}
+                onChange={(e) => setEventUrl(e.target.value)}
+                placeholder="https://instagram.com/... or https://venue.com/tickets"
+                className="min-h-[40px] w-full px-3.5 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white placeholder:text-stone-500 focus:outline-none focus:border-orange-600 shadow-2xs"
+              />
             </div>
           </div>
 

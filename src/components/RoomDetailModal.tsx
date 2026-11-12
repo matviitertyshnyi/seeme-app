@@ -803,6 +803,19 @@ export function RoomDetailModal({
                     <p className="text-sm font-medium text-stone-900 dark:text-stone-100 leading-relaxed">
                       {lobby.equipmentNote}
                     </p>
+                    {lobby.eventUrl && (
+                      <div className="pt-2">
+                        <a
+                          href={lobby.eventUrl.startsWith('http') ? lobby.eventUrl : `https://${lobby.eventUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition shadow-xs"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Official Event Link / Tickets</span>
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -918,8 +931,13 @@ export function RoomDetailModal({
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                                {person.name}, {person.age}
+                                {person.name}{(person as any).isOrganizer || (person as any).role === 'BUSINESS' || (person as any).role === 'ORGANIZER' ? '' : `, ${person.age}`}
                               </span>
+                              {Boolean((person as any).isOrganizer || (person as any).role === 'BUSINESS' || (person as any).role === 'ORGANIZER') && (
+                                <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.2 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30">
+                                  Organizer
+                                </span>
+                              )}
                               {Boolean((person as any).photoVerified) && (
                                 <ShieldCheck className="w-3 h-3 text-stone-400 dark:text-stone-500 shrink-0" />
                               )}

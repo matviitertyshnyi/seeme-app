@@ -424,6 +424,17 @@ export default function LeaveTheRoomHomePage() {
               existingIds.add(l.id);
             }
           }
+          if (
+            prev.length === combined.length &&
+            prev.every(
+              (p, i) =>
+                p.id === combined[i].id &&
+                p.participants.length === combined[i].participants.length &&
+                p.roomStatus === combined[i].roomStatus
+            )
+          ) {
+            return prev;
+          }
           return combined;
         });
       }
@@ -711,7 +722,7 @@ export default function LeaveTheRoomHomePage() {
       'Co-Working': 0,
     };
     lobbiesWithDistance.forEach((lobby) => {
-      if (lobby.distanceKm <= radiusKm) {
+      if (lobby.distanceKm <= radiusKm && lobby.computedStatus !== 'FINISHED') {
         counts['All Categories']++;
         const broad = getBroadCategory(lobby.category);
         if (counts[broad] !== undefined) {
@@ -730,7 +741,7 @@ export default function LeaveTheRoomHomePage() {
       'Co-Working': 0,
     };
     lobbiesWithDistance.forEach((lobby) => {
-      if (lobby.distanceKm <= radiusKm) {
+      if (lobby.distanceKm <= radiusKm && lobby.computedStatus !== 'FINISHED') {
         const cat = lobby.category;
         counts[cat] = (counts[cat] || 0) + 1;
         const broad = getBroadCategory(cat);
@@ -825,6 +836,62 @@ export default function LeaveTheRoomHomePage() {
     statusFilter,
     showSavedOnly,
     activeUser.savedLobbyIds,
+    activeUser.bannedUserIds,
+    activeUser.id,
+  ]);
+
+  // Filtered meetups for Map (independent of Explore searchQuery, statusFilter, and showSavedOnly)
+  const mapFilteredLobbies: LobbyWithDistance[] = useMemo(() => {
+    const bannedIds = activeUser.bannedUserIds || [];
+    return lobbiesWithDistance.filter((lobby) => {
+      if (
+        bannedIds.includes(lobby.hostId) ||
+        lobby.bannedUserIds?.includes(activeUser.id)
+      ) {
+        return false;
+      }
+      if (lobby.computedStatus === 'FINISHED') return false;
+      if (lobby.distanceKm > radiusKm) return false;
+
+      if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Categories') {
+        const isBroad = [
+          'Sports & Fitness',
+          'Gaming & Strategy',
+          'Social & Hangout',
+          'Co-Working',
+        ].includes(selectedCategory);
+        if (isBroad) {
+          if (getBroadCategory(lobby.category) !== selectedCategory) {
+            return false;
+          }
+        } else {
+          const target = selectedCategory.toLowerCase().trim();
+          const lobbyCat = lobby.category.toLowerCase().trim();
+          if (lobbyCat !== target && !lobbyCat.includes(target) && !target.includes(lobbyCat)) {
+            return false;
+          }
+        }
+      } else if (selectedBroadCategory !== 'All Categories') {
+        const broad = getBroadCategory(lobby.category);
+        if (broad !== selectedBroadCategory) {
+          return false;
+        }
+      }
+
+      if (selectedAgeFilters.length > 0) {
+        if (!doesMeetupMatchAgeFilters(lobby.preferredAgeRange, selectedAgeFilters)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [
+    lobbiesWithDistance,
+    selectedBroadCategory,
+    selectedCategory,
+    selectedAgeFilters,
+    radiusKm,
     activeUser.bannedUserIds,
     activeUser.id,
   ]);
@@ -1452,6 +1519,21 @@ export default function LeaveTheRoomHomePage() {
     }
   };
 
+  const handleMapRequestSignIn = useCallback(() => {
+    setAuthModalTab('LOGIN');
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const handleSelectMapLobby = useCallback((item: { id: string }) => {
+    if (isSignedOut) {
+      showToast('Please sign in to join or interact with meetups');
+      setAuthModalTab('LOGIN');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setSelectedLobbyId(item.id);
+  }, [isSignedOut]);
+
   const handleToggleSaveLobby = async (lobbyId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (isSignedOut) {
@@ -1663,7 +1745,15 @@ export default function LeaveTheRoomHomePage() {
                       : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
                   }`}
                 >
-                  {lobbiesWithDistance.filter((l) => l.distanceKm <= radiusKm).length}
+                  {
+                    lobbiesWithDistance.filter(
+                      (l) =>
+                        l.distanceKm <= radiusKm &&
+                        l.computedStatus !== 'FINISHED' &&
+                        !(activeUser.bannedUserIds || []).includes(l.hostId) &&
+                        !l.bannedUserIds?.includes(activeUser.id)
+                    ).length
+                  }
                 </span>
               </button>
 
@@ -1722,25 +1812,14 @@ export default function LeaveTheRoomHomePage() {
             </div>
 
             <MapRadar
-              lobbies={filteredLobbies}
+              lobbies={mapFilteredLobbies}
               userLat={userCoords.lat}
               userLng={userCoords.lng}
               radiusKm={radiusKm}
               activeUser={activeUser}
               isSignedOut={isSignedOut}
-              onRequestSignIn={() => {
-                setAuthModalTab('LOGIN');
-                setIsAuthModalOpen(true);
-              }}
-              onSelectLobby={(item) => {
-                if (isSignedOut) {
-                  showToast('Please sign in to join or interact with meetups');
-                  setAuthModalTab('LOGIN');
-                  setIsAuthModalOpen(true);
-                  return;
-                }
-                setSelectedLobbyId(item.id);
-              }}
+              onRequestSignIn={handleMapRequestSignIn}
+              onSelectLobby={handleSelectMapLobby}
               onQuickJoin={handleQuickJoin}
             />
           </div>

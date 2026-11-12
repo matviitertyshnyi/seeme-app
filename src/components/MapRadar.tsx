@@ -6,7 +6,6 @@ import {
   Navigation,
   MapPin,
   ExternalLink,
-  MessageCircle,
   UserPlus,
   LocateFixed,
   Lock,
@@ -56,6 +55,11 @@ export default function MapRadar({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
+  const prevUserCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
+  const hasFittedInitialBoundsRef = useRef<boolean>(false);
+  const markersRef = useRef<
+    Map<string, { marker: L.Marker; createIcon: (selected: boolean) => L.DivIcon }>
+  >(new Map());
   const [hoveredLobbyId, setHoveredLobbyId] = useState<string | null>(null);
   const [mapStatusFilter, setMapStatusFilter] = useState<'ALL' | 'LIVE' | 'UPCOMING'>('ALL');
 
@@ -87,15 +91,36 @@ export default function MapRadar({
     return resolveCoverImage(selectedPreviewLobby.coverImage, selectedPreviewLobby.category);
   }, [selectedPreviewLobby]);
 
+  const fitMapToLobbies = (map: L.Map, targetLobbies: LobbyWithDistance[], animate: boolean) => {
+    if (targetLobbies.length > 0) {
+      const points: [number, number][] = [
+        [userLat, userLng],
+        ...targetLobbies.map((l) => [l.lat, l.lng] as [number, number]),
+      ];
+      const bounds = L.latLngBounds(points);
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, {
+          padding: [52, 52],
+          maxZoom: 14,
+          animate,
+          duration: animate ? 0.45 : undefined,
+        });
+        return;
+      }
+    }
+    if (animate) {
+      map.flyTo([userLat, userLng], 13, { duration: 0.45 });
+    } else {
+      map.setView([userLat, userLng], 13);
+    }
+  };
+
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const initialCenterLat = userLat;
-    const initialCenterLng = userLng;
-
     const map = L.map(mapContainerRef.current, {
-      center: [initialCenterLat, initialCenterLng],
-      zoom: 14,
+      center: [userLat, userLng],
+      zoom: 13,
       zoomControl: false,
     });
 
@@ -114,6 +139,12 @@ export default function MapRadar({
     const layerGroup = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
     layerGroupRef.current = layerGroup;
+    prevUserCoordsRef.current = { lat: userLat, lng: userLng };
+
+    if (activeLobbies.length > 0) {
+      fitMapToLobbies(map, activeLobbies, false);
+      hasFittedInitialBoundsRef.current = true;
+    }
 
     return () => {
       map.remove();
@@ -122,22 +153,27 @@ export default function MapRadar({
     };
   }, []);
 
-  // Center or fly to selected event whenever it changes
+  // Only move camera when user switches city/coordinates (never on hover, pin click, or background poll)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    if (selectedPreviewLobby) {
-      const targetZoom = Math.max(map.getZoom() || 14, 14);
-      map.flyTo(
-        [selectedPreviewLobby.lat - 0.0022, selectedPreviewLobby.lng],
-        targetZoom,
-        { duration: 0.45 }
-      );
-    } else if (activeLobbies.length === 0) {
-      map.flyTo([userLat, userLng], 14, { duration: 0.45 });
+    const prev = prevUserCoordsRef.current;
+    const coordsChanged =
+      !prev ||
+      Math.abs(prev.lat - userLat) > 0.0005 ||
+      Math.abs(prev.lng - userLng) > 0.0005;
+
+    if (coordsChanged) {
+      prevUserCoordsRef.current = { lat: userLat, lng: userLng };
+      setHoveredLobbyId(null);
+      fitMapToLobbies(map, activeLobbies, true);
+      hasFittedInitialBoundsRef.current = activeLobbies.length > 0;
+    } else if (!hasFittedInitialBoundsRef.current && activeLobbies.length > 0) {
+      fitMapToLobbies(map, activeLobbies, false);
+      hasFittedInitialBoundsRef.current = true;
     }
-  }, [selectedPreviewLobby?.id, userLat, userLng, activeLobbies.length]);
+  }, [userLat, userLng, activeLobbies]);
 
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -145,6 +181,7 @@ export default function MapRadar({
     if (!map || !layerGroup) return;
 
     layerGroup.clearLayers();
+    markersRef.current.clear();
 
     // 1. Radar circles around user
     const rings = [
@@ -182,58 +219,67 @@ export default function MapRadar({
       layerGroup
     );
 
-    // 3. Render status-dot pill markers
+    // 3. Render status-dot pill markers (with de-overlap offset if multiple pins share identical coordinates)
+    const placedCoords: Array<{ lat: number; lng: number }> = [];
+
     activeLobbies.forEach((lobby) => {
-      const isSelected = selectedPreviewLobby?.id === lobby.id;
+      let displayLat = lobby.lat;
+      let displayLng = lobby.lng;
+      const overlapCount = placedCoords.filter(
+        (c) => Math.abs(c.lat - lobby.lat) < 0.0005 && Math.abs(c.lng - lobby.lng) < 0.0005
+      ).length;
+      placedCoords.push({ lat: lobby.lat, lng: lobby.lng });
+      if (overlapCount > 0) {
+        const angle = (overlapCount * (2 * Math.PI)) / 5;
+        displayLat += Math.sin(angle) * 0.0012;
+        displayLng += Math.cos(angle) * 0.0016;
+      }
+
       const statusDotHex =
         lobby.computedStatus === 'LIVE'
           ? '#10B981'
           : '#78716C';
 
-      const borderHex = isSelected ? '#EA580C' : '#E7E5E4';
+      const createPillIcon = (isSelected: boolean) => {
+        const borderHex = isSelected ? '#EA580C' : '#E7E5E4';
+        const bgStyle = isSelected
+          ? 'background:#EA580C;color:#FFFFFF;border:2px solid #FFFFFF;box-shadow:0 4px 12px rgba(0,0,0,0.25);transform:scale(1.05);'
+          : 'background:#FFFFFF;color:#1C1917;border:1.5px solid #E7E5E4;box-shadow:0 4px 14px rgba(0,0,0,0.12);';
 
-      const bgStyle = isSelected
-        ? 'background:#EA580C;color:#FFFFFF;border:2px solid #FFFFFF;box-shadow:0 4px 12px rgba(0,0,0,0.25);transform:scale(1.05);'
-        : 'background:#FFFFFF;color:#1C1917;border:1.5px solid #E7E5E4;box-shadow:0 4px 14px rgba(0,0,0,0.12);';
-
-      const pillIcon = L.divIcon({
-        className: 'lobby-pill-marker-wrapper',
-        html: `
-          <div style="display:inline-flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;">
-            <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;transition:all 0.18s ease;${bgStyle}">
-              <span style="width:6px;height:6px;border-radius:9999px;background:${statusDotHex};display:inline-block;flex-shrink:0;"></span>
-              <span>${escapeHtml(lobby.mapPinLabel || '')}</span>
-              <span style="opacity:0.8;font-weight:500;font-size:10px;padding-left:2px;border-left:1px solid currentColor;">${lobby.participants.length}/${lobby.maxParticipants >= 999 ? '∞' : lobby.maxParticipants}</span>
+        return L.divIcon({
+          className: 'lobby-pill-marker-wrapper',
+          html: `
+            <div style="display:inline-flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;">
+              <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;transition:all 0.18s ease;${bgStyle}">
+                <span style="width:6px;height:6px;border-radius:9999px;background:${statusDotHex};display:inline-block;flex-shrink:0;"></span>
+                <span>${escapeHtml(lobby.mapPinLabel || '')}</span>
+                <span style="opacity:0.8;font-weight:500;font-size:10px;padding-left:2px;border-left:1px solid currentColor;">${lobby.participants.length}/${lobby.maxParticipants >= 999 ? '∞' : lobby.maxParticipants}</span>
+              </div>
+              <div style="width:6px;height:6px;background:${isSelected ? '#EA580C' : '#FFFFFF'};transform:rotate(45deg);margin-top:-3px;border-right:1.5px solid ${borderHex};border-bottom:1.5px solid ${borderHex};"></div>
             </div>
-            <div style="width:6px;height:6px;background:${isSelected ? '#EA580C' : '#FFFFFF'};transform:rotate(45deg);margin-top:-3px;border-right:1.5px solid ${borderHex};border-bottom:1.5px solid ${borderHex};"></div>
-          </div>
-        `,
-        iconSize: [110, 36],
-        iconAnchor: [55, 32],
-      });
+          `,
+          iconSize: [110, 36],
+          iconAnchor: [55, 32],
+        });
+      };
 
-      const marker = L.marker([lobby.lat, lobby.lng], {
-        icon: pillIcon,
-        zIndexOffset: isSelected ? 1000 : 500,
+      const isInitiallySelected = hoveredLobbyId === lobby.id;
+      const marker = L.marker([displayLat, displayLng], {
+        icon: createPillIcon(isInitiallySelected),
+        zIndexOffset: isInitiallySelected ? 1000 : 500,
       }).addTo(layerGroup);
+
+      markersRef.current.set(lobby.id, { marker, createIcon: createPillIcon });
 
       marker.on('click', (e: any) => {
         if (e?.originalEvent) {
           e.originalEvent.stopPropagation();
         }
         setHoveredLobbyId(lobby.id);
-        const map = mapInstanceRef.current;
-        if (map) {
-          map.flyTo(
-            [lobby.lat - 0.0022, lobby.lng],
-            Math.max(map.getZoom(), 14),
-            { duration: 0.45 }
-          );
+        const currentMap = mapInstanceRef.current;
+        if (currentMap) {
+          currentMap.panTo([displayLat, displayLng], { animate: true, duration: 0.35 });
         }
-      });
-
-      marker.on('mouseover', () => {
-        setHoveredLobbyId(lobby.id);
       });
     });
   }, [
@@ -241,22 +287,22 @@ export default function MapRadar({
     userLat,
     userLng,
     radiusKm,
-    activeUser.id,
-    selectedPreviewLobby?.id,
-    onSelectLobby,
   ]);
+
+  // Fast lightweight visual update when selected pin changes (zero layer clear / zero marker recreation)
+  useEffect(() => {
+    markersRef.current.forEach(
+      ({ marker, createIcon }: { marker: L.Marker; createIcon: (selected: boolean) => L.DivIcon }, lobbyId: string) => {
+        const isSelected = lobbyId === hoveredLobbyId;
+        marker.setIcon(createIcon(isSelected));
+        marker.setZIndexOffset(isSelected ? 1000 : 500);
+      }
+    );
+  }, [hoveredLobbyId]);
 
   const handleRecenter = () => {
     if (mapInstanceRef.current) {
-      if (selectedPreviewLobby) {
-        mapInstanceRef.current.flyTo(
-          [selectedPreviewLobby.lat - 0.0022, selectedPreviewLobby.lng],
-          Math.max(mapInstanceRef.current.getZoom(), 14),
-          { duration: 0.5 }
-        );
-      } else {
-        mapInstanceRef.current.flyTo([userLat, userLng], 14, { duration: 0.5 });
-      }
+      fitMapToLobbies(mapInstanceRef.current, activeLobbies, true);
     }
   };
 
@@ -318,23 +364,21 @@ export default function MapRadar({
             className="min-h-[38px] bg-white/95 dark:bg-[#1C1917]/95 hover:bg-stone-50 dark:hover:bg-stone-800 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-stone-200 dark:border-stone-800 inline-flex items-center gap-1.5 text-xs font-semibold text-stone-800 dark:text-stone-200 transition-all cursor-pointer"
           >
             <LocateFixed className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
-            <span>Center</span>
+            <span>Fit All</span>
           </button>
 
-          {selectedPreviewLobby && (
-            <button
-              type="button"
-              onClick={() => {
-                if (mapInstanceRef.current) {
-                  mapInstanceRef.current.flyTo([userLat, userLng], 14, { duration: 0.5 });
-                }
-              }}
-              className="min-h-[38px] bg-white/95 dark:bg-[#1C1917]/95 hover:bg-stone-50 dark:hover:bg-stone-800 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-stone-200 dark:border-stone-800 inline-flex items-center gap-1.5 text-xs font-semibold text-stone-800 dark:text-stone-200 transition-all cursor-pointer"
-            >
-              <Navigation className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
-              <span>You</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              if (mapInstanceRef.current) {
+                mapInstanceRef.current.flyTo([userLat, userLng], 14, { duration: 0.5 });
+              }
+            }}
+            className="min-h-[38px] bg-white/95 dark:bg-[#1C1917]/95 hover:bg-stone-50 dark:hover:bg-stone-800 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-stone-200 dark:border-stone-800 inline-flex items-center gap-1.5 text-xs font-semibold text-stone-800 dark:text-stone-200 transition-all cursor-pointer"
+          >
+            <Navigation className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
+            <span>You</span>
+          </button>
         </div>
       )}
 

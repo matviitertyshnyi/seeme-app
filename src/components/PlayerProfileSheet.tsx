@@ -14,6 +14,7 @@ import {
   Clock,
   ShieldAlert,
   Loader2,
+  Globe,
 } from 'lucide-react';
 import { UserPersona } from '@/types/lobby';
 import { CategoryIcon } from '@/components/CategoryIcon';
@@ -180,8 +181,16 @@ export function PlayerProfileSheet({
             <div className="flex-1 text-center sm:text-left min-w-0">
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                 <h2 className="text-2xl font-black text-stone-950 dark:text-white">
-                  {user.name}, {user.age}
+                  {user.name}
+                  {user.isOrganizer || user.role === 'BUSINESS' || user.role === 'ORGANIZER'
+                    ? ''
+                    : `, ${user.age}`}
                 </h2>
+                {Boolean(user.isOrganizer || user.role === 'BUSINESS' || user.role === 'ORGANIZER') && (
+                  <span className="px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold text-xs border border-orange-500/30">
+                    Organizer / Venue
+                  </span>
+                )}
                 <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-mono text-xs font-semibold">
                   {getUserTag(user)}
                 </span>
@@ -197,6 +206,20 @@ export function PlayerProfileSheet({
                 <div className="flex items-center justify-center sm:justify-start gap-1 text-xs font-semibold text-stone-500 dark:text-stone-400 mt-1">
                   <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0" />
                   <span>{user.neighborhood}</span>
+                </div>
+              )}
+
+              {user.website && (
+                <div className="flex items-center justify-center sm:justify-start gap-1 text-xs font-semibold text-orange-600 dark:text-orange-400 mt-1">
+                  <Globe className="w-3.5 h-3.5 shrink-0" />
+                  <a
+                    href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline truncate"
+                  >
+                    {user.website.replace(/^https?:\/\//i, '')}
+                  </a>
                 </div>
               )}
 

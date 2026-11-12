@@ -93,6 +93,8 @@ export async function PUT(
         meetup.roomStatus = ((updates.roomStatus || updates.status) as string).toUpperCase() as any;
       }
       if (updates.coverImage) meetup.coverImage = updates.coverImage;
+      if (updates.eventUrl !== undefined) (meetup as any).eventUrl = updates.eventUrl;
+      if (updates.isVenueEvent !== undefined) (meetup as any).isVenueEvent = updates.isVenueEvent;
 
       (meetup as any).updatedAt = new Date().toISOString();
 

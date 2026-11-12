@@ -96,6 +96,10 @@ export function AuthProfileModal({
   const [selectedCityPreset, setSelectedCityPreset] = useState<CityPreset | null>(null);
   const [avatar, setAvatar] = useState(activeUser.avatar);
   const [tagline, setTagline] = useState(activeUser.tagline);
+  const [isOrganizer, setIsOrganizer] = useState(
+    Boolean(activeUser.isOrganizer || activeUser.role === 'BUSINESS' || activeUser.role === 'ORGANIZER')
+  );
+  const [website, setWebsite] = useState(activeUser.website || '');
   const [favoriteActivities, setFavoriteActivities] = useState<ActivityCategory[]>(
     activeUser.favoriteActivities || ['Coffee', 'Park Walk']
   );
@@ -275,13 +279,15 @@ export function AuthProfileModal({
       ctx.drawImage(imageSource, sx, sy, minDim, minDim, 0, 0, size, size);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
-      const result = await verifyHumanFace(dataUrl);
-      if (!result.isValidFace) {
-        setFaceError(result.message);
-        setIsFaceVerified(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        if (cameraInputRef.current) cameraInputRef.current.value = '';
-        return;
+      if (!isOrganizer) {
+        const result = await verifyHumanFace(dataUrl);
+        if (!result.isValidFace) {
+          setFaceError(result.message);
+          setIsFaceVerified(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          if (cameraInputRef.current) cameraInputRef.current.value = '';
+          return;
+        }
       }
       setAvatar(dataUrl);
       setIsFaceVerified(true);
@@ -372,8 +378,10 @@ export function AuthProfileModal({
           photoVerified: hasRealFacePhoto,
           neighborhood: chosenCity,
           avatar: finalAvatar,
-          tagline,
-          favoriteActivities,
+          tagline,
+          favoriteActivities,
+          isOrganizer,
+          website: isOrganizer ? website.trim() || undefined : undefined,
         }),
       });
       if (res.ok) {
@@ -628,6 +636,35 @@ export function AuthProfileModal({
                 )}
               </div>
 
+              {/* Venue / Organizer Account Mode */}
+              <div className="p-3.5 rounded-2xl bg-orange-500/[0.07] dark:bg-orange-500/[0.12] border border-orange-500/25 space-y-2.5">
+                <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isOrganizer}
+                    onChange={(e) => setIsOrganizer(e.target.checked)}
+                    className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-stone-300 dark:border-stone-700"
+                  />
+                  <span className="text-xs font-bold text-stone-900 dark:text-white">
+                    I represent a Venue, Club, or Event Organizer
+                  </span>
+                </label>
+                {isOrganizer && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-stone-600 dark:text-stone-300 mb-1">
+                      Venue / Organizer Website or Instagram
+                    </label>
+                    <input
+                      type="url"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      placeholder="https://instagram.com/venue or https://venue.com"
+                      className="min-h-[38px] w-full px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs font-medium text-stone-950 dark:text-white focus:outline-none focus:border-orange-600"
+                    />
+                  </div>
+                )}
+              </div>
+
               {/* City Selection from POPULAR_CITIES + Custom City */}
               <div className="relative">
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">

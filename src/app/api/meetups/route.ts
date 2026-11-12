@@ -174,7 +174,14 @@ export async function POST(req: NextRequest) {
     return await withDbMutation(async (db) => {
       const nowIso = new Date().toISOString();
       const meetupId = `lobby-${crypto.randomUUID()}`;
-      const clampedMax = Math.max(2, Math.min(16, Number(body.maxParticipants) || 4));
+      const isVenue = Boolean(
+        body.isVenueEvent ||
+        authUser.isOrganizer ||
+        authUser.role === 'BUSINESS' ||
+        authUser.role === 'ORGANIZER'
+      );
+      const maxAllowedCap = isVenue ? 500 : 16;
+      const clampedMax = Math.max(2, Math.min(maxAllowedCap, Number(body.maxParticipants) || 4));
       const chosenStart = body.startTime || 'Now';
 
       const hostPersona = db.personas.find((p) => p.id === authUser.id) || authUser;
@@ -242,6 +249,8 @@ export async function POST(req: NextRequest) {
         preferredAgeRange: body.preferredAgeRange || 'All Ages (18+)',
         isRecurring: body.isRecurring ?? false,
         recurringSchedule: body.recurringSchedule || undefined,
+        isVenueEvent: isVenue,
+        eventUrl: body.eventUrl?.trim() || undefined,
         hostId: authUser.id,
         bannedUserIds: hostPersona.bannedUserIds ? [...hostPersona.bannedUserIds] : [],
         participants: initialParticipants,

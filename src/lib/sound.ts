@@ -4,6 +4,27 @@ import { UserSettings } from '@/types/lobby';
 
 type SoundCue = 'JOIN' | 'CHECK_IN' | 'NOTIFICATION' | 'SUCCESS' | 'TAP';
 
+let sharedAudioCtx: AudioContext | null = null;
+
+function getSharedAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  const AudioCtx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+    try {
+      sharedAudioCtx = new AudioCtx();
+    } catch {
+      return null;
+    }
+  }
+  if (sharedAudioCtx.state === 'suspended') {
+    sharedAudioCtx.resume().catch(() => {});
+  }
+  return sharedAudioCtx;
+}
+
 export function triggerSensoryFeedback(
   cue: SoundCue,
   settings?: Partial<UserSettings>
@@ -40,12 +61,8 @@ export function triggerSensoryFeedback(
   // 2. Clean Web Audio API synthesized chime (zero external audio files required)
   if (enableSound) {
     try {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AudioCtx) return;
-
-      const ctx = new AudioCtx();
+      const ctx = getSharedAudioContext();
+      if (!ctx) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
